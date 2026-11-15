@@ -56,10 +56,15 @@ function renderNav(activeTab = '') {
         <div class="brand-logo-icon">🎨</div>
         <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
       </a>
-      <div class="nav-links">
+      <button class="nav-toggle-btn" id="navToggleBtn" aria-label="Toggle Navigation" onclick="toggleMobileNav(event)">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+      <div class="nav-links" id="siteNavLinks">
         <a href="/" ${activeTab === 'home' ? 'class="active"' : ''}>🏠 Home</a>
         <div class="dropdown">
-          <a href="#" class="dropbtn">📂 Categories ▾</a>
+          <a href="javascript:void(0)" class="dropbtn" onclick="toggleMobileDropdown(this)">📂 Categories ▾</a>
           <div class="dropdown-content">
             ${categories.map(c => `<a href="/${c.id}/">${c.icon || '🎨'} ${c.name}</a>`).join('')}
           </div>
@@ -70,6 +75,19 @@ function renderNav(activeTab = '') {
       </div>
     </div>
   </nav>
+  <script>
+    function toggleMobileNav(e) {
+      if (e) e.stopPropagation();
+      const el = document.getElementById('siteNavLinks');
+      if (el) el.classList.toggle('mobile-open');
+    }
+    function toggleMobileDropdown(btn) {
+      if (window.innerWidth <= 768) {
+        const parent = btn.closest('.dropdown');
+        if (parent) parent.classList.toggle('mobile-open');
+      }
+    }
+  </script>
   `;
 }
 
@@ -441,28 +459,41 @@ const studioHtml = `<!DOCTYPE html>
       color: #0F172A;
     }
     .studio-top-bar {
-      background: #1E1B4B;
+      background: #000000;
       color: white;
-      padding: 12px 20px;
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .studio-title-box {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .studio-title-box h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .btn-back {
       background: rgba(255,255,255,0.15);
       color: white;
       text-decoration: none;
-      padding: 7px 16px;
+      padding: 6px 14px;
       border-radius: 20px;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       font-weight: 600;
+      white-space: nowrap;
       transition: background 0.2s;
+      flex-shrink: 0;
     }
     .btn-back:hover {
       background: var(--primary);
@@ -478,17 +509,54 @@ const studioHtml = `<!DOCTYPE html>
     @media (max-width: 992px) {
       .studio-layout {
         grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+    @media (max-width: 640px) {
+      .studio-layout {
+        padding: 0 8px;
+        margin: 10px auto;
+        gap: 16px;
+      }
+      .studio-top-bar {
+        padding: 8px 10px;
+        flex-direction: row;
+        gap: 6px;
+      }
+      .studio-title-box {
+        gap: 8px;
+      }
+      .studio-title-box h1 {
+        font-size: 0.98rem !important;
+      }
+      .btn-back {
+        padding: 5px 10px;
+        font-size: 0.8rem;
       }
     }
     .stage-wrapper {
       background: #FFFFFF;
       border-radius: 20px;
-      padding: 24px;
+      padding: 20px;
       box-shadow: 0 10px 30px rgba(15,23,42,0.06);
       border: 1px solid #E2E8F0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 640px) {
+      .stage-wrapper {
+        padding: 10px 6px;
+        border-radius: 14px;
+      }
+      .hint-banner {
+        font-size: 0.78rem !important;
+        padding: 7px 10px !important;
+        margin-bottom: 8px !important;
+        border-radius: 14px !important;
+      }
     }
     .hint-banner {
       background: #EEF2FF;
@@ -501,46 +569,60 @@ const studioHtml = `<!DOCTYPE html>
       display: flex;
       align-items: center;
       gap: 8px;
+      text-align: center;
+      line-height: 1.4;
     }
     .canvas-container {
       position: relative;
-      width: 510px;
-      height: 580px;
-      max-width: 100%;
-      background: #999999;
+      width: 100%;
+      max-width: 510px;
+      aspect-ratio: 510 / 580;
+      height: auto;
+      background: #FFFFFF;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      margin: 0 auto;
     }
     #canvas {
       width: 100%;
       height: 100%;
       display: block;
-      touch-action: manipulation;
+      touch-action: none;
     }
     .controls-strip {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       width: 100%;
-      max-width: 540px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
+      max-width: 510px;
+      margin-top: 14px;
+      gap: 8px;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      .controls-strip {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
     }
     .btn-studio-action {
       background: #4F46E5;
       color: white;
       border: none;
-      padding: 10px 18px;
-      border-radius: 25px;
+      padding: 10px 8px;
+      border-radius: 14px;
       cursor: pointer;
       font-family: inherit;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 5px;
       transition: all 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+      white-space: nowrap;
     }
     .btn-studio-action:hover {
       background: #4338CA;
@@ -550,6 +632,14 @@ const studioHtml = `<!DOCTYPE html>
       background: #0284C7;
     }
     .btn-print:hover {
+      background: #0369A1;
+    }
+    .btn-save {
+      background: #10B981;
+    }
+    .btn-save:hover {
+      background: #059669;
+    }
       background: #0369A1;
     }
     .btn-save {
@@ -649,9 +739,9 @@ const studioHtml = `<!DOCTYPE html>
   <header class="studio-top-bar">
     <div class="studio-title-box">
       <a href="/" id="backLink" class="btn-back">&larr; Back</a>
-      <h1 style="margin:0;font-size:1.35rem;" id="gameTitle">Coloring Studio</h1>
+      <h1 id="gameTitle">Coloring Studio</h1>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div class="studio-top-actions">
       <a href="/studio.html?random=1" class="btn-back" style="background:#F59E0B;">✨ Surprise Drawing!</a>
     </div>
   </header>
@@ -671,16 +761,10 @@ const studioHtml = `<!DOCTYPE html>
       <div class="raster-palette" id="rasterPalette"></div>
 
       <div class="controls-strip">
-        <div style="display:flex;gap:8px;">
-          <button class="btn-studio-action" onclick="navigateGame(-1)">◀ Previous</button>
-          <button class="btn-studio-action" onclick="navigateGame(1)">Next ▶</button>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn-studio-action btn-print" onclick="if(typeof window.gtag==='function'){window.gtag('event','print_drawing',{item_name:currentGame.label,item_category:currentGame.catName});} window.print()">🖨️ Print</button>
-          <button class="btn-studio-action btn-save" onclick="saveArtwork()">💾 Save Artwork</button>
-        </div>
-      </div>
-
+        <button class="btn-studio-action" onclick="navigateGame(-1)">◀ Previous</button>
+        <button class="btn-studio-action" onclick="navigateGame(1)">Next ▶</button>
+        <button class="btn-studio-action btn-print" onclick="if(typeof window.gtag==='function'){window.gtag('event','print_drawing',{item_name:currentGame.label,item_category:currentGame.catName});} window.print()">🖨️ Print</button>
+        <button class="btn-studio-action btn-save" onclick="saveArtwork()">💾 Save Artwork</button>
       </div>
     </main>
 
@@ -1059,6 +1143,7 @@ const studioHtml = `<!DOCTYPE html>
         const x = (canvas.width - w) / 2;
         const y = (canvas.height - h) / 2;
         ctx.drawImage(img, x, y, w, h);
+        makeResponsive(true, 'both', false, 1, { properties: { width: 510, height: 580 } });
       };
 
       // Tap-to-paint / brush on canvas
@@ -1094,14 +1179,17 @@ const studioHtml = `<!DOCTYPE html>
 
     function makeResponsive(isResp, respDim, isScale, scaleType, lib) {
       function resizeCanvas() {
-        const w = lib.properties.width || 510;
-        const h = lib.properties.height || 580;
+        const w = (lib && lib.properties && lib.properties.width) || 510;
+        const h = (lib && lib.properties && lib.properties.height) || 580;
         const wrap = document.querySelector('.canvas-container');
-        const containerW = wrap ? wrap.clientWidth : w;
+        const containerW = wrap ? wrap.clientWidth : Math.min(window.innerWidth - 32, w);
         const sRatio = containerW / w;
 
-        canvas.style.width = (w * sRatio) + 'px';
+        canvas.style.width = containerW + 'px';
         canvas.style.height = (h * sRatio) + 'px';
+        if (wrap) {
+          wrap.style.height = (h * sRatio) + 'px';
+        }
         if (stage) {
           stage.scaleX = sRatio;
           stage.scaleY = sRatio;
@@ -1109,7 +1197,10 @@ const studioHtml = `<!DOCTYPE html>
         }
       }
       window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('orientationchange', resizeCanvas);
       resizeCanvas();
+      setTimeout(resizeCanvas, 50);
+      setTimeout(resizeCanvas, 200);
     }
 
     function saveArtwork() {

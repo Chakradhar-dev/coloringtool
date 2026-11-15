@@ -30,10 +30,15 @@
         <div class="brand-logo-icon">🎨</div>
         <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
       </a>
-      <div class="nav-links">
+      <button class="nav-toggle-btn" id="navToggleBtn" aria-label="Toggle Navigation" onclick="toggleMobileNav(event)">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+      <div class="nav-links" id="siteNavLinks">
         <a href="/" >🏠 Home</a>
         <div class="dropdown">
-          <a href="#" class="dropbtn">📂 Categories ▾</a>
+          <a href="javascript:void(0)" class="dropbtn" onclick="toggleMobileDropdown(this)">📂 Categories ▾</a>
           <div class="dropdown-content">
             <a href="/animals/">🦁 Animals</a><a href="/unicorn/">🦄 Unicorns</a><a href="/princess/">👑 Princesses</a><a href="/transport/">🚀 Transportation</a><a href="/christmas/">🎄 Christmas</a><a href="/food/">🍦 Food</a>
           </div>
@@ -44,6 +49,19 @@
       </div>
     </div>
   </nav>
+  <script>
+    function toggleMobileNav(e) {
+      if (e) e.stopPropagation();
+      const el = document.getElementById('siteNavLinks');
+      if (el) el.classList.toggle('mobile-open');
+    }
+    function toggleMobileDropdown(btn) {
+      if (window.innerWidth <= 768) {
+        const parent = btn.closest('.dropdown');
+        if (parent) parent.classList.toggle('mobile-open');
+      }
+    }
+  </script>
   
 
   <header class="hero-banner">

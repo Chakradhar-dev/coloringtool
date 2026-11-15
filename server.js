@@ -167,10 +167,15 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
         <div class="brand-logo-icon">🎨</div>
         <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.8;">.com</span></span>
       </a>
-      <div class="nav-links">
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation" onclick="document.getElementById('serverNavLinks').classList.toggle('mobile-open')">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+      <div class="nav-links" id="serverNavLinks">
         <a href="/">🏠 Home</a>
         <div class="dropdown">
-          <a href="#" class="dropbtn">📂 Categories ▾</a>
+          <a href="#" class="dropbtn" onclick="if(window.innerWidth<=768){this.closest('.dropdown').classList.toggle('mobile-open');return false;}">📂 Categories ▾</a>
           <div class="dropdown-content">
             ${categories.map(c => `<a href="/${c.id}/">${c.icon || '🎨'} ${c.name}</a>`).join('')}
           </div>
