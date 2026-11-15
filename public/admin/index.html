@@ -609,13 +609,24 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Drawing Picture (File Upload or URL) *</label>
+        <label class="form-label">Drawing Picture (Line-Art Contour / Black & White) *</label>
         <input type="file" id="gameFileInput" class="form-control" accept="image/*" onchange="previewGameImage(this)">
-        <div style="margin-top:6px;font-size:0.85rem;color:#64748B;">OR provide image path / URL:</div>
+        <div style="margin-top:6px;font-size:0.85rem;color:#64748B;">OR provide line-art image path / URL:</div>
         <input type="text" id="gameUrlInput" class="form-control" placeholder="/uploads/my-drawing.png" style="margin-top:4px;">
         <div id="imagePreviewWrap" style="margin-top:10px;display:none;">
           <img id="imagePreview" src="" style="max-width:140px;height:auto;border-radius:8px;border:2px solid #CBD5E1;">
         </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">🎨 Original Color Image (Colored Reference Sample Guide)</label>
+        <input type="file" id="gameColorFileInput" class="form-control" accept="image/*" onchange="previewColorImage(this)">
+        <div style="margin-top:6px;font-size:0.85rem;color:#64748B;">OR provide colored image path / URL:</div>
+        <input type="text" id="gameColorUrlInput" class="form-control" placeholder="/uploads/my-colored-drawing.png" style="margin-top:4px;">
+        <div id="imageColorPreviewWrap" style="margin-top:10px;display:none;">
+          <img id="imageColorPreview" src="" style="max-width:140px;height:auto;border-radius:8px;border:2px solid #CBD5E1;">
+        </div>
+        <small style="color:#64748B;">Featured in the "Original Color Image" section on the drawing studio page so kids can see the completed colored artwork!</small>
       </div>
 
       <div class="form-group">
@@ -832,7 +843,12 @@
       const list = filtered || gamesList;
       document.getElementById('adminGamesTable').innerHTML = list.map(g => `
         <tr>
-          <td><img src="/${g.thumbSrc || g.fullImageSrc}" class="table-thumb" alt="${g.label}"></td>
+          <td>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <img src="/${g.fullImageSrc || g.thumbSrc}" class="table-thumb" title="Line art contour" alt="${g.label}">
+              <img src="/${g.thumbSrc || g.fullImageSrc}" class="table-thumb" style="border-color:#4F46E5;" title="Original Color Image" alt="${g.label}">
+            </div>
+          </td>
           <td><strong>${g.label}</strong></td>
           <td>${g.catName}</td>
           <td><code>${g.slug}</code></td>
@@ -873,7 +889,12 @@
       sel.innerHTML = catsList.map(c => `<option value="${c.id}">${c.icon || ''} ${c.name}</option>`).join('');
     }
 
-    // Image Upload Preview
+    let pendingFilename = '';
+    let pendingImageBase64 = null;
+    let pendingColorFilename = '';
+    let pendingColorImageBase64 = null;
+
+    // Image Upload Preview (Line-Art Contour)
     function previewGameImage(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -888,15 +909,34 @@
       }
     }
 
+    // Color Image Upload Preview (Original Colored Sample)
+    function previewColorImage(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        pendingColorFilename = file.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          pendingColorImageBase64 = e.target.result;
+          document.getElementById('imageColorPreview').src = pendingColorImageBase64;
+          document.getElementById('imageColorPreviewWrap').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function openAddGameModal() {
       document.getElementById('editGameId').value = '';
       document.getElementById('gameModalTitle').innerText = '➕ Add New Coloring Page';
       document.getElementById('gameTitleInput').value = '';
       document.getElementById('gameUrlInput').value = '';
       document.getElementById('gameFileInput').value = '';
+      document.getElementById('gameColorUrlInput').value = '';
+      document.getElementById('gameColorFileInput').value = '';
       document.getElementById('gameDescInput').value = '';
       document.getElementById('imagePreviewWrap').style.display = 'none';
+      document.getElementById('imageColorPreviewWrap').style.display = 'none';
       pendingImageBase64 = null;
+      pendingColorImageBase64 = null;
       document.getElementById('gameModal').style.display = 'flex';
     }
 
@@ -910,6 +950,7 @@
       const catId = document.getElementById('gameCatSelect').value;
       const desc = document.getElementById('gameDescInput').value.trim();
       const urlInput = document.getElementById('gameUrlInput').value.trim();
+      const colorUrlInput = document.getElementById('gameColorUrlInput').value.trim();
 
       if (!title) return alert('Please enter a drawing title.');
 
@@ -920,7 +961,10 @@
         desc,
         imageUrl: urlInput,
         imageBase64: pendingImageBase64,
-        filename: pendingFilename
+        filename: pendingFilename,
+        colorImageUrl: colorUrlInput,
+        colorImageBase64: pendingColorImageBase64,
+        colorFilename: pendingColorFilename
       };
 
       const res = await adminFetch('/api/admin/games', {
@@ -945,10 +989,19 @@
       document.getElementById('gameModalTitle').innerText = '✏️ Edit Coloring Page: ' + g.label;
       document.getElementById('gameTitleInput').value = g.label;
       document.getElementById('gameCatSelect').value = g.catId;
-      document.getElementById('gameUrlInput').value = g.fullImageSrc || g.thumbSrc || '';
+      document.getElementById('gameUrlInput').value = g.fullImageSrc || '';
+      document.getElementById('gameColorUrlInput').value = g.thumbSrc || '';
       document.getElementById('gameDescInput').value = g.descriptionText || '';
       document.getElementById('imagePreview').src = '/' + (g.fullImageSrc || g.thumbSrc);
       document.getElementById('imagePreviewWrap').style.display = 'block';
+      if (g.thumbSrc) {
+        document.getElementById('imageColorPreview').src = '/' + g.thumbSrc;
+        document.getElementById('imageColorPreviewWrap').style.display = 'block';
+      } else {
+        document.getElementById('imageColorPreviewWrap').style.display = 'none';
+      }
+      pendingImageBase64 = null;
+      pendingColorImageBase64 = null;
       document.getElementById('gameModal').style.display = 'flex';
     }
 

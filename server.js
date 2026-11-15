@@ -365,8 +365,9 @@ const server = http.createServer(async (req, res) => {
 
       const catObj = categories.find(c => c.id === body.catId) || categories[0] || { id: 'animals', name: 'Animals' };
       let imagePath = body.imageUrl || '';
+      let colorImagePath = body.colorImageUrl || '';
 
-      // Handle Base64 Upload
+      // Handle Base64 Upload for Line-art Picture
       if (body.imageBase64) {
         try {
           const match = body.imageBase64.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
@@ -383,6 +384,23 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
+      // Handle Base64 Upload for Original Color Image Sample
+      if (body.colorImageBase64) {
+        try {
+          const match = body.colorImageBase64.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+          const ext = match ? match[1] : 'png';
+          const base64Data = match ? match[2] : body.colorImageBase64;
+          const cleanName = (body.colorFilename || `sample_${Date.now()}`).replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+          const finalFilename = cleanName.endsWith(`.${ext}`) ? cleanName : `${cleanName}.${ext}`;
+          const targetDiskPath = path.join(UPLOADS_DIR, finalFilename);
+
+          fs.writeFileSync(targetDiskPath, Buffer.from(base64Data, 'base64'));
+          colorImagePath = `uploads/${finalFilename}`;
+        } catch (uploadErr) {
+          console.error('Failed to save uploaded color image:', uploadErr);
+        }
+      }
+
       if (body.id) {
         // Edit existing game
         const idx = games.findIndex(g => g.id === body.id);
@@ -390,10 +408,9 @@ const server = http.createServer(async (req, res) => {
           games[idx].label = body.title || games[idx].label;
           games[idx].catId = body.catId || games[idx].catId;
           games[idx].catName = catObj.name;
-          if (imagePath) {
-            games[idx].fullImageSrc = imagePath;
-            games[idx].thumbSrc = imagePath;
-          }
+          if (imagePath) games[idx].fullImageSrc = imagePath;
+          if (colorImagePath) games[idx].thumbSrc = colorImagePath;
+          else if (imagePath && !games[idx].thumbSrc) games[idx].thumbSrc = imagePath;
           if (body.desc) games[idx].descriptionText = body.desc;
           writeJson('games.json', games);
           res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
@@ -409,7 +426,7 @@ const server = http.createServer(async (req, res) => {
         catName: catObj.name,
         slug: slug,
         label: body.title,
-        thumbSrc: imagePath || `${catObj.id}/img/${slug}.png`,
+        thumbSrc: colorImagePath || imagePath || `${catObj.id}/img/${slug}.png`,
         fullImageSrc: imagePath || `${catObj.id}/img/${slug}.png`,
         gameScript: '', // Custom uploaded coloring sheet runs interactive raster/fill canvas
         descriptionText: body.desc || `Free online coloring page: ${body.title}. Fun coloring activity for kids ages 3 to 10 on ColoringTool.com`,

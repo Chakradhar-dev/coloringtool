@@ -682,12 +682,98 @@ const studioHtml = `<!DOCTYPE html>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>` : ''}
 
+      <!-- Sidebar Original Color Guide Card -->
+      <div class="sidebar-widget original-color-widget">
+        <div class="original-color-widget-header">
+          <span class="original-color-pill">🎨 Color Guide</span>
+          <span style="font-size:0.75rem;color:#64748B;font-weight:700;">SAMPLE ARTWORK</span>
+        </div>
+        <h3 class="widget-title" style="margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid #F1F5F9;font-size:1.05rem;">Original Color Image</h3>
+        <div class="original-color-frame" onclick="openOriginalImageModal()" title="Click to view full size">
+          <img id="sidebarOriginalColorImg" src="" alt="Original Colored Reference">
+          <button type="button" class="zoom-hint-btn">🔍 View Full Size</button>
+        </div>
+        <div class="original-color-caption">
+          <strong>💡 Artist's Inspiration:</strong> See how this picture looks when colored! Follow these shades or invent your own palette.
+        </div>
+      </div>
+
       <div class="sidebar-widget">
         <h3 class="widget-title" id="relatedTitle">More Fun Drawings</h3>
         <div class="related-scroll-grid" id="relatedGrid"></div>
       </div>
     </aside>
   </div>
+
+  <!-- Dedicated Original Color Image & Inspiration Showcase Section -->
+  <section class="original-color-section" id="originalColorSection">
+    <div class="showcase-card">
+      <div class="showcase-header">
+        <div class="showcase-badge-wrap">
+          <span style="font-size:1.3rem;">🎨</span>
+          <span class="showcase-badge">Original Color Guide & Reference</span>
+        </div>
+        <h2 class="showcase-title" id="originalColorSectionTitle">Original Color Image</h2>
+        <p class="showcase-subtitle">Compare the original artist's colored illustration with your live interactive coloring canvas above!</p>
+      </div>
+
+      <div class="showcase-grid">
+        <!-- Original Colored Reference Card -->
+        <div class="showcase-item">
+          <div class="showcase-item-header">
+            <span class="showcase-item-tag tag-colored">
+              <span style="font-size:1.15rem;">🖼️</span>
+              <strong>Original Colored Illustration</strong>
+            </span>
+            <span style="background:#EEF2FF;color:#4F46E5;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;">REFERENCE GUIDE</span>
+          </div>
+
+          <div class="showcase-img-wrap" onclick="openOriginalImageModal()" title="Click to view full size">
+            <img id="sectionOriginalColorImg" src="" alt="Original Colored Drawing">
+          </div>
+
+          <div class="showcase-details">
+            <h4>✨ Color Guide & Artist Tips:</h4>
+            <ul class="showcase-bullets">
+              <li>Notice how the artist balanced vibrant subject colors with soothing background tones.</li>
+              <li>Use this colored artwork as a visual guide to find matching colors on the palette.</li>
+              <li>Or unleash your creativity with completely new, unique color combinations!</li>
+            </ul>
+            <button type="button" class="btn-showcase-action btn-showcase-colored" onclick="openOriginalImageModal()">
+              🔍 View Original Image Full Size
+            </button>
+          </div>
+        </div>
+
+        <!-- Line-Art Contour & Coloring Feature Card -->
+        <div class="showcase-item">
+          <div class="showcase-item-header">
+            <span class="showcase-item-tag tag-outline">
+              <span style="font-size:1.15rem;">🖌️</span>
+              <strong>Your Coloring Canvas (Interactive)</strong>
+            </span>
+            <span style="background:#E0F2FE;color:#0284C7;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;">LIVE STUDIO</span>
+          </div>
+
+          <div class="showcase-img-wrap" onclick="scrollToCanvas()" title="Click to start painting above">
+            <img id="sectionOutlineImg" src="" alt="Contour Line Art Drawing">
+          </div>
+
+          <div class="showcase-details">
+            <h4>🎨 Interactive Studio Features:</h4>
+            <ul class="showcase-bullets">
+              <li><strong>Clean Contour Fills:</strong> Colors stay strictly within the lines without bleeding out.</li>
+              <li><strong>Kid-Friendly Palette:</strong> 15 vibrant, child-safe shades ready for instant one-tap coloring.</li>
+              <li><strong>Save & Print:</strong> Save your masterpiece directly to your Art Gallery or print anytime!</li>
+            </ul>
+            <button type="button" class="btn-showcase-action btn-showcase-paint" onclick="scrollToCanvas()">
+              🎨 Jump Up to Color Now! ☝️
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Dedicated Coloring Page Description & Educational Guide Box -->
   <section class="coloring-desc-section">
@@ -746,6 +832,23 @@ const studioHtml = `<!DOCTYPE html>
     </div>
   </section>
 
+  <!-- High-Resolution Original Color Image Modal -->
+  <div id="originalColorModal" class="color-modal" onclick="closeOriginalImageModal(event)">
+    <div class="color-modal-content" onclick="event.stopPropagation()">
+      <div class="color-modal-header">
+        <h3 id="modalGameTitle">Original Colored Drawing</h3>
+        <button type="button" class="color-modal-close" onclick="closeOriginalImageModal()">&times;</button>
+      </div>
+      <div class="color-modal-body">
+        <img id="modalColorImg" src="" alt="Original Colored Drawing">
+      </div>
+      <div class="color-modal-footer">
+        <span>💡 Use this sample as inspiration while painting above!</span>
+        <button type="button" class="btn-studio-action" style="padding:6px 16px;font-size:0.85rem;" onclick="closeOriginalImageModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Below Game AdSense Banner -->
   ${renderAdUnit(ad.belowGameSlot || '3456789012')}
 
@@ -766,9 +869,17 @@ const studioHtml = `<!DOCTYPE html>
 
     async function initStudio() {
       const urlParams = new URLSearchParams(window.location.search);
-      const catParam = urlParams.get('cat');
-      const gameParam = urlParams.get('game');
+      let catParam = urlParams.get('cat');
+      let gameParam = urlParams.get('game');
       const isRandom = urlParams.get('random');
+
+      if (!catParam || !gameParam) {
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        if (pathParts.length >= 2 && pathParts[0] !== 'admin') {
+          catParam = pathParts[0];
+          gameParam = pathParts[1].replace('.php', '').replace('.html', '');
+        }
+      }
 
       if (isRandom) {
         let pool = allGames;
@@ -800,6 +911,38 @@ const studioHtml = `<!DOCTYPE html>
       if (headingEl) headingEl.innerText = currentGame.h1 || ('About ' + currentGame.label + ' Coloring Page');
       const mainTextEl = document.getElementById('descMainText');
       if (mainTextEl) mainTextEl.innerText = currentGame.descriptionText || ('Enjoy coloring this ' + currentGame.label + ' drawing online! Specially crafted for young children ages 3 to 10 to unleash their imagination, discover colors, and build fine motor skills.');
+
+      // Bind Original Color Image and Outline Preview
+      const originalImgSrc = '/' + (currentGame.thumbSrc || currentGame.fullImageSrc);
+      const outlineImgSrc = '/' + (currentGame.fullImageSrc || currentGame.thumbSrc);
+
+      const sidebarColorImg = document.getElementById('sidebarOriginalColorImg');
+      if (sidebarColorImg) {
+        sidebarColorImg.src = originalImgSrc;
+        sidebarColorImg.alt = 'Original colored ' + currentGame.label;
+      }
+
+      const sectionColorImg = document.getElementById('sectionOriginalColorImg');
+      if (sectionColorImg) {
+        sectionColorImg.src = originalImgSrc;
+        sectionColorImg.alt = 'Original colored ' + currentGame.label;
+      }
+
+      const sectionTitle = document.getElementById('originalColorSectionTitle');
+      if (sectionTitle) {
+        sectionTitle.innerText = 'Original Color Image: ' + currentGame.label;
+      }
+
+      const sectionOutline = document.getElementById('sectionOutlineImg');
+      if (sectionOutline) {
+        sectionOutline.src = outlineImgSrc;
+        sectionOutline.alt = currentGame.label + ' line art contour';
+      }
+
+      const modalImg = document.getElementById('modalColorImg');
+      if (modalImg) modalImg.src = originalImgSrc;
+      const modalTitle = document.getElementById('modalGameTitle');
+      if (modalTitle) modalTitle.innerText = currentGame.label + ' — Original Color Image';
 
       // Populate sidebar
       const related = allGames.filter(g => g.catId === currentGame.catId && g.slug !== currentGame.slug);
@@ -973,6 +1116,33 @@ const studioHtml = `<!DOCTYPE html>
       if (nextIdx >= catGames.length) nextIdx = 0;
       window.location.href = '/studio.html?cat=' + catGames[nextIdx].catId + '&game=' + catGames[nextIdx].slug;
     }
+
+    function openOriginalImageModal() {
+      const modal = document.getElementById('originalColorModal');
+      if (modal) modal.classList.add('show');
+    }
+
+    function closeOriginalImageModal(e) {
+      if (e && e.target !== e.currentTarget && !e.target.classList.contains('color-modal-close') && !e.target.closest('.btn-studio-action')) {
+        return;
+      }
+      const modal = document.getElementById('originalColorModal');
+      if (modal) modal.classList.remove('show');
+    }
+
+    function scrollToCanvas() {
+      const canvasEl = document.getElementById('canvas');
+      if (canvasEl) {
+        canvasEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('originalColorModal');
+        if (modal) modal.classList.remove('show');
+      }
+    });
 
     window.onload = initStudio;
   </script>
