@@ -17,7 +17,7 @@
   --card-border: #E2E8F0;
   --text-main: #0F172A;
   --text-muted: #64748B;
-  --header-grad: linear-gradient(135deg, #3730A3 0%, #4F46E5 40%, #7C3AED 75%, #EC4899 100%);
+  --header-grad: #000000;
   --hero-grad: linear-gradient(180deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);
   --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.08);
@@ -44,9 +44,9 @@ body {
    Navigation Header
    ======================================================== */
 .site-nav {
-  background: var(--header-grad);
-  border-bottom: 3px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+  background: #000000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -91,7 +91,7 @@ body {
   gap: 12px;
 }
 .nav-links a {
-  color: #E0E7FF;
+  color: #F3F4F6;
   text-decoration: none;
   font-size: 0.98rem;
   font-weight: 600;
@@ -100,7 +100,7 @@ body {
   transition: all 0.2s ease;
 }
 .nav-links a:hover, .nav-links a.active {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.16);
   color: #FFFFFF;
   transform: translateY(-1px);
 }
@@ -158,8 +158,8 @@ body {
   box-shadow: 0 8px 20px rgba(236, 72, 153, 0.5);
 }
 .btn-admin-link {
-  background: rgba(255, 255, 255, 0.15);
-  color: #E0E7FF !important;
+  background: rgba(255, 255, 255, 0.12);
+  color: #F3F4F6 !important;
   font-weight: 600;
   padding: 7px 14px;
   border-radius: 20px;
@@ -169,7 +169,7 @@ body {
   transition: all 0.2s;
 }
 .btn-admin-link:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
   color: #FFFFFF !important;
 }
 
