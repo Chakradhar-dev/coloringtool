@@ -68,10 +68,6 @@ function renderNav(activeTab = '') {
         <a href="/about.html" ${activeTab === 'about' ? 'class="active"' : ''}>ℹ️ About Us</a>
         <a href="/privacy.html" ${activeTab === 'privacy' ? 'class="active"' : ''}>🔒 Privacy Policy</a>
       </div>
-      <div class="nav-actions">
-        <a href="/studio.html?random=1" class="btn-surprise" title="Surprise Me with a random drawing!">✨ Surprise Me!</a>
-        <a href="/admin/" class="btn-admin-link">⚙️ Admin</a>
-      </div>
     </div>
   </nav>
   `;
@@ -1194,6 +1190,69 @@ const studioHtml = `<!DOCTYPE html>
 </html>`;
 
 fs.writeFileSync(path.join(PUBLIC_DIR, 'studio.html'), studioHtml);
+
+// ----------------------------------------------------
+// 5. GENERATE ABOUT US & PRIVACY POLICY PAGES
+// ----------------------------------------------------
+console.log('Generating public/about.html and public/privacy.html...');
+
+const aboutHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — ColoringTool.com</title>
+  <meta name="description" content="Learn about ColoringTool.com: safe, fun, and free online coloring activities for kids and families worldwide.">
+  <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
+  <link rel="stylesheet" href="/css/modern-theme.css">
+  ${adHeaderScript}
+  ${analyticsHeaderScript}
+</head>
+<body>
+  ${renderNav('about')}
+  <header class="hero-banner" style="padding:40px 20px 30px;">
+    <h1 class="hero-title">About ColoringTool.com</h1>
+    <p class="hero-sub">Providing safe, joyful, and creative digital activities for kids around the world.</p>
+  </header>
+  <main style="max-width:960px;margin:40px auto;padding:0 20px;">
+    <div style="background:#FFFFFF;border-radius:20px;padding:40px;box-shadow:0 8px 30px rgba(15,23,42,0.08);border:1px solid #E2E8F0;line-height:1.8;font-size:1.05rem;color:#334155;">
+      ${siteConfig.aboutUsHtml || '<p>Welcome to ColoringTool.com!</p>'}
+    </div>
+  </main>
+  ${renderAdUnit(ad.belowGameSlot || '3456789012')}
+  ${renderFooter()}
+</body>
+</html>`;
+fs.writeFileSync(path.join(PUBLIC_DIR, 'about.html'), aboutHtml);
+
+const privacyHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — ColoringTool.com</title>
+  <meta name="description" content="Privacy Policy for ColoringTool.com. We prioritize child safety and strict COPPA compliance.">
+  <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
+  <link rel="stylesheet" href="/css/modern-theme.css">
+  ${adHeaderScript}
+  ${analyticsHeaderScript}
+</head>
+<body>
+  ${renderNav('privacy')}
+  <header class="hero-banner" style="padding:40px 20px 30px;">
+    <h1 class="hero-title">Privacy Policy & Children's Safety</h1>
+    <p class="hero-sub">Our commitment to transparency, child privacy, and COPPA compliance.</p>
+  </header>
+  <main style="max-width:960px;margin:40px auto;padding:0 20px;">
+    <div style="background:#FFFFFF;border-radius:20px;padding:40px;box-shadow:0 8px 30px rgba(15,23,42,0.08);border:1px solid #E2E8F0;line-height:1.8;font-size:1.05rem;color:#334155;">
+      ${siteConfig.privacyPolicyHtml || '<p>ColoringTool.com respects your privacy.</p>'}
+    </div>
+  </main>
+  ${renderAdUnit(ad.belowGameSlot || '3456789012')}
+  ${renderFooter()}
+</body>
+</html>`;
+fs.writeFileSync(path.join(PUBLIC_DIR, 'privacy.html'), privacyHtml);
 
 // Automatically generate Cloudflare Worker edge files
 try {

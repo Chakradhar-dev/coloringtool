@@ -179,10 +179,6 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
         <a href="/about.html" ${pageHeading.toLowerCase().includes('about') ? 'class="active"' : ''}>ℹ️ About Us</a>
         <a href="/privacy.html" ${pageHeading.toLowerCase().includes('privacy') ? 'class="active"' : ''}>🔒 Privacy Policy</a>
       </div>
-      <div class="nav-actions">
-        <a href="/studio.html?random=1" class="btn-surprise">✨ Surprise Me!</a>
-        <a href="/admin/" class="btn-admin-link">⚙️ Admin</a>
-      </div>
     </div>
   </nav>
 
