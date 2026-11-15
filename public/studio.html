@@ -331,14 +331,118 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+        @media (max-width: 600px) {
+      .studio-tool-bar {
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 6px 8px !important;
+      }
+      .tool-btn {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+      }
+      .tool-indicator-badge {
+        padding: 4px 8px !important;
+      }
+    }
+    /* Studio Toolbar & Brush Indicator */
+    .studio-tool-bar {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 510px;
+      margin: 12px auto 8px;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #FFFFFF;
+      padding: 8px 12px;
+      border-radius: 16px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #E2E8F0;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .tool-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .tool-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #F1F5F9;
+      border: 2px solid transparent;
+      color: #1E293B;
+      padding: 7px 12px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tool-btn:hover {
+      background: #E2E8F0;
+    }
+    .tool-btn.active {
+      background: #4F46E5;
+      color: #FFFFFF;
+      border-color: #4338CA;
+      box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+    }
+    .tool-indicator-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #F8FAFC;
+      padding: 5px 12px;
+      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+    }
+    .brush-icon-wrapper {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brush-dot {
+      position: absolute;
+      bottom: -1px;
+      right: -2px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+    .brush-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+    .brush-mode-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0F172A;
+    }
+    .brush-color-name {
+      font-size: 0.72rem;
+      color: #64748B;
+      font-weight: 600;
+    }
     /* Dynamic Color Palette for raster custom uploaded drawings */
     .raster-palette {
       display: none;
       flex-wrap: wrap;
       gap: 8px;
-      margin-top: 14px;
+      margin-top: 10px;
       justify-content: center;
       max-width: 510px;
+      box-sizing: border-box;
+      width: 100%;
     }
     .palette-swatch {
       width: 34px;
@@ -420,6 +524,47 @@
 
       <div class="canvas-container">
         <canvas id="canvas" width="510" height="580"></canvas>
+      </div>
+
+      <!-- Raster custom drawing toolbar (active for custom uploaded drawings) -->
+      <div class="studio-tool-bar" id="rasterToolBar" style="display:none;">
+        <div class="tool-group">
+          <button type="button" class="tool-btn active" id="toolBucketBtn" onclick="setStudioTool('bucket')" title="Tap-to-Fill Region">
+            <span>🪣</span>
+            <span>Fill Bucket</span>
+          </button>
+          <button type="button" class="tool-btn" id="toolBrushBtn" onclick="setStudioTool('brush')" title="Paint with Brush">
+            <span>🖌️</span>
+            <span>Paint Brush</span>
+          </button>
+        </div>
+
+        <div class="tool-indicator-badge" id="toolIndicatorBadge">
+          <div class="brush-icon-wrapper">
+            <svg class="brush-svg" viewBox="0 0 32 32" width="30" height="30" style="overflow:visible;display:block;">
+              <polygon points="6,26 10,25 25,10 21,6 6,21" fill="#F8FAFC" stroke="#0F172A" stroke-width="1.6" stroke-linejoin="round"/>
+              <polygon id="brushSvgTip" points="6,26 10,25 6,21" fill="#FF3B30" stroke="#0F172A" stroke-width="1.2"/>
+              <polygon points="21,6 25,10 27,8 23,4" fill="#94A3B8" stroke="#0F172A" stroke-width="1.4" stroke-linejoin="round"/>
+              <circle id="brushColorDot" cx="4" cy="28" r="3.5" fill="#FF3B30" stroke="#FFFFFF" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="brush-info">
+            <div style="display:flex;align-items:center;gap:4px;">
+              <span id="toolIndicatorIcon">🪣</span>
+              <span class="brush-mode-text" id="brushModeText">Tap to Fill</span>
+            </div>
+            <span class="brush-color-name" id="brushColorName">Color: Red</span>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <button type="button" class="tool-btn btn-undo" id="btnUndo" onclick="undoLastColorAction()" title="Undo Last Action">
+            <span>↩️ Undo</span>
+          </button>
+          <button type="button" class="tool-btn btn-clean" id="btnCleanCanvas" onclick="cleanRasterCanvas()" title="Reset Canvas">
+            <span>🧹 Clean</span>
+          </button>
+        </div>
       </div>
 
       <!-- Raster custom drawing palette (active for uploaded pictures) -->
@@ -718,9 +863,10 @@
         const localGames = JSON.parse(localStorage.getItem('coloringtool_local_games') || '[]');
         if (Array.isArray(localGames) && localGames.length > 0) {
           localGames.forEach(lg => {
+            if (!lg || !lg.slug) return;
             const idx = allGames.findIndex(g => g.id === lg.id || (g.catId === lg.catId && g.slug === lg.slug));
             if (idx >= 0) allGames[idx] = Object.assign({}, allGames[idx], lg);
-            else allGames.unshift(lg);
+            else if (lg.fullImageSrc || lg.thumbSrc || lg.gameScript) allGames.push(lg);
           });
         }
       } catch(e) {}
@@ -736,7 +882,7 @@
       }
 
       if (!currentGame) {
-        currentGame = allGames[0];
+        currentGame = allGames.find(g => g.slug === 'scs') || allGames.find(g => g.fullImageSrc || g.gameScript) || allGames[0];
       }
 
       // Update UI elements & dynamic SEO metadata
@@ -869,28 +1015,284 @@
     }
 
     // Raster Coloring Engine for Admin-uploaded Pictures
-    function loadRasterColoringGame(game) {
-      const palette = document.getElementById('rasterPalette');
-      palette.style.display = 'flex';
-      palette.innerHTML = PALETTE_COLORS.map(c => {
-        return '<div class="palette-swatch ' + (c === currentColor ? 'active' : '') + '" style="background:' + c + ';" onclick="selectColor(\'' + c + '\', this)"></div>';
-      }).join('');
+    const COLOR_NAMES = {
+      '#FF3B30': 'Red',
+      '#FF9500': 'Orange',
+      '#FFCC00': 'Yellow',
+      '#34C759': 'Green',
+      '#00C7BE': 'Teal',
+      '#30B0C7': 'Cyan',
+      '#32ADE6': 'Sky Blue',
+      '#007AFF': 'Blue',
+      '#5856D6': 'Deep Blue',
+      '#AF52DE': 'Purple',
+      '#FF2D55': 'Pink',
+      '#A2845E': 'Brown',
+      '#8E8E93': 'Grey',
+      '#FFFFFF': 'White',
+      '#000000': 'Black'
+    };
+
+    let currentTool = 'bucket'; // 'bucket' (Tap-to-Fill) or 'brush' (Paint Brush)
+    let undoStack = [];
+    let baseLineArtImg = null;
+
+    function saveUndoState() {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (undoStack.length >= 25) undoStack.shift();
+      undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    }
+
+    function undoLastColorAction() {
+      if (undoStack.length === 0) return;
+      const ctx = canvas.getContext('2d');
+      const lastState = undoStack.pop();
+      ctx.putImageData(lastState, 0, 0);
+      try { createjs.Sound.play('sonidoClic'); } catch(e) {}
+    }
+
+    function cleanRasterCanvas() {
+      if (!baseLineArtImg) return;
+      saveUndoState();
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const aspect = (baseLineArtImg.width && baseLineArtImg.height) ? (baseLineArtImg.width / baseLineArtImg.height) : 1;
+      let w = canvas.width - 20;
+      let h = w / aspect;
+      if (h > canvas.height - 20) {
+        h = canvas.height - 20;
+        w = h * aspect;
+      }
+      const x = (canvas.width - w) / 2;
+      const y = (canvas.height - h) / 2;
+      ctx.drawImage(baseLineArtImg, x, y, w, h);
+      try { createjs.Sound.play('sonidoClic'); } catch(e) {}
+    }
+
+    function setStudioTool(tool) {
+      currentTool = tool;
+      const bucketBtn = document.getElementById('toolBucketBtn');
+      const brushBtn = document.getElementById('toolBrushBtn');
+      const modeText = document.getElementById('brushModeText');
+      const iconSpan = document.getElementById('toolIndicatorIcon');
+
+      if (tool === 'bucket') {
+        if (bucketBtn) bucketBtn.classList.add('active');
+        if (brushBtn) brushBtn.classList.remove('active');
+        if (modeText) modeText.innerText = 'Tap to Fill';
+        if (iconSpan) iconSpan.innerText = '🪣';
+        canvas.style.cursor = 'crosshair';
+      } else {
+        if (brushBtn) brushBtn.classList.add('active');
+        if (bucketBtn) bucketBtn.classList.remove('active');
+        if (modeText) modeText.innerText = 'Paint Brush';
+        if (iconSpan) iconSpan.innerText = '🖌️';
+        canvas.style.cursor = 'crosshair';
+      }
+      try { createjs.Sound.play('sonidoClic'); } catch(e) {}
+    }
+
+    function selectColor(c, el) {
+      currentColor = c;
+      document.querySelectorAll('.palette-swatch').forEach(s => s.classList.remove('active'));
+      if (el) {
+        el.classList.add('active');
+      } else {
+        const swatches = document.querySelectorAll('.palette-swatch');
+        swatches.forEach(s => {
+          if (s.style.background.toLowerCase() === c.toLowerCase() || s.getAttribute('data-color') === c) {
+            s.classList.add('active');
+          }
+        });
+      }
+
+      const tipSvg = document.getElementById('brushSvgTip');
+      if (tipSvg) tipSvg.setAttribute('fill', c);
+      const colorDot = document.getElementById('brushColorDot');
+      if (colorDot) colorDot.setAttribute('fill', c);
+      const nameEl = document.getElementById('brushColorName');
+      if (nameEl) nameEl.innerText = 'Color: ' + (COLOR_NAMES[c] || c);
+
+      try { createjs.Sound.play('sonidoClic'); } catch(e) {}
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(ch => ch + ch).join('');
+      const num = parseInt(hex, 16);
+      return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+    }
+
+    // High-performance 4-Way Queue BFS Flood Fill Algorithm for line-art
+    function performFloodFill(startX, startY, fillHex) {
+      startX = Math.round(startX);
+      startY = Math.round(startY);
+      if (startX < 0 || startX >= canvas.width || startY < 0 || startY >= canvas.height) return;
 
       const ctx = canvas.getContext('2d');
-      const img = new Image();
-      const rawSrc = formatImgSrc(game.fullImageSrc || game.thumbSrc);
-      if (!rawSrc.startsWith('data:')) {
-        img.crossOrigin = 'anonymous';
+      const w = canvas.width;
+      const h = canvas.height;
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      const fillRgb = hexToRgb(fillHex);
+      const fillR = fillRgb[0], fillG = fillRgb[1], fillB = fillRgb[2];
+
+      const startIdx = (startY * w + startX) * 4;
+      const startR = data[startIdx];
+      const startG = data[startIdx + 1];
+      const startB = data[startIdx + 2];
+      const startA = data[startIdx + 3];
+
+      // Luminance check: don't fill if clicking directly on a dark line/contour
+      const startLum = 0.299 * startR + 0.587 * startG + 0.114 * startB;
+      if (startLum < 75 && startA > 160) {
+        return; // Don't wipe out the outline
       }
-      img.src = rawSrc;
-      img.onload = () => {
+
+      // Check if target area already matches the fill color
+      const diffToFill = Math.abs(startR - fillR) + Math.abs(startG - fillG) + Math.abs(startB - fillB);
+      if (diffToFill < 16) {
+        return;
+      }
+
+      saveUndoState();
+
+      // Check if starting in an unfilled / white area
+      const isStartWhite = startLum >= 180 && (Math.max(startR, startG, startB) - Math.min(startR, startG, startB) < 35);
+
+      function matchPixel(idx) {
+        const a = data[idx + 3];
+        if (a < 50) return false;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        if (lum < 75 && a > 160) return false; // Stop at dark line contour
+
+        if (isStartWhite) {
+          // Uncolored region: fills all white/light paper up to the dark ink outline
+          // Stop if pixel has significant color saturation from another painted section
+          const sat = Math.max(r, g, b) - Math.min(r, g, b);
+          if (sat > 35) return false;
+          return lum >= 75;
+        } else {
+          // Repainting an already-colored area
+          const diff = Math.abs(r - startR) + Math.abs(g - startG) + Math.abs(b - startB);
+          return diff <= 75;
+        }
+      }
+
+      const totalPixels = w * h;
+      const visited = new Uint8Array(totalPixels);
+      const queue = new Int32Array(totalPixels);
+      let queueStart = 0;
+      let queueEnd = 0;
+
+      const startPixel = startY * w + startX;
+      queue[queueEnd++] = startPixel;
+      visited[startPixel] = 1;
+
+      while (queueStart < queueEnd) {
+        const pixel = queue[queueStart++];
+        const px = pixel % w;
+        const py = (pixel / w) | 0;
+        const idx = pixel * 4;
+
+        data[idx] = fillR;
+        data[idx + 1] = fillG;
+        data[idx + 2] = fillB;
+        data[idx + 3] = 255;
+
+        // West
+        if (px > 0) {
+          const left = pixel - 1;
+          if (!visited[left] && matchPixel(left * 4)) {
+            visited[left] = 1;
+            queue[queueEnd++] = left;
+          }
+        }
+        // East
+        if (px < w - 1) {
+          const right = pixel + 1;
+          if (!visited[right] && matchPixel(right * 4)) {
+            visited[right] = 1;
+            queue[queueEnd++] = right;
+          }
+        }
+        // North
+        if (py > 0) {
+          const up = pixel - w;
+          if (!visited[up] && matchPixel(up * 4)) {
+            visited[up] = 1;
+            queue[queueEnd++] = up;
+          }
+        }
+        // South
+        if (py < h - 1) {
+          const down = pixel + w;
+          if (!visited[down] && matchPixel(down * 4)) {
+            visited[down] = 1;
+            queue[queueEnd++] = down;
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      try { createjs.Sound.play('sonidoClic'); } catch(e) {}
+    }
+
+    // Raster Coloring Engine for Admin-uploaded Pictures
+    function loadRasterColoringGame(game) {
+      const toolBar = document.getElementById('rasterToolBar');
+      if (toolBar) toolBar.style.display = 'flex';
+
+      const palette = document.getElementById('rasterPalette');
+      if (palette) {
+        palette.style.display = 'flex';
+        palette.innerHTML = PALETTE_COLORS.map(c => {
+          return '<div class="palette-swatch ' + (c === currentColor ? 'active' : '') + '" style="background:' + c + ';" data-color="' + c + '"></div>';
+        }).join('');
+        palette.querySelectorAll('.palette-swatch').forEach(swatch => {
+          swatch.onclick = function() {
+            selectColor(this.getAttribute('data-color'), this);
+          };
+        });
+      }
+
+      setStudioTool('bucket');
+      selectColor(currentColor || '#FF3B30', document.querySelector('.palette-swatch'));
+
+      const ctx = canvas.getContext('2d');
+      canvas.width = 510;
+      canvas.height = 580;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const rawSrc = formatImgSrc(game.fullImageSrc || game.thumbSrc);
+      const img = new Image();
+
+      // Only set crossOrigin for external remote URLs
+      if (rawSrc.startsWith('http://') || rawSrc.startsWith('https://')) {
+        try {
+          const u = new URL(rawSrc);
+          if (u.origin !== window.location.origin) {
+            img.crossOrigin = 'anonymous';
+          }
+        } catch(e) {}
+      }
+
+      function renderImageToCanvas() {
+        baseLineArtImg = img;
         canvas.width = 510;
         canvas.height = 580;
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Center image
-        const aspect = (img.width && img.height) ? (img.width / img.height) : 1;
+        const aspect = (img.naturalWidth && img.naturalHeight) ? (img.naturalWidth / img.naturalHeight) : ((img.width && img.height) ? (img.width / img.height) : 1);
         let w = canvas.width - 20;
         let h = w / aspect;
         if (h > canvas.height - 20) {
@@ -900,9 +1302,24 @@
         const x = (canvas.width - w) / 2;
         const y = (canvas.height - h) / 2;
         ctx.drawImage(img, x, y, w, h);
+        undoStack = [];
         makeResponsive(true, 'both', false, 1, { properties: { width: 510, height: 580 } });
+      }
+
+      let retryWithoutCors = false;
+      img.onload = () => {
+        renderImageToCanvas();
       };
-      img.onerror = () => {
+
+      img.onerror = (err) => {
+        console.warn('Canvas image load warning:', err, rawSrc);
+        if (!retryWithoutCors && img.crossOrigin) {
+          retryWithoutCors = true;
+          img.crossOrigin = null;
+          img.src = rawSrc + (rawSrc.includes('?') ? '&' : '?') + 't=' + Date.now();
+          return;
+        }
+
         canvas.width = 510;
         canvas.height = 580;
         ctx.fillStyle = '#FFFFFF';
@@ -918,62 +1335,96 @@
         ctx.fillText('Tap colors below to paint this canvas!', 255, 310);
       };
 
-      // Smooth brush painting
-      let isDrawing = false;
-      let lastX = 0, lastY = 0;
+      // Set src AFTER handlers are defined
+      img.src = rawSrc;
 
-      function getPos(e) {
+      // Handle synchronously cached images
+      if (img.complete && img.naturalWidth !== 0) {
+        renderImageToCanvas();
+      }
+
+      // Pointer interactions (Tap to Fill & Smooth Paint Brush)
+      let isPointerDown = false;
+      let startPos = { x: 0, y: 0 };
+      let lastX = 0, lastY = 0;
+      let hasDragged = false;
+
+      function getCanvasPos(e) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const clientX = e.touches ? e.touches[0].clientX : (e.changedTouches ? e.changedTouches[0].clientX : e.clientX);
+        const clientY = e.touches ? e.touches[0].clientY : (e.changedTouches ? e.changedTouches[0].clientY : e.clientY);
         return {
-          x: (clientX - rect.left) * scaleX,
-          y: (clientY - rect.top) * scaleY
+          x: Math.round((clientX - rect.left) * scaleX),
+          y: Math.round((clientY - rect.top) * scaleY)
         };
       }
 
-      function startDraw(e) {
-        isDrawing = true;
-        const pos = getPos(e);
+      function onPointerDown(e) {
+        isPointerDown = true;
+        hasDragged = false;
+        const pos = getCanvasPos(e);
+        startPos = pos;
         lastX = pos.x;
         lastY = pos.y;
-        ctx.fillStyle = currentColor;
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 7, 0, Math.PI * 2);
-        ctx.fill();
+
+        if (currentTool === 'brush') {
+          saveUndoState();
+          ctx.fillStyle = currentColor;
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, 7, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
-      function moveDraw(e) {
-        if (!isDrawing) return;
-        const pos = getPos(e);
-        ctx.strokeStyle = currentColor;
-        ctx.fillStyle = currentColor;
-        ctx.lineWidth = 14;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        lastX = pos.x;
-        lastY = pos.y;
+      function onPointerMove(e) {
+        if (!isPointerDown) return;
+        const pos = getCanvasPos(e);
+        const dist = Math.hypot(pos.x - startPos.x, pos.y - startPos.y);
+        if (dist > 4) hasDragged = true;
+
+        if (currentTool === 'brush') {
+          ctx.strokeStyle = currentColor;
+          ctx.fillStyle = currentColor;
+          ctx.lineWidth = 14;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          ctx.moveTo(lastX, lastY);
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+          lastX = pos.x;
+          lastY = pos.y;
+        }
       }
 
-      canvas.onmousedown = startDraw;
-      canvas.onmousemove = moveDraw;
-      window.onmouseup = () => { isDrawing = false; };
+      function onPointerUp(e) {
+        if (!isPointerDown) return;
+        isPointerDown = false;
 
-      canvas.ontouchstart = (e) => { startDraw(e); e.preventDefault(); };
-      canvas.ontouchmove = (e) => { moveDraw(e); e.preventDefault(); };
-      window.ontouchend = () => { isDrawing = false; };
-    }
+        if (currentTool === 'bucket') {
+          const pos = getCanvasPos(e);
+          performFloodFill(pos.x, pos.y, currentColor);
+        }
+      }
 
-    function selectColor(c, el) {
-      currentColor = c;
-      document.querySelectorAll('.palette-swatch').forEach(s => s.classList.remove('active'));
-      if (el) el.classList.add('active');
+      canvas.onmousedown = onPointerDown;
+      canvas.onmousemove = onPointerMove;
+      window.onmouseup = onPointerUp;
+
+      canvas.ontouchstart = (e) => {
+        onPointerDown(e);
+        e.preventDefault();
+      };
+      canvas.ontouchmove = (e) => {
+        onPointerMove(e);
+        e.preventDefault();
+      };
+      canvas.ontouchend = (e) => {
+        onPointerUp(e);
+        e.preventDefault();
+      };
     }
 
     function makeResponsive(isResp, respDim, isScale, scaleType, lib) {
