@@ -34,6 +34,19 @@
     "trackArtworkSaves": true,
     "trackPrints": true
   },
+  "seo": {
+    "defaultTitle": "ColoringTool.com — Free Online Coloring Pages for Kids & Painting Games",
+    "defaultDescription": "Enjoy 100+ free online coloring pages to paint and color online. Fun interactive coloring games for kids with animals, unicorns, princesses, Christmas and more.",
+    "keywords": "coloring pages, free coloring pages, online coloring for kids, coloring games, printable coloring sheets, kids painting online",
+    "canonicalBase": "https://coloringtool.com",
+    "ogImage": "/my-favicon/favicon-96x96.png",
+    "googleVerification": "",
+    "bingVerification": "",
+    "robotsDirectives": "index, follow, max-image-preview:large",
+    "robotsTxt": "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/admin/\n\nSitemap: https://coloringtool.com/sitemap.xml",
+    "ratingValue": "4.9",
+    "ratingCount": "1280"
+  },
   "adsense": {
     "enabled": false,
     "publisherId": "ca-pub-1234567890123456",

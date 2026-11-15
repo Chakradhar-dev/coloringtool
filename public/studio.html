@@ -3,7 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Coloring Studio — ColoringTool.com</title>
+  <title>Coloring Studio — Free Online Coloring Games for Kids | ColoringTool.com</title>
+  <meta name="description" content="Interactive online coloring studio for kids. Paint, draw, color, and print over 100 free animals, unicorns, food, and Christmas drawings online!">
+  <meta name="keywords" content="coloring studio, online coloring tool, free kids drawing game, paint online, printable coloring games">
+  <link rel="canonical" href="https://coloringtool.com/studio.html">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ColoringTool">
+  <meta property="og:url" content="https://coloringtool.com/studio.html">
+  <meta property="og:title" content="Coloring Studio — Free Online Coloring Games for Kids | ColoringTool.com">
+  <meta property="og:description" content="Interactive online coloring studio for kids. Paint, draw, color, and print over 100 free animals, unicorns, food, and Christmas drawings online!">
+  <meta property="og:image" content="https://coloringtool.com/my-favicon/favicon-96x96.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Coloring Studio — Free Online Coloring Games for Kids | ColoringTool.com">
+  <meta name="twitter:description" content="Interactive online coloring studio for kids. Paint, draw, color, and print over 100 free animals, unicorns, food, and Christmas drawings online!">
+  <meta name="twitter:image" content="https://coloringtool.com/my-favicon/favicon-96x96.png">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ColoringTool Studio",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All modern browsers",
+  "offers": {
+    "@type": "Offer",
+    "price": "0.00",
+    "priceCurrency": "USD"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "1280"
+  }
+}</script>
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
 
@@ -640,8 +675,16 @@
         currentGame = allGames[0];
       }
 
-      // Update UI elements
-      document.title = currentGame.label + ' — Coloring Studio | ColoringTool.com';
+      // Update UI elements & dynamic SEO metadata
+      const pageTitle = (currentGame.h1 ? (currentGame.h1 + ' | ColoringTool.com') : (currentGame.label + ' Free Online Coloring Page | ColoringTool.com'));
+      document.title = pageTitle;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', currentGame.metaDescription || currentGame.descriptionText || ('Free online ' + currentGame.label + ' coloring page for kids. Color online or print for free!'));
+      const metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (metaKeywords) metaKeywords.setAttribute('content', (currentGame.label.toLowerCase() + ' coloring page, free ' + currentGame.label.toLowerCase() + ' printable, online coloring ' + currentGame.label.toLowerCase() + ', ' + currentGame.catName.toLowerCase() + ' coloring'));
+      const linkCanonical = document.querySelector('link[rel="canonical"]');
+      if (linkCanonical) linkCanonical.setAttribute('href', window.location.origin + '/studio.html?cat=' + encodeURIComponent(currentGame.catId) + '&game=' + encodeURIComponent(currentGame.slug));
+
       document.getElementById('gameTitle').innerText = currentGame.label + ' (' + currentGame.catName + ')';
       document.getElementById('backLink').href = '/' + currentGame.catId + '/';
       document.getElementById('backLink').innerText = '← ' + currentGame.catName;

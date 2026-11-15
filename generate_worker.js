@@ -305,7 +305,64 @@ export default {
         return jsonResponse({ success: true, logo: cfg.logo, siteName: cfg.siteName });
       }
 
+      // 11. Update SEO & Keywords Configuration
+      if (pathname === '/api/admin/seo' && method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        const cfg = getConfig();
+        if (!cfg.seo) cfg.seo = {};
+        cfg.seo = Object.assign(cfg.seo, {
+          defaultTitle: (body.defaultTitle !== undefined ? body.defaultTitle : (cfg.seo.defaultTitle || '')).trim(),
+          defaultDescription: (body.defaultDescription !== undefined ? body.defaultDescription : (cfg.seo.defaultDescription || '')).trim(),
+          keywords: (body.keywords !== undefined ? body.keywords : (cfg.seo.keywords || '')).trim(),
+          canonicalBase: (body.canonicalBase || cfg.seo.canonicalBase || 'https://coloringtool.com').trim(),
+          ogImage: (body.ogImage || cfg.seo.ogImage || '/my-favicon/favicon-96x96.png').trim(),
+          googleVerification: (body.googleVerification !== undefined ? body.googleVerification : (cfg.seo.googleVerification || '')).trim(),
+          bingVerification: (body.bingVerification !== undefined ? body.bingVerification : (cfg.seo.bingVerification || '')).trim(),
+          robotsDirectives: (body.robotsDirectives || cfg.seo.robotsDirectives || 'index, follow, max-image-preview:large').trim(),
+          robotsTxt: (body.robotsTxt !== undefined ? body.robotsTxt : (cfg.seo.robotsTxt || '')).trim(),
+          ratingValue: (body.ratingValue || cfg.seo.ratingValue || '4.9').trim(),
+          ratingCount: (body.ratingCount || cfg.seo.ratingCount || '1280').trim()
+        });
+        return jsonResponse({ success: true, seo: cfg.seo });
+      }
+
       return jsonResponse({ error: 'Endpoint not found' }, 404);
+    }
+
+    // ========================================================
+    // ROOT SITEMAP & ROBOTS.TXT ROUTES
+    // ========================================================
+    if (pathname === '/sitemap.xml') {
+      const cfg = getConfig();
+      const base = (cfg.seo?.canonicalBase || 'https://coloringtool.com').replace(/\\/+$/, '');
+      const today = new Date().toISOString().split('T')[0];
+      const cats = getCategories();
+      const allGames = getGames();
+
+      let xml = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\\n';
+      xml += '  <url>\\n    <loc>' + base + '/</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>daily</changefreq>\\n    <priority>1.0</priority>\\n  </url>\\n';
+      xml += '  <url>\\n    <loc>' + base + '/gallery.html</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>weekly</changefreq>\\n    <priority>0.6</priority>\\n  </url>\\n';
+      xml += '  <url>\\n    <loc>' + base + '/about.html</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>monthly</changefreq>\\n    <priority>0.5</priority>\\n  </url>\\n';
+      xml += '  <url>\\n    <loc>' + base + '/privacy.html</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>monthly</changefreq>\\n    <priority>0.5</priority>\\n  </url>\\n';
+      cats.forEach(c => {
+        xml += '  <url>\\n    <loc>' + base + '/' + c.id + '/</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>weekly</changefreq>\\n    <priority>0.8</priority>\\n  </url>\\n';
+      });
+      allGames.forEach(g => {
+        xml += '  <url>\\n    <loc>' + base + '/studio.html?cat=' + encodeURIComponent(g.catId) + '&amp;game=' + encodeURIComponent(g.slug) + '</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>weekly</changefreq>\\n    <priority>0.7</priority>\\n  </url>\\n';
+      });
+      xml += '</urlset>\\n';
+
+      return new Response(xml, {
+        headers: { 'Content-Type': 'application/xml; charset=UTF-8' }
+      });
+    }
+
+    if (pathname === '/robots.txt') {
+      const cfg = getConfig();
+      const content = cfg.seo?.robotsTxt || 'User-agent: *\\nAllow: /\\nDisallow: /admin/\\nDisallow: /api/admin/\\n\\nSitemap: https://coloringtool.com/sitemap.xml\\n';
+      return new Response(content, {
+        headers: { 'Content-Type': 'text/plain; charset=UTF-8' }
+      });
     }
 
     // ========================================================

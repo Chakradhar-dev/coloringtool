@@ -62,6 +62,7 @@ const MIME_TYPES = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=UTF-8',
+  '.xml': 'application/xml; charset=UTF-8',
   '.webmanifest': 'application/manifest+json'
 };
 
@@ -171,13 +172,39 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
     `;
   }
 
+  const seo = siteConfig.seo || {};
+  const base = (seo.canonicalBase || 'https://coloringtool.com').replace(/\/+$/, '');
+  const canonicalUrl = `${base}/${pageTitle.toLowerCase().includes('about') ? 'about.html' : 'privacy.html'}`;
+  const metaDescription = pageTitle.toLowerCase().includes('about')
+    ? 'Learn about ColoringTool.com: safe, fun, and free online coloring activities for kids and families worldwide.'
+    : 'Privacy Policy for ColoringTool.com. We prioritize child safety, strict COPPA compliance, and transparent data practices.';
+  const shareImg = seo.ogImage ? (seo.ogImage.startsWith('http') ? seo.ogImage : `${base}${seo.ogImage}`) : `${base}/my-favicon/favicon-96x96.png`;
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${pageTitle} — ColoringTool.com</title>
-  <meta name="description" content="${siteConfig.tagline}">
+  <meta name="description" content="${metaDescription}">
+  <meta name="keywords" content="${seo.keywords || 'coloring pages, online coloring for kids'}">
+  <link rel="canonical" href="${canonicalUrl}">
+  <meta name="robots" content="${seo.robotsDirectives || 'index, follow, max-image-preview:large'}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="${siteName}">
+  <meta property="og:url" content="${canonicalUrl}">
+  <meta property="og:title" content="${pageTitle} — ColoringTool.com">
+  <meta property="og:description" content="${metaDescription}">
+  <meta property="og:image" content="${shareImg}">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${pageTitle} — ColoringTool.com">
+  <meta name="twitter:description" content="${metaDescription}">
+  <meta name="twitter:image" content="${shareImg}">
+
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
@@ -650,6 +677,40 @@ const server = http.createServer(async (req, res) => {
       return res.end(JSON.stringify({ success: true, logo: siteConfig.logo, siteName: siteConfig.siteName }));
     }
 
+    // 11. Update SEO & Keywords Configuration
+    if (pathname === '/api/admin/seo' && method === 'POST') {
+      const body = await parseBody(req);
+      const siteConfig = readJson('site_config.json');
+      if (!siteConfig.seo) siteConfig.seo = {};
+
+      siteConfig.seo = {
+        defaultTitle: (body.defaultTitle !== undefined ? body.defaultTitle : (siteConfig.seo.defaultTitle || '')).trim(),
+        defaultDescription: (body.defaultDescription !== undefined ? body.defaultDescription : (siteConfig.seo.defaultDescription || '')).trim(),
+        keywords: (body.keywords !== undefined ? body.keywords : (siteConfig.seo.keywords || '')).trim(),
+        canonicalBase: (body.canonicalBase || siteConfig.seo.canonicalBase || 'https://coloringtool.com').trim(),
+        ogImage: (body.ogImage || siteConfig.seo.ogImage || '/my-favicon/favicon-96x96.png').trim(),
+        googleVerification: (body.googleVerification !== undefined ? body.googleVerification : (siteConfig.seo.googleVerification || '')).trim(),
+        bingVerification: (body.bingVerification !== undefined ? body.bingVerification : (siteConfig.seo.bingVerification || '')).trim(),
+        robotsDirectives: (body.robotsDirectives || siteConfig.seo.robotsDirectives || 'index, follow, max-image-preview:large').trim(),
+        robotsTxt: (body.robotsTxt !== undefined ? body.robotsTxt : (siteConfig.seo.robotsTxt || '')).trim(),
+        ratingValue: (body.ratingValue || siteConfig.seo.ratingValue || '4.9').trim(),
+        ratingCount: (body.ratingCount || siteConfig.seo.ratingCount || '1280').trim()
+      };
+
+      writeJson('site_config.json', siteConfig);
+
+      // Trigger automatic regeneration of static pages & sitemap
+      try {
+        const { execSync } = require('child_process');
+        execSync('node generate_pages.js', { cwd: __dirname });
+      } catch (genErr) {
+        console.error('Failed to regenerate pages:', genErr);
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
+      return res.end(JSON.stringify({ success: true, seo: siteConfig.seo }));
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json; charset=UTF-8' });
     return res.end(JSON.stringify({ error: 'Endpoint not found' }));
   }
@@ -683,6 +744,24 @@ const server = http.createServer(async (req, res) => {
     );
     res.writeHead(200, { 'Content-Type': 'text/html; charset=UTF-8' });
     return res.end(html);
+  }
+
+  // ========================================================
+  // SEO ROUTES (Sitemap & Robots.txt)
+  // ========================================================
+  if (pathname === '/sitemap.xml') {
+    const sitemapPath = path.join(PUBLIC_DIR, 'sitemap.xml');
+    if (fs.existsSync(sitemapPath)) {
+      res.writeHead(200, { 'Content-Type': 'application/xml; charset=UTF-8' });
+      return fs.createReadStream(sitemapPath).pipe(res);
+    }
+  }
+
+  if (pathname === '/robots.txt') {
+    const siteConfig = readJson('site_config.json');
+    const robotsTxt = siteConfig.seo?.robotsTxt || `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/admin/\n\nSitemap: https://coloringtool.com/sitemap.xml\n`;
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=UTF-8' });
+    return res.end(robotsTxt);
   }
 
   // ========================================================

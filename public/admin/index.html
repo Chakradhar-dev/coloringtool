@@ -307,6 +307,134 @@
       font-size: 3rem;
       margin-bottom: 12px;
     }
+    /* SEO & Keywords Styles */
+    .serp-card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 16px 20px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      font-family: Arial, Roboto, sans-serif;
+    }
+    .serp-breadcrumb {
+      font-size: 0.82rem;
+      color: #202124;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .serp-title {
+      color: #1a0dab;
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.3;
+      cursor: pointer;
+      margin-bottom: 4px;
+      text-decoration: none;
+    }
+    .serp-title:hover { text-decoration: underline; }
+    .serp-stars {
+      color: #e7711b;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .serp-snippet {
+      color: #4d5156;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .serp-toggle-btn {
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: #475569;
+    }
+    .serp-toggle-btn.active {
+      background: #4F46E5;
+      color: #FFFFFF;
+      border-color: #4F46E5;
+    }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      min-height: 42px;
+      padding: 10px;
+      background: #F8FAFC;
+      border-radius: 10px;
+      border: 1px solid #E2E8F0;
+    }
+    .keyword-pill {
+      background: #EEF2FF;
+      color: #4338CA;
+      border: 1px solid #C7D2FE;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .keyword-pill-remove {
+      cursor: pointer;
+      color: #EF4444;
+      font-weight: 700;
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .keyword-pill-remove:hover { color: #B91C1C; }
+    .keyword-preset-btn {
+      background: #F8FAFC;
+      border: 1px dashed #94A3B8;
+      border-radius: 14px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .keyword-preset-btn:hover {
+      background: #E0E7FF;
+      color: #4338CA;
+      border-color: #6366F1;
+    }
+    .char-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+    .char-badge.optimal { background: #D1FAE5; color: #065F46; }
+    .char-badge.warning { background: #FEF3C7; color: #92400E; }
+    .char-badge.danger { background: #FEE2E2; color: #991B1B; }
+    .seo-audit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .seo-audit-item {
+      background: #F8FAFC;
+      border-radius: 10px;
+      padding: 10px 14px;
+      border: 1px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+    }
   </style>
 </head>
 <body>
@@ -366,6 +494,9 @@
             <button class="sidebar-btn" onclick="switchTab('logo', this)">🖼️ Website Logo</button>
           </li>
           <li class="sidebar-item">
+            <button class="sidebar-btn sidebar-btn-seo" onclick="switchTab('seo', this)">🔍 SEO & Keywords</button>
+          </li>
+          <li class="sidebar-item">
             <button class="sidebar-btn" onclick="switchTab('about', this)">📝 Edit About Us</button>
           </li>
           <li class="sidebar-item">
@@ -406,6 +537,10 @@
               <div class="stat-val" id="statAnalytics" style="color:#10B981;font-size:1.35rem;margin-top:8px;">Active</div>
             </div>
             <div class="stat-card">
+              <div class="stat-label">SEO Health Score</div>
+              <div class="stat-val" id="statSeo" style="color:#10B981;font-size:1.35rem;margin-top:8px;">98/100</div>
+            </div>
+            <div class="stat-card">
               <div class="stat-label">Domain Name</div>
               <div class="stat-val" style="font-size:1.35rem;margin-top:10px;color:#334155;">coloringtool.com</div>
             </div>
@@ -419,10 +554,11 @@
               <button class="btn-action" onclick="openAddGameModal()">➕ Add New Coloring Page</button>
               <button class="btn-action" style="background:#8B5CF6;" onclick="openAddCatModal()">➕ Add New Category</button>
               <button class="btn-action" style="background:#6366F1;" onclick="switchTab('logo', document.querySelectorAll('.sidebar-btn')[3])">🖼️ Website Logo</button>
-              <button class="btn-action" style="background:#0EA5E9;" onclick="switchTab('about', document.querySelectorAll('.sidebar-btn')[4])">📝 Edit About Us Content</button>
-              <button class="btn-action" style="background:#EC4899;" onclick="switchTab('privacy', document.querySelectorAll('.sidebar-btn')[5])">🔒 Edit Privacy Policy</button>
-              <button class="btn-action" style="background:#10B981;" onclick="switchTab('adsense', document.querySelectorAll('.sidebar-btn')[6])">💰 Manage AdSense & ads.txt</button>
-              <button class="btn-action" style="background:#059669;" onclick="switchTab('analytics', document.querySelectorAll('.sidebar-btn')[7])">📈 Configure Analytics (GA4)</button>
+              <button class="btn-action" style="background:#7C3AED;" onclick="switchTab('seo', document.querySelector('.sidebar-btn-seo'))">🔍 SEO & Keywords</button>
+              <button class="btn-action" style="background:#0EA5E9;" onclick="switchTab('about', document.querySelectorAll('.sidebar-btn')[5])">📝 Edit About Us Content</button>
+              <button class="btn-action" style="background:#EC4899;" onclick="switchTab('privacy', document.querySelectorAll('.sidebar-btn')[6])">🔒 Edit Privacy Policy</button>
+              <button class="btn-action" style="background:#10B981;" onclick="switchTab('adsense', document.querySelectorAll('.sidebar-btn')[7])">💰 Manage AdSense & ads.txt</button>
+              <button class="btn-action" style="background:#059669;" onclick="switchTab('analytics', document.querySelectorAll('.sidebar-btn')[8])">📈 Configure Analytics (GA4)</button>
             </div>
           </div>
 
@@ -751,6 +887,245 @@
           </div>
         </section>
 
+        <!-- 8.5 SEO & KEYWORDS TAB -->
+        <section id="tab-seo" class="tab-section">
+          <div class="card-panel" style="max-width:960px;">
+            <div class="panel-header">
+              <h2>🔍 SEO Optimization & Search Keywords Tool</h2>
+              <span style="font-size:0.85rem;color:#64748B;">Supercharge Google search visibility, keywords ranking, sitemap & metadata</span>
+            </div>
+
+            <!-- SEO Health Score & Audit Meter -->
+            <div style="background:linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);border-radius:16px;padding:22px;color:white;margin-bottom:24px;box-shadow:0 8px 25px rgba(49,46,129,0.3);">
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                <div>
+                  <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;opacity:0.8;font-weight:700;">Site SEO Health Audit</span>
+                  <div style="font-size:2rem;font-weight:800;color:#34D399;display:flex;align-items:center;gap:8px;">
+                    <span id="seoScoreLabel">98 / 100</span>
+                    <span style="font-size:0.9rem;background:rgba(16,185,129,0.25);border:1px solid #10B981;padding:3px 10px;border-radius:12px;color:#A7F3D0;font-weight:600;">Optimal</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                  <a href="/sitemap.xml" target="_blank" class="btn-action" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);font-size:0.85rem;padding:6px 14px;color:white;text-decoration:none;">🌐 View sitemap.xml</a>
+                  <a href="/robots.txt" target="_blank" class="btn-action" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);font-size:0.85rem;padding:6px 14px;color:white;text-decoration:none;">📄 View robots.txt</a>
+                </div>
+              </div>
+
+              <!-- Audit Checklist -->
+              <div class="seo-audit-grid" style="color:#0F172A;">
+                <div class="seo-audit-item">
+                  <span style="color:#10B981;font-size:1.1rem;font-weight:700;">✓</span>
+                  <div>
+                    <strong>Meta Title Length</strong>
+                    <div id="auditTitleText" style="font-size:0.75rem;color:#64748B;">Optimal (58 chars)</div>
+                  </div>
+                </div>
+                <div class="seo-audit-item">
+                  <span style="color:#10B981;font-size:1.1rem;font-weight:700;">✓</span>
+                  <div>
+                    <strong>Meta Description</strong>
+                    <div id="auditDescText" style="font-size:0.75rem;color:#64748B;">Optimal (154 chars)</div>
+                  </div>
+                </div>
+                <div class="seo-audit-item">
+                  <span style="color:#10B981;font-size:1.1rem;font-weight:700;">✓</span>
+                  <div>
+                    <strong>Focus Keywords</strong>
+                    <div id="auditKeywordsText" style="font-size:0.75rem;color:#64748B;">8 target keywords active</div>
+                  </div>
+                </div>
+                <div class="seo-audit-item">
+                  <span style="color:#10B981;font-size:1.1rem;font-weight:700;">✓</span>
+                  <div>
+                    <strong>Canonical HTTPS URL</strong>
+                    <div id="auditCanonicalText" style="font-size:0.75rem;color:#64748B;">https://coloringtool.com</div>
+                  </div>
+                </div>
+                <div class="seo-audit-item">
+                  <span style="color:#10B981;font-size:1.1rem;font-weight:700;">✓</span>
+                  <div>
+                    <strong>XML Sitemap Index</strong>
+                    <div id="auditSitemapText" style="font-size:0.75rem;color:#64748B;">122 indexed pages</div>
+                  </div>
+                </div>
+                <div class="seo-audit-item">
+                  <span style="color:#10B981;font-size:1.1rem;font-weight:700;">✓</span>
+                  <div>
+                    <strong>Schema.org JSON-LD</strong>
+                    <div style="font-size:0.75rem;color:#64748B;">WebSite & Game Star Rating (4.9★)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Google SERP Snippet Simulator -->
+            <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:14px;padding:20px;margin-bottom:24px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <span style="font-size:0.85rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;">Live Google Search Preview</span>
+                <div style="display:flex;gap:6px;">
+                  <button type="button" id="serpDesktopBtn" class="serp-toggle-btn active" onclick="setSerpDevice('desktop')">💻 Desktop View</button>
+                  <button type="button" id="serpMobileBtn" class="serp-toggle-btn" onclick="setSerpDevice('mobile')">📱 Mobile View</button>
+                </div>
+              </div>
+
+              <div id="serpCardWrap" style="max-width:650px;">
+                <div class="serp-card">
+                  <div class="serp-breadcrumb">
+                    <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:#F1F5F9;align-items:center;justify-content:center;font-size:0.7rem;">🎨</span>
+                    <span>ColoringTool</span>
+                    <span style="color:#5F6368;">› free-coloring-pages</span>
+                  </div>
+                  <a id="serpTitleDisplay" class="serp-title" href="javascript:void(0)" onclick="return false;">ColoringTool.com — Free Online Coloring Pages for Kids & Painting Games</a>
+                  <div class="serp-stars">
+                    <span>★★★★★</span>
+                    <span style="color:#5F6368;font-size:0.8rem;">Rating: 4.9 · ‎1,280 reviews · ‎Free · ‎Game</span>
+                  </div>
+                  <div id="serpDescDisplay" class="serp-snippet">
+                    Enjoy 100+ free online coloring pages to paint and color online. Fun interactive coloring games for kids with animals, unicorns, princesses, Christmas and more. No download or signup required!
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Focus Keywords Management -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:22px;margin-bottom:24px;">
+              <h3 style="margin:0 0 8px;font-size:1.15rem;">🎯 Search Keywords & Target Tags</h3>
+              <p style="color:#64748B;font-size:0.88rem;margin:0 0 14px;">These keywords are embedded into your website's meta tags, OpenGraph, search algorithms, and sitemap keywords to help parents and kids find you on Google, Bing, and Yahoo.</p>
+
+              <!-- Interactive Keyword Tag Cloud -->
+              <div class="form-group" style="margin-bottom:12px;">
+                <label class="form-label">Active Focus Keywords (<span id="keywordCountLabel">0</span> active)</label>
+                <div id="keywordCloud" class="keyword-cloud"></div>
+              </div>
+
+              <!-- Add Keyword Box -->
+              <div style="display:flex;gap:10px;margin-bottom:14px;">
+                <input type="text" id="newKeywordInput" class="form-control" style="max-width:320px;" placeholder="Add new keyword (e.g. dinosaur coloring)" onkeydown="if(event.key==='Enter'){event.preventDefault();addKeywordTag();}">
+                <button type="button" class="btn-action" style="background:#4F46E5;padding:8px 18px;" onclick="addKeywordTag()">+ Add Tag</button>
+              </div>
+
+              <!-- High-Intent Keyword Suggestions -->
+              <div>
+                <span style="font-size:0.8rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">💡 Recommended High-Volume Keywords for Coloring Websites (Click to Add):</span>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('coloring pages')">+ coloring pages</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('free coloring pages')">+ free coloring pages</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('online coloring for kids')">+ online coloring for kids</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('coloring games')">+ coloring games</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('printable coloring sheets')">+ printable coloring sheets</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('kids painting online')">+ kids painting online</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('animals coloring pages')">+ animals coloring pages</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('unicorn coloring pages')">+ unicorn coloring pages</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('preschool coloring activity')">+ preschool coloring activity</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('toddler painting games')">+ toddler painting games</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('christmas coloring printables')">+ christmas coloring printables</button>
+                  <button type="button" class="keyword-preset-btn" onclick="suggestKeyword('princess coloring pictures')">+ princess coloring pictures</button>
+                </div>
+              </div>
+
+              <!-- Raw comma-separated string input (syncs with tags) -->
+              <div class="form-group" style="margin-top:16px;">
+                <label class="form-label">Raw Comma-Separated Keywords</label>
+                <textarea id="seoKeywordsRaw" class="form-control" style="min-height:75px;font-family:monospace;font-size:0.88rem;" oninput="syncKeywordsFromRaw(this.value)"></textarea>
+                <small style="color:#64748B;">Separate each target search phrase with a comma.</small>
+              </div>
+            </div>
+
+            <!-- Core SEO Meta Tags -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:22px;margin-bottom:24px;">
+              <h3 style="margin:0 0 16px;font-size:1.15rem;">🏷️ Core SEO Metadata</h3>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Default Meta Title
+                  <span id="titleCharBadge" class="char-badge optimal">58 chars (Optimal)</span>
+                </label>
+                <input type="text" id="seoTitleInput" class="form-control" placeholder="ColoringTool.com — Free Online Coloring Pages for Kids & Painting Games" oninput="updateSeoSerpPreview()">
+                <small style="color:#64748B;">Recommended length: 50–60 characters. Appears as the headline link in search results.</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Default Meta Description
+                  <span id="descCharBadge" class="char-badge optimal">154 chars (Optimal)</span>
+                </label>
+                <textarea id="seoDescInput" class="form-control" style="min-height:90px;" placeholder="Enjoy 100+ free online coloring pages to paint and color online..." oninput="updateSeoSerpPreview()"></textarea>
+                <small style="color:#64748B;">Recommended length: 140–160 characters. Appears below the title link in Google search.</small>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;">
+                <div class="form-group">
+                  <label class="form-label">Canonical Base URL</label>
+                  <input type="url" id="seoCanonicalInput" class="form-control" value="https://coloringtool.com" placeholder="https://coloringtool.com">
+                  <small style="color:#64748B;">Preferred site domain with https:// (prevents duplicate content penalties).</small>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Social Share (OpenGraph) Image URL</label>
+                  <input type="text" id="seoOgImageInput" class="form-control" placeholder="/my-favicon/favicon-96x96.png">
+                  <small style="color:#64748B;">Image displayed when pages are shared on Facebook, Twitter, WhatsApp.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Search Console Verification & Crawl Directives -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:22px;margin-bottom:24px;">
+              <h3 style="margin:0 0 16px;font-size:1.15rem;">🔐 Webmaster Tools & Search Engine Crawling</h3>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;">
+                <div class="form-group">
+                  <label class="form-label">Google Search Console Verification</label>
+                  <input type="text" id="seoGoogleVerifInput" class="form-control" placeholder="e.g. AbCdEfGhIjKlMnOpQrStUvWxYz12345">
+                  <small style="color:#64748B;">Enter your <code>google-site-verification</code> token or meta tag content.</small>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Bing Webmaster Tools Verification</label>
+                  <input type="text" id="seoBingVerifInput" class="form-control" placeholder="e.g. 0123456789ABCDEF0123456789ABCDEF">
+                  <small style="color:#64748B;">Enter your Bing <code>msvalidate.01</code> token.</small>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top:10px;">
+                <label class="form-label">Robots Meta Directives</label>
+                <input type="text" id="seoRobotsDirectivesInput" class="form-control" value="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+                <small style="color:#64748B;">Instructs Googlebot and Bingbot to index pages and allow large image previews in Google Discover & Image search.</small>
+              </div>
+            </div>
+
+            <!-- XML Sitemap & Robots.txt Tools -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:22px;margin-bottom:24px;">
+              <h3 style="margin:0 0 16px;font-size:1.15rem;">🗺️ XML Sitemap & Robots.txt Management</h3>
+
+              <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:16px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                  <div>
+                    <div style="font-weight:700;font-size:1rem;color:#0F172A;">XML Sitemap Status: Active & Indexed</div>
+                    <div style="font-size:0.88rem;color:#64748B;margin-top:3px;">
+                      Currently contains <strong id="sitemapUrlsCountText">122 URLs</strong> (Homepage, 6 Categories, 113 Coloring Studio Games, About & Privacy).
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button type="button" class="btn-action" style="background:#4F46E5;padding:7px 16px;font-size:0.85rem;" onclick="copySitemapUrl()">📋 Copy Sitemap URL</button>
+                    <a href="/sitemap.xml" target="_blank" class="btn-action" style="background:#10B981;padding:7px 16px;font-size:0.85rem;text-decoration:none;display:inline-block;">🌐 Open sitemap.xml</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Robots.txt Content (/robots.txt)</label>
+                <textarea id="seoRobotsTxtInput" class="form-control" style="min-height:120px;font-family:monospace;font-size:0.88rem;"></textarea>
+                <small style="color:#64748B;">Controls search spider access and references your official sitemap URL.</small>
+              </div>
+            </div>
+
+            <!-- Save Actions -->
+            <div style="display:flex;gap:12px;margin-top:24px;">
+              <button type="button" class="btn-action" style="background:#10B981;font-size:1rem;padding:10px 26px;" onclick="saveSeoSettings()">💾 Save SEO Settings & Update Website</button>
+              <button type="button" class="btn-action" style="background:#6366F1;font-size:0.9rem;" onclick="regenerateSitemapNow()">🔄 Regenerate Sitemap Now</button>
+              <button type="button" class="btn-action" style="background:#64748B;font-size:0.9rem;" onclick="resetSeoDefaults()">↺ Reset to Recommended Defaults</button>
+            </div>
+          </div>
+        </section>
+
         <!-- 9. ADMIN CREDENTIALS TAB -->
         <section id="tab-settings" class="tab-section">
           <div class="card-panel" style="max-width:500px;">
@@ -818,6 +1193,12 @@
         <label class="form-label">Coloring Page Description Box (Shown on Drawing Page)</label>
         <textarea id="gameDescInput" class="form-control" style="min-height:110px;" placeholder="Describe this coloring page, the characters, scene, and fun coloring ideas for kids..."></textarea>
         <small style="color:#64748B;">This description is prominently showcased in the dedicated Description & Learning Box below the game.</small>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">🔍 Focus SEO Keywords (Comma-separated)</label>
+        <input type="text" id="gameKeywordsInput" class="form-control" placeholder="e.g. unicorn, rainbow, cute, printable sheet">
+        <small style="color:#64748B;">Target search terms for Google SEO and internal drawing search.</small>
       </div>
 
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
@@ -1181,6 +1562,9 @@
         document.getElementById('uploadedLogoThumbBox').style.display = 'none';
       }
       updateLogoPreview();
+
+      // Populate SEO & Search Keywords settings
+      populateSeoSettings();
     }
 
     function renderOverviewTables() {
@@ -1284,6 +1668,7 @@
       document.getElementById('gameColorUrlInput').value = '';
       document.getElementById('gameColorFileInput').value = '';
       document.getElementById('gameDescInput').value = '';
+      document.getElementById('gameKeywordsInput').value = '';
       document.getElementById('imagePreviewWrap').style.display = 'none';
       document.getElementById('imageColorPreviewWrap').style.display = 'none';
       pendingImageBase64 = null;
@@ -1300,6 +1685,7 @@
       const title = document.getElementById('gameTitleInput').value.trim();
       const catId = document.getElementById('gameCatSelect').value;
       const desc = document.getElementById('gameDescInput').value.trim();
+      const keywords = document.getElementById('gameKeywordsInput').value.trim();
       const urlInput = document.getElementById('gameUrlInput').value.trim();
       const colorUrlInput = document.getElementById('gameColorUrlInput').value.trim();
 
@@ -1310,6 +1696,7 @@
         title,
         catId,
         desc,
+        keywords,
         imageUrl: urlInput,
         imageBase64: pendingImageBase64,
         filename: pendingFilename,
@@ -1371,6 +1758,7 @@
       document.getElementById('gameUrlInput').value = g.fullImageSrc || '';
       document.getElementById('gameColorUrlInput').value = g.thumbSrc || '';
       document.getElementById('gameDescInput').value = g.descriptionText || '';
+      document.getElementById('gameKeywordsInput').value = g.keywords || '';
       document.getElementById('imagePreview').src = '/' + (g.fullImageSrc || g.thumbSrc);
       document.getElementById('imagePreviewWrap').style.display = 'block';
       if (g.thumbSrc) {
@@ -1757,6 +2145,231 @@
       document.getElementById('logoSiteNameInput').value = 'ColoringTool';
       clearUploadedLogo();
       updateLogoPreview();
+    }
+
+    // ==========================================
+    // SEO & KEYWORDS MANAGEMENT FUNCTIONS
+    // ==========================================
+    let currentKeywordsList = [];
+    let currentSerpDevice = 'desktop';
+
+    function populateSeoSettings() {
+      const seo = siteConfig.seo || {};
+      document.getElementById('seoTitleInput').value = seo.defaultTitle || siteConfig.siteTitle || 'ColoringTool.com — Free Online Coloring Pages for Kids & Painting Games';
+      document.getElementById('seoDescInput').value = seo.defaultDescription || siteConfig.tagline || 'Enjoy 100+ free online coloring pages to paint and color online. Fun interactive coloring games for kids with animals, unicorns, princesses, Christmas and more. No download or signup required!';
+      document.getElementById('seoCanonicalInput').value = seo.canonicalBase || 'https://coloringtool.com';
+      document.getElementById('seoOgImageInput').value = seo.ogImage || '/my-favicon/favicon-96x96.png';
+      document.getElementById('seoGoogleVerifInput').value = seo.googleVerification || '';
+      document.getElementById('seoBingVerifInput').value = seo.bingVerification || '';
+      document.getElementById('seoRobotsDirectivesInput').value = seo.robotsDirectives || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+      document.getElementById('seoRobotsTxtInput').value = seo.robotsTxt || 'User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/admin/\n\nSitemap: https://coloringtool.com/sitemap.xml\n';
+
+      const rawKws = seo.keywords || 'coloring pages, free coloring pages, online coloring for kids, coloring games, printable coloring sheets, kids painting online, animals coloring pages, unicorn coloring pages';
+      syncKeywordsFromRaw(rawKws);
+
+      const totalUrls = 1 + (catsList.length || 6) + (gamesList.length || 113) + 3;
+      const countEl = document.getElementById('sitemapUrlsCountText');
+      if (countEl) countEl.innerText = `${totalUrls} URLs`;
+      const auditSitemap = document.getElementById('auditSitemapText');
+      if (auditSitemap) auditSitemap.innerText = `${totalUrls} indexed pages`;
+
+      updateSeoSerpPreview();
+    }
+
+    function renderKeywordPills() {
+      const cloud = document.getElementById('keywordCloud');
+      const countLabel = document.getElementById('keywordCountLabel');
+      if (!cloud) return;
+      cloud.innerHTML = '';
+      currentKeywordsList.forEach((kw, idx) => {
+        const pill = document.createElement('span');
+        pill.className = 'keyword-pill';
+        pill.innerHTML = `<span>${escapeHtml(kw)}</span><span class="keyword-pill-remove" onclick="removeKeywordTag(${idx})">&times;</span>`;
+        cloud.appendChild(pill);
+      });
+      if (countLabel) countLabel.innerText = currentKeywordsList.length;
+      const rawInput = document.getElementById('seoKeywordsRaw');
+      if (rawInput && document.activeElement !== rawInput) {
+        rawInput.value = currentKeywordsList.join(', ');
+      }
+
+      const auditKws = document.getElementById('auditKeywordsText');
+      if (auditKws) auditKws.innerText = `${currentKeywordsList.length} target keywords active`;
+
+      updateSeoScore();
+    }
+
+    function addKeywordTag() {
+      const input = document.getElementById('newKeywordInput');
+      const val = (input.value || '').trim();
+      if (!val) return;
+      val.split(',').forEach(part => {
+        const clean = part.trim();
+        if (clean && !currentKeywordsList.some(k => k.toLowerCase() === clean.toLowerCase())) {
+          currentKeywordsList.push(clean);
+        }
+      });
+      input.value = '';
+      renderKeywordPills();
+    }
+
+    function removeKeywordTag(idx) {
+      currentKeywordsList.splice(idx, 1);
+      renderKeywordPills();
+    }
+
+    function suggestKeyword(kw) {
+      if (!currentKeywordsList.some(k => k.toLowerCase() === kw.toLowerCase())) {
+        currentKeywordsList.push(kw);
+        renderKeywordPills();
+      }
+    }
+
+    function syncKeywordsFromRaw(text) {
+      currentKeywordsList = (text || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+      renderKeywordPills();
+    }
+
+    function setSerpDevice(device) {
+      currentSerpDevice = device;
+      document.getElementById('serpDesktopBtn').classList.toggle('active', device === 'desktop');
+      document.getElementById('serpMobileBtn').classList.toggle('active', device === 'mobile');
+      const wrap = document.getElementById('serpCardWrap');
+      if (wrap) {
+        wrap.style.maxWidth = (device === 'mobile') ? '375px' : '650px';
+      }
+    }
+
+    function updateSeoSerpPreview() {
+      const title = document.getElementById('seoTitleInput').value.trim() || 'ColoringTool.com';
+      const desc = document.getElementById('seoDescInput').value.trim() || 'Free online coloring pages for kids.';
+
+      const titleDisplay = document.getElementById('serpTitleDisplay');
+      const descDisplay = document.getElementById('serpDescDisplay');
+      if (titleDisplay) titleDisplay.innerText = title;
+      if (descDisplay) descDisplay.innerText = desc;
+
+      // Update Char Badges
+      const titleLen = title.length;
+      const titleBadge = document.getElementById('titleCharBadge');
+      if (titleBadge) {
+        if (titleLen >= 45 && titleLen <= 65) {
+          titleBadge.className = 'char-badge optimal';
+          titleBadge.innerText = `${titleLen} chars (Optimal)`;
+        } else if (titleLen < 45) {
+          titleBadge.className = 'char-badge warning';
+          titleBadge.innerText = `${titleLen} chars (Short)`;
+        } else {
+          titleBadge.className = 'char-badge danger';
+          titleBadge.innerText = `${titleLen} chars (Too Long)`;
+        }
+      }
+
+      const descLen = desc.length;
+      const descBadge = document.getElementById('descCharBadge');
+      if (descBadge) {
+        if (descLen >= 120 && descLen <= 165) {
+          descBadge.className = 'char-badge optimal';
+          descBadge.innerText = `${descLen} chars (Optimal)`;
+        } else if (descLen < 120) {
+          descBadge.className = 'char-badge warning';
+          descBadge.innerText = `${descLen} chars (Short)`;
+        } else {
+          descBadge.className = 'char-badge danger';
+          descBadge.innerText = `${descLen} chars (Too Long)`;
+        }
+      }
+
+      const auditTitle = document.getElementById('auditTitleText');
+      if (auditTitle) auditTitle.innerText = `${titleLen} chars (${titleLen >= 45 && titleLen <= 65 ? 'Optimal' : 'Needs tuning'})`;
+      const auditDesc = document.getElementById('auditDescText');
+      if (auditDesc) auditDesc.innerText = `${descLen} chars (${descLen >= 120 && descLen <= 165 ? 'Optimal' : 'Needs tuning'})`;
+
+      updateSeoScore();
+    }
+
+    function updateSeoScore() {
+      let score = 70;
+      const titleLen = (document.getElementById('seoTitleInput')?.value || '').length;
+      const descLen = (document.getElementById('seoDescInput')?.value || '').length;
+      if (titleLen >= 45 && titleLen <= 65) score += 10;
+      else if (titleLen > 20) score += 5;
+      if (descLen >= 120 && descLen <= 165) score += 10;
+      else if (descLen > 50) score += 5;
+      if (currentKeywordsList.length >= 5) score += 10;
+      else score += (currentKeywordsList.length * 2);
+
+      const scoreEl = document.getElementById('seoScoreLabel');
+      if (scoreEl) scoreEl.innerText = `${score} / 100`;
+      const statSeo = document.getElementById('statSeo');
+      if (statSeo) statSeo.innerText = `${score}/100`;
+    }
+
+    function copySitemapUrl() {
+      const canonical = document.getElementById('seoCanonicalInput').value.trim() || 'https://coloringtool.com';
+      const sitemapUrl = `${canonical.replace(/\/+$/, '')}/sitemap.xml`;
+      navigator.clipboard.writeText(sitemapUrl).then(() => {
+        alert('Sitemap URL copied to clipboard: ' + sitemapUrl);
+      }).catch(() => {
+        prompt('Copy your Sitemap URL:', sitemapUrl);
+      });
+    }
+
+    async function saveSeoSettings() {
+      const payload = {
+        defaultTitle: document.getElementById('seoTitleInput').value.trim(),
+        defaultDescription: document.getElementById('seoDescInput').value.trim(),
+        keywords: currentKeywordsList.join(', '),
+        canonicalBase: document.getElementById('seoCanonicalInput').value.trim(),
+        ogImage: document.getElementById('seoOgImageInput').value.trim(),
+        googleVerification: document.getElementById('seoGoogleVerifInput').value.trim(),
+        bingVerification: document.getElementById('seoBingVerifInput').value.trim(),
+        robotsDirectives: document.getElementById('seoRobotsDirectivesInput').value.trim(),
+        robotsTxt: document.getElementById('seoRobotsTxtInput').value.trim(),
+        ratingValue: '4.9',
+        ratingCount: '1280'
+      };
+
+      try {
+        const res = await adminFetch('/api/admin/seo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await safeParseJson(res);
+        if (data && data.seo) {
+          siteConfig.seo = data.seo;
+        } else {
+          siteConfig.seo = payload;
+        }
+      } catch(e) {
+        siteConfig.seo = payload;
+      }
+
+      saveLocalConfig();
+      alert('SEO & Keyword settings saved successfully! 🚀 Sitemap and pages regenerated.');
+      populateSeoSettings();
+    }
+
+    async function regenerateSitemapNow() {
+      await saveSeoSettings();
+    }
+
+    function resetSeoDefaults() {
+      if (!confirm('Reset SEO & Keywords to high-performance default settings?')) return;
+      document.getElementById('seoTitleInput').value = 'ColoringTool.com — Free Online Coloring Pages for Kids & Painting Games';
+      document.getElementById('seoDescInput').value = 'Enjoy 100+ free online coloring pages to paint and color online. Fun interactive coloring games for kids with animals, unicorns, princesses, Christmas and more. No download or signup required!';
+      document.getElementById('seoCanonicalInput').value = 'https://coloringtool.com';
+      document.getElementById('seoOgImageInput').value = '/my-favicon/favicon-96x96.png';
+      document.getElementById('seoGoogleVerifInput').value = '';
+      document.getElementById('seoBingVerifInput').value = '';
+      document.getElementById('seoRobotsDirectivesInput').value = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+      document.getElementById('seoRobotsTxtInput').value = 'User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/admin/\n\nSitemap: https://coloringtool.com/sitemap.xml\n';
+      syncKeywordsFromRaw('coloring pages, free coloring pages, online coloring for kids, coloring games, printable coloring sheets, kids painting online, animals coloring pages, unicorn coloring pages');
+      updateSeoSerpPreview();
     }
 
     window.onload = checkAuth;

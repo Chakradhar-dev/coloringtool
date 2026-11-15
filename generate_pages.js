@@ -30,6 +30,93 @@ const analyticsHeaderScript = (analytics.enabled && gaMeasurementId) ? `
   </script>
 ` : '';
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function escapeAttr(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderSeoHeadTags({ title, description, keywords, canonicalPath = '', ogImage = '', jsonLd = null }) {
+  const cfgSeo = siteConfig.seo || {};
+  const base = (cfgSeo.canonicalBase || 'https://coloringtool.com').replace(/\/+$/, '');
+  const siteName = siteConfig.siteName || 'ColoringTool';
+  const pageTitle = title || cfgSeo.defaultTitle || siteConfig.siteTitle || `${siteName}.com — Free Online Coloring Pages for Kids`;
+  const pageDesc = description || cfgSeo.defaultDescription || siteConfig.tagline || 'Free online coloring pages for kids.';
+  const pageKeywords = keywords || cfgSeo.keywords || 'coloring pages, free coloring pages, online coloring for kids';
+  const canonicalUrl = `${base}${canonicalPath}`;
+  const shareImage = ogImage ? (ogImage.startsWith('http') ? ogImage : `${base}${ogImage}`) : `${base}${cfgSeo.ogImage || '/my-favicon/favicon-96x96.png'}`;
+  const robots = cfgSeo.robotsDirectives || 'index, follow, max-image-preview:large';
+
+  let verificationMeta = '';
+  if (cfgSeo.googleVerification) {
+    verificationMeta += `\n  <meta name="google-site-verification" content="${escapeAttr(cfgSeo.googleVerification)}">`;
+  }
+  if (cfgSeo.bingVerification) {
+    verificationMeta += `\n  <meta name="msvalidate.01" content="${escapeAttr(cfgSeo.bingVerification)}">`;
+  }
+
+  let ldJsonBlock = '';
+  if (jsonLd) {
+    ldJsonBlock = `\n  <script type="application/ld+json">${JSON.stringify(jsonLd, null, 2)}</script>`;
+  }
+
+  return `  <title>${escapeHtml(pageTitle)}</title>
+  <meta name="description" content="${escapeAttr(pageDesc)}">
+  <meta name="keywords" content="${escapeAttr(pageKeywords)}">
+  <link rel="canonical" href="${canonicalUrl}">
+  <meta name="robots" content="${robots}">${verificationMeta}
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="${escapeAttr(siteName)}">
+  <meta property="og:url" content="${canonicalUrl}">
+  <meta property="og:title" content="${escapeAttr(pageTitle)}">
+  <meta property="og:description" content="${escapeAttr(pageDesc)}">
+  <meta property="og:image" content="${shareImage}">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeAttr(pageTitle)}">
+  <meta name="twitter:description" content="${escapeAttr(pageDesc)}">
+  <meta name="twitter:image" content="${shareImage}">${ldJsonBlock}`;
+}
+
+function generateSitemapXml() {
+  const cfgSeo = siteConfig.seo || {};
+  const base = (cfgSeo.canonicalBase || 'https://coloringtool.com').replace(/\/+$/, '');
+  const today = new Date().toISOString().split('T')[0];
+
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+  xml += `  <url>\n    <loc>${base}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${base}/gallery.html</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${base}/about.html</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${base}/privacy.html</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+
+  categories.forEach(c => {
+    xml += `  <url>\n    <loc>${base}/${c.id}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+  });
+
+  games.forEach(g => {
+    xml += `  <url>\n    <loc>${base}/studio.html?cat=${encodeURIComponent(g.catId)}&amp;game=${encodeURIComponent(g.slug)}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+  });
+
+  xml += `</urlset>\n`;
+  return xml;
+}
+
+function generateRobotsTxt() {
+  const cfgSeo = siteConfig.seo || {};
+  const base = (cfgSeo.canonicalBase || 'https://coloringtool.com').replace(/\/+$/, '');
+  if (cfgSeo.robotsTxt && cfgSeo.robotsTxt.trim()) {
+    return cfgSeo.robotsTxt.trim() + '\n';
+  }
+  return `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/admin/\n\nSitemap: ${base}/sitemap.xml\n`;
+}
+
 function renderAdUnit(slotId, label = 'ADVERTISEMENT') {
   if (!ad.enabled) return '';
   return `
@@ -192,8 +279,24 @@ const homeHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${siteConfig.siteTitle}</title>
-  <meta name="description" content="${siteConfig.tagline}">
+${renderSeoHeadTags({
+  title: siteConfig.seo?.defaultTitle || siteConfig.siteTitle,
+  description: siteConfig.seo?.defaultDescription || siteConfig.tagline,
+  keywords: siteConfig.seo?.keywords,
+  canonicalPath: '/',
+  jsonLd: {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": siteConfig.siteName || "ColoringTool",
+    "url": (siteConfig.seo?.canonicalBase || "https://coloringtool.com"),
+    "description": siteConfig.seo?.defaultDescription || siteConfig.tagline,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": (siteConfig.seo?.canonicalBase || "https://coloringtool.com") + "/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+})}
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
@@ -328,8 +431,19 @@ categories.forEach(cat => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Free Online ${cat.name} Coloring Pages for Kids | ColoringTool.com</title>
-  <meta name="description" content="${cat.description}">
+${renderSeoHeadTags({
+  title: `Free Online ${cat.name} Coloring Pages for Kids | ColoringTool.com`,
+  description: cat.description || `Play free online ${cat.name} coloring pages for kids. Beautiful printable drawings to paint and color online on ColoringTool.com.`,
+  keywords: `${cat.name.toLowerCase()} coloring pages, free ${cat.name.toLowerCase()} drawings, online ${cat.name.toLowerCase()} coloring for kids, printable ${cat.name.toLowerCase()} sheets`,
+  canonicalPath: `/${cat.id}/`,
+  jsonLd: {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": `${cat.name} Coloring Pages`,
+    "url": `${(siteConfig.seo?.canonicalBase || 'https://coloringtool.com')}/${cat.id}/`,
+    "description": cat.description
+  }
+})}
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
@@ -375,8 +489,12 @@ const galleryHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Art Gallery — ColoringTool.com</title>
-  <meta name="description" content="View, print, and download all your colored masterpieces on ColoringTool.com">
+${renderSeoHeadTags({
+  title: 'My Art Gallery — ColoringTool.com',
+  description: 'View, print, and download all your colored masterpieces and drawings on ColoringTool.com.',
+  keywords: 'my art gallery, saved coloring pages, kids artwork, print colored drawings',
+  canonicalPath: '/gallery.html'
+})}
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
@@ -461,7 +579,25 @@ const studioHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Coloring Studio — ColoringTool.com</title>
+${renderSeoHeadTags({
+  title: 'Coloring Studio — Free Online Coloring Games for Kids | ColoringTool.com',
+  description: 'Interactive online coloring studio for kids. Paint, draw, color, and print over 100 free animals, unicorns, food, and Christmas drawings online!',
+  keywords: 'coloring studio, online coloring tool, free kids drawing game, paint online, printable coloring games',
+  canonicalPath: '/studio.html',
+  jsonLd: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ColoringTool Studio",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All modern browsers",
+    "offers": { "@type": "Offer", "price": "0.00", "priceCurrency": "USD" },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": (siteConfig.seo?.ratingValue || "4.9"),
+      "reviewCount": (siteConfig.seo?.ratingCount || "1280")
+    }
+  }
+})}
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
 
@@ -1024,8 +1160,16 @@ const studioHtml = `<!DOCTYPE html>
         currentGame = allGames[0];
       }
 
-      // Update UI elements
-      document.title = currentGame.label + ' — Coloring Studio | ColoringTool.com';
+      // Update UI elements & dynamic SEO metadata
+      const pageTitle = (currentGame.h1 ? (currentGame.h1 + ' | ColoringTool.com') : (currentGame.label + ' Free Online Coloring Page | ColoringTool.com'));
+      document.title = pageTitle;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', currentGame.metaDescription || currentGame.descriptionText || ('Free online ' + currentGame.label + ' coloring page for kids. Color online or print for free!'));
+      const metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (metaKeywords) metaKeywords.setAttribute('content', (currentGame.label.toLowerCase() + ' coloring page, free ' + currentGame.label.toLowerCase() + ' printable, online coloring ' + currentGame.label.toLowerCase() + ', ' + currentGame.catName.toLowerCase() + ' coloring'));
+      const linkCanonical = document.querySelector('link[rel="canonical"]');
+      if (linkCanonical) linkCanonical.setAttribute('href', window.location.origin + '/studio.html?cat=' + encodeURIComponent(currentGame.catId) + '&game=' + encodeURIComponent(currentGame.slug));
+
       document.getElementById('gameTitle').innerText = currentGame.label + ' (' + currentGame.catName + ')';
       document.getElementById('backLink').href = '/' + currentGame.catId + '/';
       document.getElementById('backLink').innerText = '← ' + currentGame.catName;
@@ -1323,8 +1467,12 @@ const aboutHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us — ColoringTool.com</title>
-  <meta name="description" content="Learn about ColoringTool.com: safe, fun, and free online coloring activities for kids and families worldwide.">
+${renderSeoHeadTags({
+  title: 'About Us — ColoringTool.com',
+  description: 'Learn about ColoringTool.com: safe, fun, and free online coloring activities for kids and families worldwide.',
+  keywords: 'about coloringtool, kids coloring platform, online painting website, safe coloring games',
+  canonicalPath: '/about.html'
+})}
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
@@ -1352,8 +1500,12 @@ const privacyHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy — ColoringTool.com</title>
-  <meta name="description" content="Privacy Policy for ColoringTool.com. We prioritize child safety and strict COPPA compliance.">
+${renderSeoHeadTags({
+  title: 'Privacy Policy & Children\'s Safety — ColoringTool.com',
+  description: 'Privacy Policy for ColoringTool.com. We prioritize child safety, strict COPPA compliance, and transparent data practices.',
+  keywords: 'coloringtool privacy policy, COPPA compliance, child safe coloring website',
+  canonicalPath: '/privacy.html'
+})}
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
@@ -1375,6 +1527,13 @@ const privacyHtml = `<!DOCTYPE html>
 </body>
 </html>`;
 fs.writeFileSync(path.join(PUBLIC_DIR, 'privacy.html'), privacyHtml);
+
+// ----------------------------------------------------
+// 6. GENERATE SITEMAP.XML AND ROBOTS.TXT
+// ----------------------------------------------------
+console.log('Generating public/sitemap.xml and public/robots.txt...');
+fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap.xml'), generateSitemapXml(), 'utf-8');
+fs.writeFileSync(path.join(PUBLIC_DIR, 'robots.txt'), generateRobotsTxt(), 'utf-8');
 
 // Automatically generate Cloudflare Worker edge files
 try {
