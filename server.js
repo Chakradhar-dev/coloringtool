@@ -120,6 +120,22 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ad.publisherId || 'ca-pub-1234567890123456'}" crossorigin="anonymous"></script>
   ` : '';
 
+  const analytics = siteConfig.analytics || {};
+  const gaId = analytics.measurementId ? analytics.measurementId.trim() : '';
+  const analyticsHeaderScript = (analytics.enabled && gaId) ? `
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${gaId}', {
+        page_path: window.location.pathname + window.location.search,
+        cookie_flags: 'SameSite=None;Secure'
+      });
+    </script>
+  ` : '';
+
   const catLinks = categories.map(c => `
     <li><a href="/${c.id}/">${c.icon || '🎨'} Online ${c.name} Coloring Pages</a></li>
   `).join('');
@@ -134,6 +150,7 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
+  ${analyticsHeaderScript}
 </head>
 <body>
   <!-- Navigation Header -->
@@ -530,6 +547,32 @@ const server = http.createServer(async (req, res) => {
       writeJson('site_config.json', siteConfig);
       res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
       return res.end(JSON.stringify({ success: true }));
+    }
+
+    // 9. Save Google Analytics Settings
+    if (pathname === '/api/admin/analytics' && method === 'POST') {
+      const body = await parseBody(req);
+      const siteConfig = readJson('site_config.json');
+      siteConfig.analytics = {
+        enabled: Boolean(body.enabled),
+        measurementId: (body.measurementId || '').trim(),
+        sendPageView: body.sendPageView !== undefined ? Boolean(body.sendPageView) : true,
+        trackDrawingClicks: body.trackDrawingClicks !== undefined ? Boolean(body.trackDrawingClicks) : true,
+        trackArtworkSaves: body.trackArtworkSaves !== undefined ? Boolean(body.trackArtworkSaves) : true,
+        trackPrints: body.trackPrints !== undefined ? Boolean(body.trackPrints) : true
+      };
+      writeJson('site_config.json', siteConfig);
+
+      // Trigger automatic regeneration of static pages
+      try {
+        const { execSync } = require('child_process');
+        execSync('node generate_pages.js', { cwd: __dirname });
+      } catch (genErr) {
+        console.error('Failed to regenerate pages:', genErr);
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
+      return res.end(JSON.stringify({ success: true, analytics: siteConfig.analytics }));
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json; charset=UTF-8' });

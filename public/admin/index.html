@@ -358,6 +358,9 @@
             <button class="sidebar-btn" onclick="switchTab('adsense', this)">💰 Google AdSense & ads.txt</button>
           </li>
           <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('analytics', this)">📈 Google Analytics</button>
+          </li>
+          <li class="sidebar-item">
             <button class="sidebar-btn" onclick="switchTab('settings', this)">⚙️ Admin Credentials</button>
           </li>
         </ul>
@@ -382,6 +385,10 @@
               <div class="stat-val" id="statAdsense" style="color:#10B981;font-size:1.6rem;margin-top:8px;">Ready</div>
             </div>
             <div class="stat-card">
+              <div class="stat-label">Google Analytics</div>
+              <div class="stat-val" id="statAnalytics" style="color:#10B981;font-size:1.35rem;margin-top:8px;">Active</div>
+            </div>
+            <div class="stat-card">
               <div class="stat-label">Domain Name</div>
               <div class="stat-val" style="font-size:1.35rem;margin-top:10px;color:#334155;">coloringtool.com</div>
             </div>
@@ -397,6 +404,7 @@
               <button class="btn-action" style="background:#0EA5E9;" onclick="switchTab('about', document.querySelectorAll('.sidebar-btn')[3])">📝 Edit About Us Content</button>
               <button class="btn-action" style="background:#EC4899;" onclick="switchTab('privacy', document.querySelectorAll('.sidebar-btn')[4])">🔒 Edit Privacy Policy</button>
               <button class="btn-action" style="background:#10B981;" onclick="switchTab('adsense', document.querySelectorAll('.sidebar-btn')[5])">💰 Manage AdSense & ads.txt</button>
+              <button class="btn-action" style="background:#059669;" onclick="switchTab('analytics', document.querySelectorAll('.sidebar-btn')[6])">📈 Configure Analytics (GA4)</button>
             </div>
           </div>
 
@@ -566,7 +574,70 @@
           </div>
         </section>
 
-        <!-- 7. ADMIN CREDENTIALS TAB -->
+        <!-- 7. GOOGLE ANALYTICS (GA4) TAB -->
+        <section id="tab-analytics" class="tab-section">
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h2>📈 Google Analytics (GA4) Tracking</h2>
+                <span style="color:#64748B;font-size:0.88rem;">Track site visitors, coloring interactions, artwork saves, and prints in real-time</span>
+              </div>
+              <button class="btn-action" onclick="saveAnalyticsSettings()">💾 Save Analytics Settings</button>
+            </div>
+
+            <div class="switch-wrap">
+              <label class="switch">
+                <input type="checkbox" id="analyticsEnabled">
+                <span class="slider"></span>
+              </label>
+              <span style="font-weight:700;font-size:1.05rem;">Enable Google Analytics (gtag.js) Across All Pages</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Google Analytics Measurement ID (GA4) *</label>
+              <input type="text" id="analyticsMeasurementId" class="form-control" placeholder="G-XXXXXXXXXX">
+              <small style="color:#64748B;">Find this in your Google Analytics Admin &gt; Data Streams &gt; Web Stream (starts with <code>G-</code>).</small>
+            </div>
+
+            <h3 style="margin-top:24px;border-bottom:1px solid #E2E8F0;padding-bottom:8px;">Custom Event Tracking Options</h3>
+            
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input type="checkbox" id="analyticsSendPageView" checked>
+                <span><strong>Automatic Page Views:</strong> Track page visits across Home, Category lists, Studio, and Gallery</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input type="checkbox" id="analyticsTrackDrawingClicks" checked>
+                <span><strong>Drawing Selection Events:</strong> Track which coloring pages kids click on and play (<code>select_content</code>)</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input type="checkbox" id="analyticsTrackArtworkSaves" checked>
+                <span><strong>Artwork Save Events:</strong> Track when children click "Save Artwork" to download their art (<code>save_artwork</code>)</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input type="checkbox" id="analyticsTrackPrints" checked>
+                <span><strong>Print Events:</strong> Track when parents/kids print a drawing for coloring offline (<code>print_drawing</code>)</span>
+              </label>
+            </div>
+
+            <div style="margin-top:24px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px;">
+              <h4 style="margin:0 0 8px;color:#0F172A;">💡 Need help setting up Google Analytics?</h4>
+              <p style="margin:0;font-size:0.88rem;color:#475569;line-height:1.6;">
+                1. Go to <a href="https://analytics.google.com" target="_blank" style="color:#4F46E5;font-weight:600;">analytics.google.com</a> and sign in with your Google account.<br>
+                2. Create a Property for <strong>ColoringTool.com</strong>.<br>
+                3. Add a <strong>Web</strong> Data Stream and enter your website URL.<br>
+                4. Copy your <strong>Measurement ID</strong> (e.g., <code>G-XXXXXXXXXX</code>) and paste it above.<br>
+                5. Click <strong>"Save Analytics Settings"</strong> to activate live tracking instantly!
+              </p>
+            </div>
+
+            <div style="margin-top:20px;">
+              <button class="btn-action" onclick="saveAnalyticsSettings()">💾 Save Analytics Settings</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. ADMIN CREDENTIALS TAB -->
         <section id="tab-settings" class="tab-section">
           <div class="card-panel" style="max-width:500px;">
             <div class="panel-header">
@@ -822,6 +893,27 @@
       document.getElementById('adsenseAdsTxt').value = ad.adsTxtContent || '';
       document.getElementById('statAdsense').innerText = ad.enabled ? 'Active' : 'Disabled';
       document.getElementById('statAdsense').style.color = ad.enabled ? '#10B981' : '#EF4444';
+
+      // Populate Google Analytics settings
+      const ga = siteConfig.analytics || {};
+      document.getElementById('analyticsEnabled').checked = Boolean(ga.enabled);
+      document.getElementById('analyticsMeasurementId').value = ga.measurementId || '';
+      document.getElementById('analyticsSendPageView').checked = ga.sendPageView !== false;
+      document.getElementById('analyticsTrackDrawingClicks').checked = ga.trackDrawingClicks !== false;
+      document.getElementById('analyticsTrackArtworkSaves').checked = ga.trackArtworkSaves !== false;
+      document.getElementById('analyticsTrackPrints').checked = ga.trackPrints !== false;
+
+      const statAnalytics = document.getElementById('statAnalytics');
+      if (statAnalytics) {
+        if (ga.enabled && ga.measurementId) {
+          const displayId = ga.measurementId.length > 14 ? ga.measurementId.slice(0, 12) + '...' : ga.measurementId;
+          statAnalytics.innerText = 'Active (' + displayId + ')';
+          statAnalytics.style.color = '#10B981';
+        } else {
+          statAnalytics.innerText = 'Disabled';
+          statAnalytics.style.color = '#EF4444';
+        }
+      }
 
       // Populate username
       document.getElementById('adminNewUsername').value = siteConfig.admin?.username || 'admin';
@@ -1104,6 +1196,31 @@
       if (data.success) {
         alert('Google AdSense configuration and ads.txt saved and updated live! 💰');
         loadDashboardData();
+      }
+    }
+
+    // Save Google Analytics Settings
+    async function saveAnalyticsSettings() {
+      const payload = {
+        enabled: document.getElementById('analyticsEnabled').checked,
+        measurementId: document.getElementById('analyticsMeasurementId').value.trim(),
+        sendPageView: document.getElementById('analyticsSendPageView').checked,
+        trackDrawingClicks: document.getElementById('analyticsTrackDrawingClicks').checked,
+        trackArtworkSaves: document.getElementById('analyticsTrackArtworkSaves').checked,
+        trackPrints: document.getElementById('analyticsTrackPrints').checked
+      };
+
+      const res = await adminFetch('/api/admin/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Google Analytics configuration saved and static pages updated live! 📈');
+        loadDashboardData();
+      } else {
+        alert(data.error || 'Failed to save Google Analytics settings');
       }
     }
 

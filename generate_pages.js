@@ -14,6 +14,22 @@ const adHeaderScript = ad.enabled ? `
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ad.publisherId || 'ca-pub-1234567890123456'}" crossorigin="anonymous"></script>
 ` : '';
 
+const analytics = siteConfig.analytics || {};
+const gaMeasurementId = analytics.measurementId ? analytics.measurementId.trim() : '';
+const analyticsHeaderScript = (analytics.enabled && gaMeasurementId) ? `
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '${gaMeasurementId}', {
+      page_path: window.location.pathname + window.location.search,
+      cookie_flags: 'SameSite=None;Secure'
+    });
+  </script>
+` : '';
+
 function renderAdUnit(slotId, label = 'ADVERTISEMENT') {
   if (!ad.enabled) return '';
   return `
@@ -102,7 +118,7 @@ function renderFooter() {
 console.log('Generating public/index.html...');
 const homeCardsHtml = games.map(g => `
   <div class="drawing-card" data-cat="${g.catId}" data-name="${g.label.toLowerCase()}">
-    <a href="/studio.html?cat=${g.catId}&game=${g.slug}" class="drawing-card-inner">
+    <a href="/studio.html?cat=${g.catId}&game=${g.slug}" class="drawing-card-inner" onclick="if(typeof window.gtag==='function'){gtag('event','select_content',{content_type:'drawing',item_id:'${g.slug}',item_name:'${g.label.replace(/'/g, "\\'")}',item_category:'${g.catName}'});}">
       <div class="drawing-thumb-wrap">
         <img src="/${g.thumbSrc || g.fullImageSrc}" alt="${g.label} Coloring Page" loading="lazy" width="130" height="110">
         <span class="badge-cat badge-${g.catId}">${g.catName}</span>
@@ -136,6 +152,7 @@ const homeHtml = `<!DOCTYPE html>
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
+  ${analyticsHeaderScript}
 </head>
 <body>
   ${renderNav('home')}
@@ -250,7 +267,7 @@ categories.forEach(cat => {
 
   const catGamesHtml = catGames.map(g => `
     <div class="drawing-card">
-      <a href="/studio.html?cat=${g.catId}&game=${g.slug}" class="drawing-card-inner">
+      <a href="/studio.html?cat=${g.catId}&game=${g.slug}" class="drawing-card-inner" onclick="if(typeof window.gtag==='function'){gtag('event','select_content',{content_type:'drawing',item_id:'${g.slug}',item_name:'${g.label.replace(/'/g, "\\'")}',item_category:'${g.catName}'});}">
         <div class="drawing-thumb-wrap">
           <img src="/${g.thumbSrc || g.fullImageSrc}" alt="${g.label} Coloring Page" loading="lazy" width="130" height="110">
           <span class="badge-cat badge-${g.catId}">${g.catName}</span>
@@ -271,6 +288,7 @@ categories.forEach(cat => {
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
+  ${analyticsHeaderScript}
 </head>
 <body>
   ${renderNav('')}
@@ -317,6 +335,7 @@ const galleryHtml = `<!DOCTYPE html>
   <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
   <link rel="stylesheet" href="/css/modern-theme.css">
   ${adHeaderScript}
+  ${analyticsHeaderScript}
 </head>
 <body>
   ${renderNav('gallery')}
@@ -416,6 +435,7 @@ const studioHtml = `<!DOCTYPE html>
   <script src="/js/createjs.min.js"></script>
 
   ${adHeaderScript}
+  ${analyticsHeaderScript}
 
   <style>
     body {
@@ -660,7 +680,7 @@ const studioHtml = `<!DOCTYPE html>
           <button class="btn-studio-action" onclick="navigateGame(1)">Next ▶</button>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="btn-studio-action btn-print" onclick="window.print()">🖨️ Print</button>
+          <button class="btn-studio-action btn-print" onclick="if(typeof window.gtag==='function'){window.gtag('event','print_drawing',{item_name:currentGame.label,item_category:currentGame.catName});} window.print()">🖨️ Print</button>
           <button class="btn-studio-action btn-save" onclick="saveArtwork()">💾 Save Artwork</button>
         </div>
       </div>
@@ -953,6 +973,15 @@ const studioHtml = `<!DOCTYPE html>
         '</a>';
       }).join('');
 
+      // Google Analytics (GA4) Event: view_item
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'view_item', {
+          item_id: currentGame.slug || currentGame.id,
+          item_name: currentGame.label,
+          item_category: currentGame.catName
+        });
+      }
+
       // Check whether this is a CreateJS Flash game or a direct line-art image
       if (currentGame.gameScript) {
         loadCreateJSGame(currentGame);
@@ -1101,6 +1130,15 @@ const studioHtml = `<!DOCTYPE html>
         localStorage.setItem('coloring_art_gallery', JSON.stringify(saved.slice(0, 40)));
       } catch (e) {}
 
+      // Google Analytics (GA4) Event: save_artwork
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'save_artwork', {
+          item_id: currentGame.slug || currentGame.id,
+          item_name: currentGame.label,
+          item_category: currentGame.catName
+        });
+      }
+
       const a = document.createElement('a');
       a.href = dataUrl;
       a.download = (currentGame.slug || 'coloring-page') + '.png';
@@ -1118,6 +1156,12 @@ const studioHtml = `<!DOCTYPE html>
     }
 
     function openOriginalImageModal() {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'view_color_guide', {
+          item_name: currentGame.label,
+          item_category: currentGame.catName
+        });
+      }
       const modal = document.getElementById('originalColorModal');
       if (modal) modal.classList.add('show');
     }

@@ -20,6 +20,14 @@
     "username": "admin",
     "password": "admin123"
   },
+  "analytics": {
+    "enabled": true,
+    "measurementId": "G-COLORINGTOOL",
+    "sendPageView": true,
+    "trackDrawingClicks": true,
+    "trackArtworkSaves": true,
+    "trackPrints": true
+  },
   "adsense": {
     "enabled": false,
     "publisherId": "ca-pub-1234567890123456",

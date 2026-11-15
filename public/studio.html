@@ -22,6 +22,19 @@
   <script src="/js/createjs.min.js"></script>
 
   
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-COLORINGTOOL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-COLORINGTOOL', {
+      page_path: window.location.pathname + window.location.search,
+      cookie_flags: 'SameSite=None;Secure'
+    });
+  </script>
+
 
   <style>
     body {
@@ -291,7 +304,7 @@
           <button class="btn-studio-action" onclick="navigateGame(1)">Next ▶</button>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="btn-studio-action btn-print" onclick="window.print()">🖨️ Print</button>
+          <button class="btn-studio-action btn-print" onclick="if(typeof window.gtag==='function'){window.gtag('event','print_drawing',{item_name:currentGame.label,item_category:currentGame.catName});} window.print()">🖨️ Print</button>
           <button class="btn-studio-action btn-save" onclick="saveArtwork()">💾 Save Artwork</button>
         </div>
       </div>
@@ -605,6 +618,15 @@
         '</a>';
       }).join('');
 
+      // Google Analytics (GA4) Event: view_item
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'view_item', {
+          item_id: currentGame.slug || currentGame.id,
+          item_name: currentGame.label,
+          item_category: currentGame.catName
+        });
+      }
+
       // Check whether this is a CreateJS Flash game or a direct line-art image
       if (currentGame.gameScript) {
         loadCreateJSGame(currentGame);
@@ -753,6 +775,15 @@
         localStorage.setItem('coloring_art_gallery', JSON.stringify(saved.slice(0, 40)));
       } catch (e) {}
 
+      // Google Analytics (GA4) Event: save_artwork
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'save_artwork', {
+          item_id: currentGame.slug || currentGame.id,
+          item_name: currentGame.label,
+          item_category: currentGame.catName
+        });
+      }
+
       const a = document.createElement('a');
       a.href = dataUrl;
       a.download = (currentGame.slug || 'coloring-page') + '.png';
@@ -770,6 +801,12 @@
     }
 
     function openOriginalImageModal() {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'view_color_guide', {
+          item_name: currentGame.label,
+          item_category: currentGame.catName
+        });
+      }
       const modal = document.getElementById('originalColorModal');
       if (modal) modal.classList.add('show');
     }
