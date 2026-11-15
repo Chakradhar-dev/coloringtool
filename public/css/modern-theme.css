@@ -631,6 +631,152 @@ body {
 }
 
 /* ========================================================
+   Dedicated Coloring Page Description Box
+   ======================================================== */
+.coloring-desc-section {
+  max-width: 1280px;
+  margin: 30px auto 40px;
+  padding: 0 16px;
+}
+.desc-box-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  border: 2px solid #E2E8F0;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.desc-box-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #4F46E5 0%, #EC4899 50%, #F59E0B 100%);
+}
+.desc-box-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #F1F5F9;
+  padding-bottom: 18px;
+}
+.desc-header-icon {
+  width: 52px;
+  height: 52px;
+  background: #EEF2FF;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #4F46E5;
+  flex-shrink: 0;
+}
+.desc-subtitle-badge {
+  display: inline-block;
+  background: #F1F5F9;
+  color: #4F46E5;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.desc-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0F172A;
+}
+.desc-body {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 32px;
+}
+@media (max-width: 900px) {
+  .desc-body {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+.desc-main-text {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #334155;
+  margin: 0 0 24px;
+}
+.desc-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .desc-features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.feature-pill {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.feature-icon {
+  font-size: 1.4rem;
+}
+.feature-pill strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #0F172A;
+}
+.feature-pill span {
+  display: block;
+  font-size: 0.78rem;
+  color: #64748B;
+}
+.tips-box {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%);
+  border: 2px solid #FDE68A;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.08);
+}
+.tips-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.tips-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #92400E;
+}
+.tips-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #78350F;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+.tips-list li {
+  margin-bottom: 8px;
+}
+.tips-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* ========================================================
    Footer
    ======================================================== */
 .site-footer {

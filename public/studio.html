@@ -296,13 +296,10 @@
         </div>
       </div>
 
-      <div style="width:100%;max-width:540px;margin-top:24px;border-top:1px solid #E2E8F0;padding-top:16px;">
-        <h3 id="infoH1" style="margin:0 0 8px;font-size:1.15rem;">Coloring Drawing Info</h3>
-        <p id="infoDesc" style="color:#64748B;font-size:0.95rem;line-height:1.6;"></p>
       </div>
     </main>
 
-    <!-- Sidebar with AdSense & Related Drawings -->
+    <!-- Sidebar with Related Drawings -->
     <aside class="studio-sidebar">
       
 
@@ -312,6 +309,63 @@
       </div>
     </aside>
   </div>
+
+  <!-- Dedicated Coloring Page Description & Educational Guide Box -->
+  <section class="coloring-desc-section">
+    <div class="desc-box-card">
+      <div class="desc-box-header">
+        <div class="desc-header-icon" id="descIcon">🎨</div>
+        <div>
+          <span class="desc-subtitle-badge" id="descCatBadge">Category &bull; Free Printable & Online Drawing</span>
+          <h2 class="desc-title" id="descHeading">About this Coloring Page</h2>
+        </div>
+      </div>
+
+      <div class="desc-body">
+        <div class="desc-text-col">
+          <p id="descMainText" class="desc-main-text"></p>
+          
+          <div class="desc-features-grid">
+            <div class="feature-pill">
+              <span class="feature-icon">✨</span>
+              <div>
+                <strong>Ages 3 to 10</strong>
+                <span>Preschool & Elementary</span>
+              </div>
+            </div>
+            <div class="feature-pill">
+              <span class="feature-icon">🎨</span>
+              <div>
+                <strong>Free Online & Print</strong>
+                <span>Instant play, no download</span>
+              </div>
+            </div>
+            <div class="feature-pill">
+              <span class="feature-icon">🧠</span>
+              <div>
+                <strong>Fine Motor Skills</strong>
+                <span>Focus, grip & coordination</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="desc-tips-col">
+          <div class="tips-box">
+            <div class="tips-header">
+              <span style="font-size:1.3rem;">💡</span>
+              <h4>Creative Coloring Tips</h4>
+            </div>
+            <ul class="tips-list" id="descTipsList">
+              <li>Tap any color tile in the palette below the picture to activate your brush.</li>
+              <li>Tap inside each region of the drawing to fill it neatly without spilling outside!</li>
+              <li>When you're happy with your masterpiece, click <strong>"Save Artwork"</strong> to save it to your personal Art Gallery, or <strong>"Print"</strong> to color with real crayons!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Below Game AdSense Banner -->
   
@@ -385,9 +439,19 @@
       document.getElementById('gameTitle').innerText = currentGame.label + ' (' + currentGame.catName + ')';
       document.getElementById('backLink').href = '/' + currentGame.catId + '/';
       document.getElementById('backLink').innerText = '← ' + currentGame.catName;
-      document.getElementById('infoH1').innerText = currentGame.h1 || currentGame.label;
-      document.getElementById('infoDesc').innerText = currentGame.descriptionText || 'Enjoy coloring this free drawing online!';
       document.getElementById('relatedTitle').innerText = 'More ' + currentGame.catName + ' Drawings';
+
+      // Update Dedicated Description Box
+      const catIcons = { unicorn: '🦄', animals: '🦁', princess: '👑', transport: '🚀', christmas: '🎄', food: '🍦' };
+      const icon = catIcons[currentGame.catId] || '🎨';
+      const iconEl = document.getElementById('descIcon');
+      if (iconEl) iconEl.innerText = icon;
+      const catBadgeEl = document.getElementById('descCatBadge');
+      if (catBadgeEl) catBadgeEl.innerText = (currentGame.catName ? currentGame.catName.toUpperCase() : 'COLORING') + ' • FREE ONLINE & PRINTABLE DRAWING';
+      const headingEl = document.getElementById('descHeading');
+      if (headingEl) headingEl.innerText = currentGame.h1 || ('About ' + currentGame.label + ' Coloring Page');
+      const mainTextEl = document.getElementById('descMainText');
+      if (mainTextEl) mainTextEl.innerText = currentGame.descriptionText || ('Enjoy coloring this ' + currentGame.label + ' drawing online! Specially crafted for young children ages 3 to 10 to unleash their imagination, discover colors, and build fine motor skills.');
 
       // Populate sidebar
       const related = allGames.filter(g => g.catId === currentGame.catId && g.slug !== currentGame.slug);
