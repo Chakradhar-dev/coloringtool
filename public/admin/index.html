@@ -1329,6 +1329,15 @@
       }
     }
 
+    // Safe Image URL helper (handles data URIs, absolute URLs, and uploads)
+    function formatImgSrc(src) {
+      if (!src) return '/my-favicon/favicon-96x96.png';
+      src = String(src).trim();
+      if (src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://')) return src;
+      if (src.startsWith('/')) return src;
+      return '/' + src;
+    }
+
     // Auth state check
     async function checkAuth() {
       try {
@@ -1492,11 +1501,18 @@
         gamesList = await safeParseJson(fbRes) || [];
       }
 
-      // Check localStorage games overlay
+      // Check localStorage games overlay (merge without clobbering)
       try {
         const localGames = JSON.parse(localStorage.getItem('coloringtool_local_games') || 'null');
         if (localGames && Array.isArray(localGames) && localGames.length > 0) {
-          gamesList = localGames;
+          localGames.forEach(lg => {
+            // Fix any old broken 'images/' path
+            if (lg.thumbSrc && lg.thumbSrc.startsWith('images/')) lg.thumbSrc = 'christmas/img/default.png';
+            if (lg.fullImageSrc && lg.fullImageSrc.startsWith('images/')) lg.fullImageSrc = 'christmas/img/default.png';
+            const idx = gamesList.findIndex(g => g.id === lg.id || (g.catId === lg.catId && g.slug === lg.slug));
+            if (idx >= 0) gamesList[idx] = { ...gamesList[idx], ...lg };
+            else gamesList.unshift(lg);
+          });
         }
       } catch(e) {}
 
@@ -1614,10 +1630,10 @@
     }
 
     function renderOverviewTables() {
-      const recent = gamesList.slice(-6).reverse();
+      const recent = gamesList.slice(0, 6);
       document.getElementById('overviewRecentTable').innerHTML = recent.map(g => `
         <tr>
-          <td><img src="/${g.thumbSrc || g.fullImageSrc}" class="table-thumb" alt="${g.label}"></td>
+          <td><img src="${formatImgSrc(g.thumbSrc || g.fullImageSrc)}" class="table-thumb" alt="${g.label}" onerror="this.onerror=null;this.src='/my-favicon/favicon-96x96.png';"></td>
           <td><strong>${g.label}</strong></td>
           <td><span style="background:#EEF2FF;color:#4F46E5;padding:2px 8px;border-radius:12px;font-size:0.8rem;">${g.catName}</span></td>
           <td><a href="/studio.html?cat=${g.catId}&game=${g.slug}" target="_blank" style="color:var(--primary);font-weight:600;">Play &rarr;</a></td>
@@ -1631,15 +1647,15 @@
         <tr>
           <td>
             <div style="display:flex;gap:6px;align-items:center;">
-              <img src="/${g.fullImageSrc || g.thumbSrc}" class="table-thumb" title="Line art contour" alt="${g.label}">
-              <img src="/${g.thumbSrc || g.fullImageSrc}" class="table-thumb" style="border-color:#4F46E5;" title="Original Color Image" alt="${g.label}">
+              <img src="${formatImgSrc(g.fullImageSrc || g.thumbSrc)}" class="table-thumb" title="Line art contour" alt="${g.label}" onerror="this.onerror=null;this.src='/my-favicon/favicon-96x96.png';">
+              <img src="${formatImgSrc(g.thumbSrc || g.fullImageSrc)}" class="table-thumb" style="border-color:#4F46E5;" title="Original Color Image" alt="${g.label}" onerror="this.onerror=null;this.src='/my-favicon/favicon-96x96.png';">
             </div>
           </td>
           <td><strong>${g.label}</strong></td>
           <td>${g.catName}</td>
           <td><code>${g.slug}</code></td>
           <td>
-            <a href="/studio.html?cat=${g.catId}&game=${g.slug}" target="_blank" style="margin-right:10px;text-decoration:none;">View</a>
+            <a href="/studio.html?cat=${g.catId}&game=${g.slug}" target="_blank" style="margin-right:10px;text-decoration:none;color:#4F46E5;font-weight:600;">View</a>
             <button onclick="editGame('${g.id}')" style="background:#0EA5E9;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;margin-right:6px;">Edit</button>
             <button onclick="deleteGame('${g.id}')" style="background:#EF4444;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;">Delete</button>
           </td>
@@ -1751,28 +1767,45 @@
         colorFilename: pendingColorFilename
       };
 
+      let savedGame = null;
       try {
         const res = await adminFetch('/api/admin/games', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        await safeParseJson(res);
-      } catch(e) {}
+        const data = await safeParseJson(res);
+        if (data && data.success && data.game) {
+          savedGame = data.game;
+        }
+      } catch(e) {
+        console.warn('API save fallback to local state:', e);
+      }
 
-      // Fallback / local update
-      const existingIdx = gamesList.findIndex(g => g.id === payload.id);
       const catObj = catsList.find(c => c.id === payload.catId) || catsList[0] || { id: payload.catId, name: payload.catId };
-      const slug = (payload.title || 'drawing').toLowerCase().replace(/[^a-z0-9\-]/g, '-');
-      const gameEntry = {
+      const slug = (payload.title || 'drawing').toLowerCase().replace(/[^a-z0-9\-]/g, '-').replace(/-+/g, '-');
+
+      const finalLineArt = (savedGame && savedGame.fullImageSrc)
+        ? savedGame.fullImageSrc
+        : (payload.imageUrl || pendingImageBase64 || (savedGame && savedGame.thumbSrc) || pendingColorImageBase64 || (catObj.id + '/img/' + slug + '.png'));
+
+      const finalColorSample = (savedGame && savedGame.thumbSrc)
+        ? savedGame.thumbSrc
+        : (payload.colorImageUrl || pendingColorImageBase64 || finalLineArt);
+
+      const existingIdx = gamesList.findIndex(g => g.id === payload.id);
+      const gameEntry = savedGame || {
         id: payload.id || ('game_' + Date.now()),
         slug: existingIdx >= 0 ? gamesList[existingIdx].slug : slug,
         label: payload.title,
         catId: payload.catId,
         catName: catObj.name,
-        thumbSrc: payload.colorImageUrl || (payload.colorFilename ? 'images/' + payload.colorFilename : (payload.imageUrl || 'images/' + (payload.filename || 'default.png'))),
-        fullImageSrc: payload.imageUrl || (payload.filename ? 'images/' + payload.filename : (payload.colorImageUrl || 'images/default.png')),
-        descriptionText: payload.desc || '',
+        thumbSrc: finalColorSample,
+        fullImageSrc: finalLineArt,
+        gameScript: '',
+        descriptionText: payload.desc || ('Free online coloring page: ' + payload.title),
+        h1: 'Online ' + payload.title + ' Coloring Page for Kids',
+        metaDescription: 'Color and paint this ' + payload.title + ' online for free on ColoringTool.com!',
         updatedAt: new Date().toISOString()
       };
 
@@ -1805,10 +1838,10 @@
       document.getElementById('gameColorUrlInput').value = g.thumbSrc || '';
       document.getElementById('gameDescInput').value = g.descriptionText || '';
       document.getElementById('gameKeywordsInput').value = g.keywords || '';
-      document.getElementById('imagePreview').src = '/' + (g.fullImageSrc || g.thumbSrc);
+      document.getElementById('imagePreview').src = formatImgSrc(g.fullImageSrc || g.thumbSrc);
       document.getElementById('imagePreviewWrap').style.display = 'block';
       if (g.thumbSrc) {
-        document.getElementById('imageColorPreview').src = '/' + g.thumbSrc;
+        document.getElementById('imageColorPreview').src = formatImgSrc(g.thumbSrc);
         document.getElementById('imageColorPreviewWrap').style.display = 'block';
       } else {
         document.getElementById('imageColorPreviewWrap').style.display = 'none';

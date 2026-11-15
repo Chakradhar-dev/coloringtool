@@ -1,5 +1,19 @@
 [
   {
+    "id": "game-1794753162783",
+    "catId": "animals",
+    "catName": "Animals",
+    "slug": "scs",
+    "label": "scs",
+    "thumbSrc": "uploads/WhatsApp_Image_2026-11-15_at_7.34.53_PM.jpeg.jpg",
+    "fullImageSrc": "uploads/WhatsApp_Image_2026-11-15_at_7.34.44_PM.jpeg.jpg",
+    "gameScript": "",
+    "descriptionText": "sdsd",
+    "h1": "Online scs Coloring Page for Kids",
+    "metaDescription": "Color and paint this scs online for free on ColoringTool.com!",
+    "createdAt": "2026-11-15T14:32:42.784Z"
+  },
+  {
     "id": "game-1",
     "catId": "animals",
     "catName": "Animals",

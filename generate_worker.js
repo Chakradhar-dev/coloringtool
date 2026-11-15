@@ -190,8 +190,8 @@ export default {
         const gamesList = getGames();
         const cats = getCategories();
         const catObj = cats.find(c => c.id === body.catId) || cats[0] || { id: 'animals', name: 'Animals' };
-        const imagePath = body.imageUrl || '';
-        const colorImagePath = body.colorImageUrl || '';
+        const imagePath = body.imageUrl || body.imageBase64 || '';
+        const colorImagePath = body.colorImageUrl || body.colorImageBase64 || imagePath || '';
 
         if (body.id) {
           const idx = gamesList.findIndex(g => g.id === body.id);
@@ -214,7 +214,7 @@ export default {
           slug,
           label: body.title,
           thumbSrc: colorImagePath || imagePath || \`\${catObj.id}/img/\${slug}.png\`,
-          fullImageSrc: imagePath || \`\${catObj.id}/img/\${slug}.png\`,
+          fullImageSrc: imagePath || colorImagePath || \`\${catObj.id}/img/\${slug}.png\`,
           gameScript: '',
           descriptionText: body.desc || \`Free online coloring page: \${body.title}\`,
           h1: \`Online \${body.title} Coloring Page for Kids\`,

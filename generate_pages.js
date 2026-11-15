@@ -1161,6 +1161,14 @@ ${renderSeoHeadTags({
       '#FF2D55', '#A2845E', '#8E8E93', '#FFFFFF', '#000000'
     ];
 
+    function formatImgSrc(src) {
+      if (!src) return '/my-favicon/favicon-96x96.png';
+      src = String(src).trim();
+      if (src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://')) return src;
+      if (src.startsWith('/')) return src;
+      return '/' + src;
+    }
+
     async function initStudio() {
       const urlParams = new URLSearchParams(window.location.search);
       let catParam = urlParams.get('cat');
@@ -1175,12 +1183,43 @@ ${renderSeoHeadTags({
         }
       }
 
+      // 1. Fetch latest games list dynamically from server or static fallback
+      try {
+        const gRes = await fetch('/api/games');
+        if (gRes.ok) {
+          const apiGames = await gRes.json();
+          if (Array.isArray(apiGames) && apiGames.length > 0) allGames = apiGames;
+        }
+      } catch(e) {
+        try {
+          const fbRes = await fetch('/data/games.json');
+          if (fbRes.ok) {
+            const fbGames = await fbRes.json();
+            if (Array.isArray(fbGames) && fbGames.length > 0) allGames = fbGames;
+          }
+        } catch(e2) {}
+      }
+
+      // 2. Also merge any local drawings saved in localStorage
+      try {
+        const localGames = JSON.parse(localStorage.getItem('coloringtool_local_games') || '[]');
+        if (Array.isArray(localGames) && localGames.length > 0) {
+          localGames.forEach(lg => {
+            const idx = allGames.findIndex(g => g.id === lg.id || (g.catId === lg.catId && g.slug === lg.slug));
+            if (idx >= 0) allGames[idx] = Object.assign({}, allGames[idx], lg);
+            else allGames.unshift(lg);
+          });
+        }
+      } catch(e) {}
+
       if (isRandom) {
         let pool = allGames;
         if (catParam) pool = allGames.filter(g => g.catId === catParam);
         currentGame = pool[Math.floor(Math.random() * pool.length)];
       } else if (catParam && gameParam) {
-        currentGame = allGames.find(g => g.catId === catParam && (g.slug === gameParam || g.id === gameParam));
+        currentGame = allGames.find(g => (g.catId === catParam || !catParam) && (g.slug === gameParam || g.id === gameParam));
+      } else if (gameParam) {
+        currentGame = allGames.find(g => g.slug === gameParam || g.id === gameParam);
       }
 
       if (!currentGame) {
@@ -1215,8 +1254,8 @@ ${renderSeoHeadTags({
       if (mainTextEl) mainTextEl.innerText = currentGame.descriptionText || ('Enjoy coloring this ' + currentGame.label + ' drawing online! Specially crafted for young children ages 3 to 10 to unleash their imagination, discover colors, and build fine motor skills.');
 
       // Bind Original Color Image and Outline Preview
-      const originalImgSrc = '/' + (currentGame.thumbSrc || currentGame.fullImageSrc);
-      const outlineImgSrc = '/' + (currentGame.fullImageSrc || currentGame.thumbSrc);
+      const originalImgSrc = formatImgSrc(currentGame.thumbSrc || currentGame.fullImageSrc);
+      const outlineImgSrc = formatImgSrc(currentGame.fullImageSrc || currentGame.thumbSrc);
 
       const sidebarColorImg = document.getElementById('sidebarOriginalColorImg');
       if (sidebarColorImg) {
@@ -1326,8 +1365,11 @@ ${renderSeoHeadTags({
 
       const ctx = canvas.getContext('2d');
       const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = '/' + (game.fullImageSrc || game.thumbSrc);
+      const rawSrc = formatImgSrc(game.fullImageSrc || game.thumbSrc);
+      if (!rawSrc.startsWith('data:')) {
+        img.crossOrigin = 'anonymous';
+      }
+      img.src = rawSrc;
       img.onload = () => {
         canvas.width = 510;
         canvas.height = 580;
@@ -1335,7 +1377,7 @@ ${renderSeoHeadTags({
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Center image
-        const aspect = img.width / img.height;
+        const aspect = (img.width && img.height) ? (img.width / img.height) : 1;
         let w = canvas.width - 20;
         let h = w / aspect;
         if (h > canvas.height - 20) {
@@ -1347,15 +1389,71 @@ ${renderSeoHeadTags({
         ctx.drawImage(img, x, y, w, h);
         makeResponsive(true, 'both', false, 1, { properties: { width: 510, height: 580 } });
       };
+      img.onerror = () => {
+        canvas.width = 510;
+        canvas.height = 580;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(20, 20, 470, 540);
+        ctx.fillStyle = '#64748B';
+        ctx.font = 'bold 22px Fredoka, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(game.label || 'Coloring Page', 255, 270);
+        ctx.font = '16px Fredoka, sans-serif';
+        ctx.fillText('Tap colors below to paint this canvas!', 255, 310);
+      };
 
-      // Tap-to-paint / brush on canvas
+      // Smooth brush painting
       let isDrawing = false;
-      canvas.onmousedown = (e) => { isDrawing = true; drawRaster(e); };
-      canvas.onmousemove = (e) => { if (isDrawing) drawRaster(e); };
+      let lastX = 0, lastY = 0;
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * scaleX,
+          y: (clientY - rect.top) * scaleY
+        };
+      }
+
+      function startDraw(e) {
+        isDrawing = true;
+        const pos = getPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+        ctx.fillStyle = currentColor;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function moveDraw(e) {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        ctx.strokeStyle = currentColor;
+        ctx.fillStyle = currentColor;
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        lastX = pos.x;
+        lastY = pos.y;
+      }
+
+      canvas.onmousedown = startDraw;
+      canvas.onmousemove = moveDraw;
       window.onmouseup = () => { isDrawing = false; };
 
-      canvas.ontouchstart = (e) => { isDrawing = true; drawRaster(e.touches[0]); e.preventDefault(); };
-      canvas.ontouchmove = (e) => { if (isDrawing) drawRaster(e.touches[0]); e.preventDefault(); };
+      canvas.ontouchstart = (e) => { startDraw(e); e.preventDefault(); };
+      canvas.ontouchmove = (e) => { moveDraw(e); e.preventDefault(); };
       window.ontouchend = () => { isDrawing = false; };
     }
 
@@ -1363,20 +1461,6 @@ ${renderSeoHeadTags({
       currentColor = c;
       document.querySelectorAll('.palette-swatch').forEach(s => s.classList.remove('active'));
       if (el) el.classList.add('active');
-    }
-
-    function drawRaster(e) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
-
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = currentColor;
-      ctx.beginPath();
-      ctx.arc(x, y, 10, 0, Math.PI * 2);
-      ctx.fill();
     }
 
     function makeResponsive(isResp, respDim, isScale, scaleType, lib) {

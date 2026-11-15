@@ -475,38 +475,43 @@ const server = http.createServer(async (req, res) => {
       let imagePath = body.imageUrl || '';
       let colorImagePath = body.colorImageUrl || '';
 
-      // Handle Base64 Upload for Line-art Picture
-      if (body.imageBase64) {
+      // Helper to save base64 image to uploads/
+      function saveBase64File(base64Str, prefix = 'drawing', originalFilename = '') {
+        if (!base64Str || typeof base64Str !== 'string') return null;
         try {
-          const match = body.imageBase64.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-          const ext = match ? match[1] : 'png';
-          const base64Data = match ? match[2] : body.imageBase64;
-          const cleanName = (body.filename || `drawing_${Date.now()}`).replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+          const commaIdx = base64Str.indexOf(',');
+          const base64Data = commaIdx !== -1 ? base64Str.slice(commaIdx + 1) : base64Str;
+          let ext = 'png';
+          if (commaIdx !== -1) {
+            const header = base64Str.slice(0, commaIdx);
+            const m = header.match(/data:image\/([a-zA-Z0-9\+\-\.]+)/);
+            if (m) {
+              const matchedExt = m[1].toLowerCase();
+              if (matchedExt === 'jpeg' || matchedExt === 'jpg') ext = 'jpg';
+              else if (matchedExt === 'svg+xml' || matchedExt === 'svg') ext = 'svg';
+              else if (matchedExt === 'webp') ext = 'webp';
+              else ext = 'png';
+            }
+          }
+          const cleanName = (originalFilename || `${prefix}_${Date.now()}`).replace(/[^a-zA-Z0-9_\-\.]/g, '_');
           const finalFilename = cleanName.endsWith(`.${ext}`) ? cleanName : `${cleanName}.${ext}`;
           const targetDiskPath = path.join(UPLOADS_DIR, finalFilename);
-
           fs.writeFileSync(targetDiskPath, Buffer.from(base64Data, 'base64'));
-          imagePath = `uploads/${finalFilename}`;
+          return `uploads/${finalFilename}`;
         } catch (uploadErr) {
           console.error('Failed to save uploaded image:', uploadErr);
+          return null;
         }
       }
 
-      // Handle Base64 Upload for Original Color Image Sample
-      if (body.colorImageBase64) {
-        try {
-          const match = body.colorImageBase64.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-          const ext = match ? match[1] : 'png';
-          const base64Data = match ? match[2] : body.colorImageBase64;
-          const cleanName = (body.colorFilename || `sample_${Date.now()}`).replace(/[^a-zA-Z0-9_\-\.]/g, '_');
-          const finalFilename = cleanName.endsWith(`.${ext}`) ? cleanName : `${cleanName}.${ext}`;
-          const targetDiskPath = path.join(UPLOADS_DIR, finalFilename);
+      if (body.imageBase64) {
+        const saved = saveBase64File(body.imageBase64, 'drawing', body.filename);
+        if (saved) imagePath = saved;
+      }
 
-          fs.writeFileSync(targetDiskPath, Buffer.from(base64Data, 'base64'));
-          colorImagePath = `uploads/${finalFilename}`;
-        } catch (uploadErr) {
-          console.error('Failed to save uploaded color image:', uploadErr);
-        }
+      if (body.colorImageBase64) {
+        const saved = saveBase64File(body.colorImageBase64, 'sample', body.colorFilename);
+        if (saved) colorImagePath = saved;
       }
 
       if (body.id) {
@@ -521,6 +526,13 @@ const server = http.createServer(async (req, res) => {
           else if (imagePath && !games[idx].thumbSrc) games[idx].thumbSrc = imagePath;
           if (body.desc) games[idx].descriptionText = body.desc;
           writeJson('games.json', games);
+
+          try {
+            const { execSync } = require('child_process');
+            execSync('node generate_pages.js', { cwd: __dirname });
+            execSync('node generate_worker.js', { cwd: __dirname });
+          } catch(e) {}
+
           res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
           return res.end(JSON.stringify({ success: true, game: games[idx] }));
         }
@@ -535,7 +547,7 @@ const server = http.createServer(async (req, res) => {
         slug: slug,
         label: body.title,
         thumbSrc: colorImagePath || imagePath || `${catObj.id}/img/${slug}.png`,
-        fullImageSrc: imagePath || `${catObj.id}/img/${slug}.png`,
+        fullImageSrc: imagePath || colorImagePath || `${catObj.id}/img/${slug}.png`,
         gameScript: '', // Custom uploaded coloring sheet runs interactive raster/fill canvas
         descriptionText: body.desc || `Free online coloring page: ${body.title}. Fun coloring activity for kids ages 3 to 10 on ColoringTool.com`,
         h1: `Online ${body.title} Coloring Page for Kids`,
@@ -545,6 +557,14 @@ const server = http.createServer(async (req, res) => {
 
       games.unshift(newGame);
       writeJson('games.json', games);
+
+      try {
+        const { execSync } = require('child_process');
+        execSync('node generate_pages.js', { cwd: __dirname });
+        execSync('node generate_worker.js', { cwd: __dirname });
+      } catch (genErr) {
+        console.error('Failed to regenerate pages:', genErr);
+      }
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
       return res.end(JSON.stringify({ success: true, game: newGame }));
@@ -556,6 +576,13 @@ const server = http.createServer(async (req, res) => {
       let games = readJson('games.json', []);
       games = games.filter(g => g.id !== id && g.slug !== id);
       writeJson('games.json', games);
+
+      try {
+        const { execSync } = require('child_process');
+        execSync('node generate_pages.js', { cwd: __dirname });
+        execSync('node generate_worker.js', { cwd: __dirname });
+      } catch (genErr) {}
+
       res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
       return res.end(JSON.stringify({ success: true }));
     }
