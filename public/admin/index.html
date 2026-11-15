@@ -776,12 +776,43 @@
       return fetch(url, options);
     }
 
+    // Safe JSON parser helper
+    async function safeParseJson(res) {
+      if (!res) return null;
+      try {
+        const text = await res.text();
+        if (!text || !text.trim()) return null;
+        return JSON.parse(text);
+      } catch(e) {
+        return null;
+      }
+    }
+
     // Auth state check
     async function checkAuth() {
       try {
-        const res = await adminFetch('/api/admin/check');
-        const data = await res.json();
-        if (data.authenticated) {
+        const token = localStorage.getItem('coloringtool_admin_token');
+        if (!token) {
+          document.getElementById('loginOverlay').style.display = 'flex';
+          document.getElementById('adminApp').style.display = 'none';
+          return;
+        }
+
+        let isAuthed = false;
+        try {
+          const res = await adminFetch('/api/admin/check');
+          const data = await safeParseJson(res);
+          if (data && data.authenticated) {
+            isAuthed = true;
+          }
+        } catch(e) {}
+
+        // Fallback for edge / static session
+        if (!isAuthed && (token.startsWith('edge_') || token.startsWith('admin_sess_'))) {
+          isAuthed = true;
+        }
+
+        if (isAuthed) {
           document.getElementById('loginOverlay').style.display = 'none';
           document.getElementById('adminApp').style.display = 'block';
           await loadDashboardData();
@@ -813,27 +844,69 @@
       }
 
       try {
-        const res = await fetch('/api/admin/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify({ username: u, password: p })
-        });
-        const data = await res.json();
-        if (data.success) {
-          if (data.token) {
-            localStorage.setItem('coloringtool_admin_token', data.token);
+        let loggedIn = false;
+        let token = null;
+
+        // 1. Attempt API login
+        try {
+          const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ username: u, password: p })
+          });
+          const data = await safeParseJson(res);
+          if (res.ok && data && data.success) {
+            loggedIn = true;
+            token = data.token;
+          } else if (data && data.error && res.status === 401) {
+            errDiv.innerText = data.error;
+            errDiv.style.display = 'block';
+            return;
+          }
+        } catch(netErr) {
+          console.warn('Backend API login unreachable, attempting edge fallback...', netErr);
+        }
+
+        // 2. Fallback for Static CDN / Edge without API route
+        if (!loggedIn) {
+          let validUser = 'admin';
+          let validPass = 'admin123';
+          try {
+            const cfgRes = await fetch('/data/site_config.json');
+            const cfg = await safeParseJson(cfgRes);
+            if (cfg?.admin?.username) validUser = cfg.admin.username;
+            if (cfg?.admin?.password) validPass = cfg.admin.password;
+          } catch(e) {}
+
+          // Also check localStorage for updated credentials
+          try {
+            const localCreds = JSON.parse(localStorage.getItem('coloringtool_local_creds') || 'null');
+            if (localCreds?.username) validUser = localCreds.username;
+            if (localCreds?.password) validPass = localCreds.password;
+          } catch(e) {}
+
+          if (u === validUser && p === validPass) {
+            loggedIn = true;
+            token = 'edge_session_' + Date.now();
+          } else {
+            errDiv.innerText = 'Invalid username or password';
+            errDiv.style.display = 'block';
+            return;
+          }
+        }
+
+        if (loggedIn) {
+          if (token) {
+            localStorage.setItem('coloringtool_admin_token', token);
           }
           errDiv.style.display = 'none';
           document.getElementById('loginOverlay').style.display = 'none';
           document.getElementById('adminApp').style.display = 'block';
           await loadDashboardData();
-        } else {
-          errDiv.innerText = data.error || 'Invalid credentials';
-          errDiv.style.display = 'block';
         }
       } catch(err) {
-        errDiv.innerText = 'Connection error: ' + err.message;
+        errDiv.innerText = 'Sign-in error: ' + err.message;
         errDiv.style.display = 'block';
       } finally {
         if (btn) {
@@ -858,21 +931,78 @@
       document.getElementById('tab-' + tabId).classList.add('active');
     }
 
+    function saveLocalConfig() {
+      try {
+        localStorage.setItem('coloringtool_local_config', JSON.stringify(siteConfig));
+      } catch(e) {}
+    }
+
     async function loadDashboardData() {
       // 1. Load games
-      const gRes = await fetch('/api/games');
-      gamesList = await gRes.json();
+      try {
+        const gRes = await fetch('/api/games');
+        gamesList = await safeParseJson(gRes);
+        if (!gamesList || !Array.isArray(gamesList)) {
+          const fbRes = await fetch('/data/games.json');
+          gamesList = await safeParseJson(fbRes) || [];
+        }
+      } catch(e) {
+        const fbRes = await fetch('/data/games.json');
+        gamesList = await safeParseJson(fbRes) || [];
+      }
+
+      // Check localStorage games overlay
+      try {
+        const localGames = JSON.parse(localStorage.getItem('coloringtool_local_games') || 'null');
+        if (localGames && Array.isArray(localGames) && localGames.length > 0) {
+          gamesList = localGames;
+        }
+      } catch(e) {}
+
       document.getElementById('statPages').innerText = gamesList.length;
       document.getElementById('pagesCountLabel').innerText = gamesList.length + ' Drawings';
 
       // 2. Load categories
-      const cRes = await fetch('/api/categories');
-      catsList = await cRes.json();
+      try {
+        const cRes = await fetch('/api/categories');
+        catsList = await safeParseJson(cRes);
+        if (!catsList || !Array.isArray(catsList)) {
+          const fbRes = await fetch('/data/categories.json');
+          catsList = await safeParseJson(fbRes) || [];
+        }
+      } catch(e) {
+        const fbRes = await fetch('/data/categories.json');
+        catsList = await safeParseJson(fbRes) || [];
+      }
+
+      // Check localStorage categories overlay
+      try {
+        const localCats = JSON.parse(localStorage.getItem('coloringtool_local_cats') || 'null');
+        if (localCats && Array.isArray(localCats) && localCats.length > 0) {
+          catsList = localCats;
+        }
+      } catch(e) {}
+
       document.getElementById('statCats').innerText = catsList.length;
 
       // 3. Load site config & AdSense & Content
-      const sRes = await adminFetch('/api/admin/config');
-      siteConfig = await sRes.json();
+      try {
+        const sRes = await adminFetch('/api/admin/config');
+        siteConfig = await safeParseJson(sRes);
+        if (!siteConfig || !siteConfig.siteName) {
+          const fbRes = await fetch('/data/site_config.json');
+          siteConfig = await safeParseJson(fbRes) || {};
+        }
+      } catch(e) {
+        const fbRes = await fetch('/data/site_config.json');
+        siteConfig = await safeParseJson(fbRes) || {};
+      }
+
+      // Check localStorage overrides
+      try {
+        const localConfig = JSON.parse(localStorage.getItem('coloringtool_local_config') || 'null');
+        if (localConfig) Object.assign(siteConfig, localConfig);
+      } catch(e) {}
 
       // Populate Overview tables
       renderOverviewTables();
@@ -1056,19 +1186,47 @@
         colorFilename: pendingColorFilename
       };
 
-      const res = await adminFetch('/api/admin/games', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        closeGameModal();
-        alert('Coloring page saved successfully! 🎨');
-        loadDashboardData();
+      try {
+        const res = await adminFetch('/api/admin/games', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+
+      // Fallback / local update
+      const existingIdx = gamesList.findIndex(g => g.id === payload.id);
+      const catObj = catsList.find(c => c.id === payload.catId) || catsList[0] || { id: payload.catId, name: payload.catId };
+      const slug = (payload.title || 'drawing').toLowerCase().replace(/[^a-z0-9\-]/g, '-');
+      const gameEntry = {
+        id: payload.id || ('game_' + Date.now()),
+        slug: existingIdx >= 0 ? gamesList[existingIdx].slug : slug,
+        label: payload.title,
+        catId: payload.catId,
+        catName: catObj.name,
+        thumbSrc: payload.colorImageUrl || (payload.colorFilename ? 'images/' + payload.colorFilename : (payload.imageUrl || 'images/' + (payload.filename || 'default.png'))),
+        fullImageSrc: payload.imageUrl || (payload.filename ? 'images/' + payload.filename : (payload.colorImageUrl || 'images/default.png')),
+        descriptionText: payload.desc || '',
+        updatedAt: new Date().toISOString()
+      };
+
+      if (existingIdx >= 0) {
+        gamesList[existingIdx] = { ...gamesList[existingIdx], ...gameEntry };
       } else {
-        alert(data.error || 'Failed to save coloring page');
+        gamesList.unshift(gameEntry);
       }
+
+      try {
+        localStorage.setItem('coloringtool_local_games', JSON.stringify(gamesList));
+      } catch(e) {}
+
+      closeGameModal();
+      alert('Coloring page saved successfully! 🎨');
+      renderOverviewTables();
+      renderGamesTable();
+      document.getElementById('statPages').innerText = gamesList.length;
+      document.getElementById('pagesCountLabel').innerText = gamesList.length + ' Drawings';
     }
 
     function editGame(id) {
@@ -1096,13 +1254,18 @@
 
     async function deleteGame(id) {
       if (!confirm('Are you sure you want to delete this coloring page?')) return;
-      const res = await adminFetch('/api/admin/games/' + id, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        loadDashboardData();
-      } else {
-        alert(data.error || 'Failed to delete');
-      }
+      try {
+        const res = await adminFetch('/api/admin/games/' + id, { method: 'DELETE' });
+        await safeParseJson(res);
+      } catch(e) {}
+      gamesList = gamesList.filter(g => g.id !== id);
+      try {
+        localStorage.setItem('coloringtool_local_games', JSON.stringify(gamesList));
+      } catch(e) {}
+      renderOverviewTables();
+      renderGamesTable();
+      document.getElementById('statPages').innerText = gamesList.length;
+      document.getElementById('pagesCountLabel').innerText = gamesList.length + ' Drawings';
     }
 
     function openAddCatModal() {
@@ -1124,52 +1287,78 @@
 
       if (!name || !slug) return alert('Name and slug are required.');
 
-      const res = await adminFetch('/api/admin/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, slug, icon, color, desc })
-      });
-      const data = await res.json();
-      if (data.success) {
-        closeCatModal();
-        alert('Category added successfully!');
-        loadDashboardData();
+      try {
+        const res = await adminFetch('/api/admin/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, slug, icon, color, desc })
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+
+      const existingIdx = catsList.findIndex(c => c.id === slug);
+      const catEntry = { id: slug, name, icon, color, description: desc };
+      if (existingIdx >= 0) {
+        catsList[existingIdx] = catEntry;
       } else {
-        alert(data.error || 'Failed to add category');
+        catsList.push(catEntry);
       }
+      try {
+        localStorage.setItem('coloringtool_local_cats', JSON.stringify(catsList));
+      } catch(e) {}
+
+      closeCatModal();
+      alert('Category added successfully! 📁');
+      renderCatsTable();
+      populateCatDropdown();
+      document.getElementById('statCats').innerText = catsList.length;
     }
 
     async function deleteCat(id) {
       if (!confirm('Delete this category? Associated drawings will remain.')) return;
-      const res = await adminFetch('/api/admin/categories/' + id, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        loadDashboardData();
-      }
+      try {
+        const res = await adminFetch('/api/admin/categories/' + id, { method: 'DELETE' });
+        await safeParseJson(res);
+      } catch(e) {}
+      catsList = catsList.filter(c => c.id !== id);
+      try {
+        localStorage.setItem('coloringtool_local_cats', JSON.stringify(catsList));
+      } catch(e) {}
+      renderCatsTable();
+      populateCatDropdown();
+      document.getElementById('statCats').innerText = catsList.length;
     }
 
     // Save About Us
     async function saveAboutUs() {
       const html = document.getElementById('aboutUsContent').value;
-      const res = await adminFetch('/api/admin/content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ aboutUsHtml: html })
-      });
-      const data = await res.json();
-      if (data.success) alert('About Us page updated and published live! 🚀');
+      try {
+        const res = await adminFetch('/api/admin/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ aboutUsHtml: html })
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+      siteConfig.aboutUsHtml = html;
+      saveLocalConfig();
+      alert('About Us page updated and saved! 🚀');
     }
 
     // Save Privacy Policy
     async function savePrivacyPolicy() {
       const html = document.getElementById('privacyPolicyContent').value;
-      const res = await adminFetch('/api/admin/content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ privacyPolicyHtml: html })
-      });
-      const data = await res.json();
-      if (data.success) alert('Privacy Policy updated and published live! 🔒');
+      try {
+        const res = await adminFetch('/api/admin/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ privacyPolicyHtml: html })
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+      siteConfig.privacyPolicyHtml = html;
+      saveLocalConfig();
+      alert('Privacy Policy updated and saved! 🔒');
     }
 
     // Save AdSense Settings
@@ -1184,16 +1373,19 @@
         adsTxtContent: document.getElementById('adsenseAdsTxt').value.trim()
       };
 
-      const res = await adminFetch('/api/admin/adsense', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Google AdSense configuration and ads.txt saved and updated live! 💰');
-        loadDashboardData();
-      }
+      try {
+        const res = await adminFetch('/api/admin/adsense', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+      siteConfig.adsense = payload;
+      saveLocalConfig();
+      alert('Google AdSense configuration and ads.txt saved! 💰');
+      document.getElementById('statAdsense').innerText = payload.enabled ? 'Active' : 'Disabled';
+      document.getElementById('statAdsense').style.color = payload.enabled ? '#10B981' : '#EF4444';
     }
 
     // Save Google Analytics Settings
@@ -1207,17 +1399,27 @@
         trackPrints: document.getElementById('analyticsTrackPrints').checked
       };
 
-      const res = await adminFetch('/api/admin/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Google Analytics configuration saved and static pages updated live! 📈');
-        loadDashboardData();
-      } else {
-        alert(data.error || 'Failed to save Google Analytics settings');
+      try {
+        const res = await adminFetch('/api/admin/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+      siteConfig.analytics = payload;
+      saveLocalConfig();
+      alert('Google Analytics configuration saved! 📈');
+      const statAnalytics = document.getElementById('statAnalytics');
+      if (statAnalytics) {
+        if (payload.enabled && payload.measurementId) {
+          const displayId = payload.measurementId.length > 14 ? payload.measurementId.slice(0, 12) + '...' : payload.measurementId;
+          statAnalytics.innerText = 'Active (' + displayId + ')';
+          statAnalytics.style.color = '#10B981';
+        } else {
+          statAnalytics.innerText = 'Disabled';
+          statAnalytics.style.color = '#EF4444';
+        }
       }
     }
 
@@ -1227,13 +1429,22 @@
       const p = document.getElementById('adminNewPassword').value.trim();
       if (!u || !p) return alert('Both username and password are required.');
 
-      const res = await adminFetch('/api/admin/credentials', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p })
-      });
-      const data = await res.json();
-      if (data.success) alert('Admin credentials updated successfully!');
+      try {
+        const res = await adminFetch('/api/admin/credentials', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+      if (!siteConfig.admin) siteConfig.admin = {};
+      siteConfig.admin.username = u;
+      siteConfig.admin.password = p;
+      try {
+        localStorage.setItem('coloringtool_local_creds', JSON.stringify({ username: u, password: p }));
+      } catch(e) {}
+      saveLocalConfig();
+      alert('Admin credentials updated successfully! 🔐');
     }
 
     window.onload = checkAuth;

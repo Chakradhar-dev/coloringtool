@@ -1,0 +1,50 @@
+[
+  {
+    "id": "animals",
+    "name": "Animals",
+    "icon": "🦁",
+    "color": "#EF4444",
+    "banner": "minis-menu/sm-animals.png",
+    "description": "Fun animal drawings to paint and color online — lions, elephants, monkeys, puppies and more!"
+  },
+  {
+    "id": "unicorn",
+    "name": "Unicorns",
+    "icon": "🦄",
+    "color": "#8B5CF6",
+    "banner": "minis-menu/sm-unicorns.png",
+    "description": "Magical unicorn coloring pages for kids — rainbows, stars, flying unicorns and fairy tales."
+  },
+  {
+    "id": "princess",
+    "name": "Princesses",
+    "icon": "👑",
+    "color": "#EC4899",
+    "banner": "minis-menu/sm-princesses.png",
+    "description": "Enchanted princess coloring pages — gowns, castles, unicorns and royal adventures."
+  },
+  {
+    "id": "transport",
+    "name": "Transportation",
+    "icon": "🚀",
+    "color": "#0EA5E9",
+    "banner": "minis-menu/sm-transportation.png",
+    "description": "Cars, trains, airplanes, rockets and trucks coloring games for curious kids."
+  },
+  {
+    "id": "christmas",
+    "name": "Christmas",
+    "icon": "🎄",
+    "color": "#10B981",
+    "banner": "minis-menu/sm-christmas.png",
+    "description": "Holiday coloring pages — Santa Claus, Christmas trees, stockings and snowmen."
+  },
+  {
+    "id": "food",
+    "name": "Food",
+    "icon": "🍦",
+    "color": "#F59E0B",
+    "banner": "minis-menu/sm-food.png",
+    "description": "Delicious fruits, veggies, ice cream, cakes and sweets coloring games."
+  }
+]

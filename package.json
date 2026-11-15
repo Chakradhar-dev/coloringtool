@@ -1,10 +1,12 @@
 {
   "name": "coloringpages-forkids",
   "version": "1.0.0",
-  "description": "",
-  "main": "analyze_js.js",
+  "description": "ColoringTool.com - Free Interactive Coloring Book for Kids",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node generate_pages.js",
+    "start": "node server.js",
+    "deploy": "npx wrangler deploy"
   },
   "keywords": [],
   "author": "",

@@ -32,6 +32,13 @@ function writeJson(filename, data) {
   try {
     const filePath = path.join(DATA_DIR, filename);
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    const pubFilePath = path.join(PUBLIC_DIR, 'data', filename);
+    try {
+      if (!fs.existsSync(path.join(PUBLIC_DIR, 'data'))) {
+        fs.mkdirSync(path.join(PUBLIC_DIR, 'data'), { recursive: true });
+      }
+      fs.writeFileSync(pubFilePath, JSON.stringify(data, null, 2), 'utf-8');
+    } catch(e) {}
     return true;
   } catch (err) {
     console.error(`Error writing ${filename}:`, err);

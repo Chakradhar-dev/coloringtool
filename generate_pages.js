@@ -1194,4 +1194,10 @@ const studioHtml = `<!DOCTYPE html>
 </html>`;
 
 fs.writeFileSync(path.join(PUBLIC_DIR, 'studio.html'), studioHtml);
+
+// Automatically generate Cloudflare Worker edge files
+try {
+  require('./generate_worker.js');
+} catch(e) {}
+
 console.log('All ColoringTool.com pages generated successfully!');
