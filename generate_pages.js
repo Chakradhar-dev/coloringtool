@@ -773,13 +773,15 @@ ${renderSeoHeadTags({
       position: relative;
       width: 100%;
       max-width: 510px;
-      aspect-ratio: 510 / 580;
       height: auto;
       background: #FFFFFF;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 8px 24px rgba(0,0,0,0.18);
       margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     #canvas {
       width: 100%;
@@ -1542,19 +1544,7 @@ ${renderSeoHeadTags({
     function cleanRasterCanvas() {
       if (!baseLineArtImg) return;
       saveUndoState();
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      const aspect = (baseLineArtImg.width && baseLineArtImg.height) ? (baseLineArtImg.width / baseLineArtImg.height) : 1;
-      let w = canvas.width - 20;
-      let h = w / aspect;
-      if (h > canvas.height - 20) {
-        h = canvas.height - 20;
-        w = h * aspect;
-      }
-      const x = (canvas.width - w) / 2;
-      const y = (canvas.height - h) / 2;
-      ctx.drawImage(baseLineArtImg, x, y, w, h);
+      renderImageToCanvas();
       try { createjs.Sound.play('sonidoClic'); } catch(e) {}
     }
 
@@ -1773,24 +1763,34 @@ ${renderSeoHeadTags({
 
       function renderImageToCanvas() {
         baseLineArtImg = img;
-        canvas.width = 510;
-        canvas.height = 580;
+        const natW = img.naturalWidth || img.width || 510;
+        const natH = img.naturalHeight || img.height || 580;
+        const aspect = natW / natH;
+
+        // Adapt canvas height to natural aspect ratio so it fills the screen cleanly
+        const targetW = 510;
+        let targetH = Math.round(targetW / aspect);
+        if (targetH < 380) targetH = 380;
+        if (targetH > 620) targetH = 620;
+
+        if (canvas.width !== targetW) canvas.width = targetW;
+        if (canvas.height !== targetH) canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Center image
-        const aspect = (img.naturalWidth && img.naturalHeight) ? (img.naturalWidth / img.naturalHeight) : ((img.width && img.height) ? (img.width / img.height) : 1);
-        let w = canvas.width - 20;
+        // Scale image to fill canvas edge-to-edge
+        let w = canvas.width - 12;
         let h = w / aspect;
-        if (h > canvas.height - 20) {
-          h = canvas.height - 20;
+        if (h > canvas.height - 12) {
+          h = canvas.height - 12;
           w = h * aspect;
         }
         const x = (canvas.width - w) / 2;
         const y = (canvas.height - h) / 2;
         ctx.drawImage(img, x, y, w, h);
         undoStack = [];
-        makeResponsive(true, 'both', false, 1, { properties: { width: 510, height: 580 } });
+        makeResponsive(true, 'both', false, 1, { properties: { width: targetW, height: targetH } });
       }
 
       let retryWithoutCors = false;
@@ -1919,17 +1919,28 @@ ${renderSeoHeadTags({
         const w = (lib && lib.properties && lib.properties.width) || 510;
         const h = (lib && lib.properties && lib.properties.height) || 580;
         const wrap = document.querySelector('.canvas-container');
-        const containerW = wrap ? wrap.clientWidth : Math.min(window.innerWidth - 32, w);
+        const containerW = wrap ? wrap.clientWidth : Math.min(window.innerWidth - 24, w);
         const sRatio = containerW / w;
+        const targetH = Math.round(h * sRatio);
+
+        // Only set canvas coordinate attributes if they actually changed (to prevent wiping 2D canvas context)
+        if (canvas.width !== w) canvas.width = w;
+        if (canvas.height !== h) canvas.height = h;
 
         canvas.style.width = containerW + 'px';
-        canvas.style.height = (h * sRatio) + 'px';
+        canvas.style.height = targetH + 'px';
         if (wrap) {
-          wrap.style.height = (h * sRatio) + 'px';
+          wrap.style.width = containerW + 'px';
+          wrap.style.height = targetH + 'px';
         }
+
+        // Inside the canvas, Adobe Animate scenes are authored for w x h (e.g. 510 x 580).
+        // Since CSS canvas.style.width already visually scales the canvas to containerW,
+        // stage.scaleX and stage.scaleY MUST remain 1:1 so the drawing fills 100% of the canvas
+        // without being double-shrunk or displaced on mobile!
         if (stage) {
-          stage.scaleX = sRatio;
-          stage.scaleY = sRatio;
+          stage.scaleX = 1;
+          stage.scaleY = 1;
           stage.update();
         }
       }
