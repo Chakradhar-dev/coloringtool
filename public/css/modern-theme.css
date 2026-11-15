@@ -44,7 +44,7 @@ body {
    Navigation Header
    ======================================================== */
 .site-nav {
-  background: #000000;
+  background: #000000 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
   position: sticky;
@@ -814,8 +814,8 @@ body {
   max-width: 1280px;
   margin: auto;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
+  gap: 32px;
 }
 .footer-logo {
   display: flex;

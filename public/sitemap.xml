@@ -25,6 +25,18 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://coloringtool.com/terms.html</loc>
+    <lastmod>2026-11-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://coloringtool.com/contact.html</loc>
+    <lastmod>2026-11-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://coloringtool.com/animals/</loc>
     <lastmod>2026-11-15</lastmod>
     <changefreq>weekly</changefreq>

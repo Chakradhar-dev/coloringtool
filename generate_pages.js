@@ -95,6 +95,8 @@ function generateSitemapXml() {
   xml += `  <url>\n    <loc>${base}/gallery.html</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
   xml += `  <url>\n    <loc>${base}/about.html</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
   xml += `  <url>\n    <loc>${base}/privacy.html</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${base}/terms.html</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${base}/contact.html</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
 
   categories.forEach(c => {
     xml += `  <url>\n    <loc>${base}/${c.id}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
@@ -219,26 +221,47 @@ function renderFooter() {
           }
         </div>
         <p>${siteConfig.tagline}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+          <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);padding:4px 10px;border-radius:20px;font-size:0.75rem;color:#E2E8F0;">🛡️ Kid-Safe &amp; COPPA Compliant</span>
+          <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);padding:4px 10px;border-radius:20px;font-size:0.75rem;color:#E2E8F0;">🔒 SSL Secure</span>
+        </div>
       </div>
       <div class="footer-links-group">
-        <h4>Coloring Categories</h4>
+        <h4>Coloring Themes</h4>
         <ul>
           ${categories.map(c => `<li><a href="/${c.id}/">${c.icon || '🎨'} Online ${c.name} Drawings</a></li>`).join('')}
         </ul>
       </div>
       <div class="footer-links-group">
-        <h4>Features & Information</h4>
+        <h4>Quick Navigation</h4>
         <ul>
+          <li><a href="/">🏠 Homepage</a></li>
           <li><a href="/gallery.html">🎨 My Art Gallery</a></li>
           <li><a href="/studio.html?random=1">✨ Random Drawing</a></li>
-          <li><a href="/about.html">ℹ️ About ColoringTool.com</a></li>
-          <li><a href="/privacy.html">🔒 Privacy Policy & COPPA</a></li>
-          <li><a href="/admin/">⚙️ Admin Management Tool</a></li>
+          <li><a href="/about.html">ℹ️ About Our Mission</a></li>
+          <li><a href="/contact.html">✉️ Contact Us &amp; FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-links-group">
+        <h4>Legal &amp; Policies</h4>
+        <ul>
+          <li><a href="/privacy.html">🔒 Privacy Policy</a></li>
+          <li><a href="/terms.html">📜 Terms of Use</a></li>
+          <li><a href="/contact.html">✉️ Contact Support</a></li>
+          <li><a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer">🍪 Google Ad Choices</a></li>
+          <li><a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer">🌐 AboutAds Opt-Out</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
       <p>&copy; 2026 <a href="/">ColoringTool.com</a> &bull; All rights reserved. Free online drawing and coloring games for kids. Safe, instant, educational!</p>
+      <div style="margin-top:10px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:0.85rem;">
+        <a href="/privacy.html" style="color:#94A3B8;">Privacy Policy</a> &bull;
+        <a href="/terms.html" style="color:#94A3B8;">Terms of Use</a> &bull;
+        <a href="/contact.html" style="color:#94A3B8;">Contact Us</a> &bull;
+        <a href="/about.html" style="color:#94A3B8;">About Us</a> &bull;
+        <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style="color:#94A3B8;">Ad Settings</a>
+      </div>
     </div>
   </footer>
   `;
@@ -626,20 +649,19 @@ ${renderSeoHeadTags({
       color: #0F172A;
     }
     .studio-top-bar {
-      background: #000000;
+      background: #000000 !important;
       color: white;
-      padding: 10px 16px;
+      padding: 10px 18px;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      flex-wrap: wrap;
-      gap: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+      gap: 14px;
     }
     .studio-title-box {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       flex: 1;
       min-width: 0;
     }
@@ -649,6 +671,8 @@ ${renderSeoHeadTags({
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
     }
     .btn-back {
       background: rgba(255,255,255,0.15);
@@ -686,19 +710,25 @@ ${renderSeoHeadTags({
         gap: 16px;
       }
       .studio-top-bar {
-        padding: 8px 10px;
+        padding: 8px 12px;
         flex-direction: row;
-        gap: 6px;
+        gap: 10px;
       }
       .studio-title-box {
-        gap: 8px;
+        gap: 10px;
+        width: 100%;
       }
       .studio-title-box h1 {
-        font-size: 0.98rem !important;
+        font-size: 1.05rem !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        min-width: 0;
       }
       .btn-back {
-        padding: 5px 10px;
-        font-size: 0.8rem;
+        padding: 6px 12px;
+        font-size: 0.85rem;
       }
     }
     .stage-wrapper {
@@ -907,9 +937,6 @@ ${renderSeoHeadTags({
     <div class="studio-title-box">
       <a href="/" id="backLink" class="btn-back">&larr; Back</a>
       <h1 id="gameTitle">Coloring Studio</h1>
-    </div>
-    <div class="studio-top-actions">
-      <a href="/studio.html?random=1" class="btn-back" style="background:#F59E0B;">✨ Surprise Drawing!</a>
     </div>
   </header>
 
@@ -1527,6 +1554,85 @@ ${renderSeoHeadTags({
 </body>
 </html>`;
 fs.writeFileSync(path.join(PUBLIC_DIR, 'privacy.html'), privacyHtml);
+
+const termsHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+${renderSeoHeadTags({
+  title: 'Terms of Use — ColoringTool.com',
+  description: 'Terms of Use and free educational licensing policy for ColoringTool.com. Free online coloring games and classroom printables.',
+  keywords: 'coloringtool terms of use, classroom coloring license, printable drawings terms',
+  canonicalPath: '/terms.html'
+})}
+  <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
+  <link rel="stylesheet" href="/css/modern-theme.css">
+  ${adHeaderScript}
+  ${analyticsHeaderScript}
+</head>
+<body>
+  ${renderNav('terms')}
+  <header class="hero-banner" style="padding:40px 20px 30px;">
+    <h1 class="hero-title">Terms of Use &amp; Educational Licensing</h1>
+    <p class="hero-sub">Our guidelines for safe personal, home, and classroom educational coloring.</p>
+  </header>
+  <main style="max-width:960px;margin:40px auto;padding:0 20px;">
+    <div style="background:#FFFFFF;border-radius:20px;padding:40px;box-shadow:0 8px 30px rgba(15,23,42,0.08);border:1px solid #E2E8F0;line-height:1.8;font-size:1.05rem;color:#334155;">
+      ${siteConfig.termsHtml || '<p>Welcome to ColoringTool.com Terms of Use.</p>'}
+    </div>
+  </main>
+  ${renderAdUnit(ad.belowGameSlot || '3456789012')}
+  ${renderFooter()}
+</body>
+</html>`;
+fs.writeFileSync(path.join(PUBLIC_DIR, 'terms.html'), termsHtml);
+
+const contactHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+${renderSeoHeadTags({
+  title: 'Contact Us & FAQ — ColoringTool.com',
+  description: 'Contact ColoringTool.com for support, teacher inquiries, drawing suggestions, and COPPA child privacy questions.',
+  keywords: 'contact coloringtool, support email, teacher coloring inquiry, drawing suggestions',
+  canonicalPath: '/contact.html'
+})}
+  <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
+  <link rel="stylesheet" href="/css/modern-theme.css">
+  ${adHeaderScript}
+  ${analyticsHeaderScript}
+</head>
+<body>
+  ${renderNav('contact')}
+  <header class="hero-banner" style="padding:40px 20px 30px;">
+    <h1 class="hero-title">Contact Us &amp; Support</h1>
+    <p class="hero-sub">Have questions or drawing ideas? We love hearing from parents, teachers, and kids!</p>
+  </header>
+  <main style="max-width:960px;margin:40px auto;padding:0 20px;">
+    <div style="background:#FFFFFF;border-radius:20px;padding:40px;box-shadow:0 8px 30px rgba(15,23,42,0.08);border:1px solid #E2E8F0;line-height:1.8;font-size:1.05rem;color:#334155;">
+      ${siteConfig.contactHtml || '<p>Contact us at contact@coloringtool.com</p>'}
+    </div>
+  </main>
+  <script>
+    function handleContactSubmit() {
+      const btn = document.getElementById('contactSubmitBtn');
+      const msg = document.getElementById('contactSuccessMsg');
+      if (btn) btn.disabled = true;
+      if (msg) msg.style.display = 'block';
+      setTimeout(() => {
+        const form = document.getElementById('contactForm');
+        if (form) form.reset();
+        if (btn) btn.disabled = false;
+      }, 4000);
+    }
+  </script>
+  ${renderAdUnit(ad.belowGameSlot || '3456789012')}
+  ${renderFooter()}
+</body>
+</html>`;
+fs.writeFileSync(path.join(PUBLIC_DIR, 'contact.html'), contactHtml);
 
 // ----------------------------------------------------
 // 6. GENERATE SITEMAP.XML AND ROBOTS.TXT

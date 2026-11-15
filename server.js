@@ -174,10 +174,21 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
 
   const seo = siteConfig.seo || {};
   const base = (seo.canonicalBase || 'https://coloringtool.com').replace(/\/+$/, '');
-  const canonicalUrl = `${base}/${pageTitle.toLowerCase().includes('about') ? 'about.html' : 'privacy.html'}`;
-  const metaDescription = pageTitle.toLowerCase().includes('about')
-    ? 'Learn about ColoringTool.com: safe, fun, and free online coloring activities for kids and families worldwide.'
-    : 'Privacy Policy for ColoringTool.com. We prioritize child safety, strict COPPA compliance, and transparent data practices.';
+  let canonicalPath = '/about.html';
+  let metaDescription = 'Learn about ColoringTool.com: safe, fun, and free online coloring activities for kids and families worldwide.';
+
+  if (pageTitle.toLowerCase().includes('privacy')) {
+    canonicalPath = '/privacy.html';
+    metaDescription = 'Privacy Policy for ColoringTool.com. We prioritize child safety, strict COPPA compliance, and Google AdSense transparency.';
+  } else if (pageTitle.toLowerCase().includes('terms')) {
+    canonicalPath = '/terms.html';
+    metaDescription = 'Terms of Use and educational coloring license for ColoringTool.com. Free online coloring games and classroom printables.';
+  } else if (pageTitle.toLowerCase().includes('contact')) {
+    canonicalPath = '/contact.html';
+    metaDescription = 'Contact ColoringTool.com for support, teacher inquiries, drawing suggestions, and COPPA child privacy questions.';
+  }
+
+  const canonicalUrl = `${base}${canonicalPath}`;
   const shareImg = seo.ogImage ? (seo.ogImage.startsWith('http') ? seo.ogImage : `${base}${seo.ogImage}`) : `${base}/my-favicon/favicon-96x96.png`;
 
   return `<!DOCTYPE html>
@@ -262,30 +273,54 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
     <div class="footer-container">
       <div class="footer-brand">
         <div class="footer-logo">
-          <div class="brand-logo-icon" style="width:34px;height:34px;font-size:1.2rem;">🎨</div>
-          <strong>ColoringTool.com</strong>
+          ${logo.imageSrc ?
+            `<img src="${logo.imageSrc}" alt="${siteConfig.siteName || 'ColoringTool.com'}" style="max-height:36px;max-width:140px;object-fit:contain;display:block;">` :
+            `<div class="brand-logo-icon" style="width:34px;height:34px;font-size:1.2rem;">${logo.icon || '🎨'}</div>
+             <strong>${siteConfig.siteName || 'ColoringTool'}.com</strong>`
+          }
         </div>
         <p>${siteConfig.tagline}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+          <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);padding:4px 10px;border-radius:20px;font-size:0.75rem;color:#E2E8F0;">🛡️ Kid-Safe &amp; COPPA Compliant</span>
+          <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);padding:4px 10px;border-radius:20px;font-size:0.75rem;color:#E2E8F0;">🔒 SSL Secure</span>
+        </div>
       </div>
       <div class="footer-links-group">
-        <h4>Coloring Categories</h4>
+        <h4>Coloring Themes</h4>
         <ul>
           ${catLinks}
         </ul>
       </div>
       <div class="footer-links-group">
-        <h4>Features & Policies</h4>
+        <h4>Quick Navigation</h4>
         <ul>
+          <li><a href="/">🏠 Homepage</a></li>
           <li><a href="/gallery.html">🎨 My Art Gallery</a></li>
           <li><a href="/studio.html?random=1">✨ Random Drawing</a></li>
           <li><a href="/about.html">ℹ️ About Our Mission</a></li>
-          <li><a href="/privacy.html">🔒 Privacy Policy & COPPA</a></li>
-          <li><a href="/admin/">⚙️ Admin Management Tool</a></li>
+          <li><a href="/contact.html">✉️ Contact Us &amp; FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-links-group">
+        <h4>Legal &amp; Policies</h4>
+        <ul>
+          <li><a href="/privacy.html">🔒 Privacy Policy</a></li>
+          <li><a href="/terms.html">📜 Terms of Use</a></li>
+          <li><a href="/contact.html">✉️ Contact Support</a></li>
+          <li><a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer">🍪 Google Ad Choices</a></li>
+          <li><a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer">🌐 AboutAds Opt-Out</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 <a href="/">ColoringTool.com</a> &bull; All rights reserved. Free online drawing and coloring games for kids.</p>
+      <p>&copy; 2026 <a href="/">ColoringTool.com</a> &bull; All rights reserved. Free online drawing and coloring games for kids. Safe, instant, educational!</p>
+      <div style="margin-top:10px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:0.85rem;">
+        <a href="/privacy.html" style="color:#94A3B8;">Privacy Policy</a> &bull;
+        <a href="/terms.html" style="color:#94A3B8;">Terms of Use</a> &bull;
+        <a href="/contact.html" style="color:#94A3B8;">Contact Us</a> &bull;
+        <a href="/about.html" style="color:#94A3B8;">About Us</a> &bull;
+        <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style="color:#94A3B8;">Ad Settings</a>
+      </div>
     </div>
   </footer>
 </body>
@@ -558,13 +593,23 @@ const server = http.createServer(async (req, res) => {
       return res.end(JSON.stringify({ success: true }));
     }
 
-    // 6. Save About Us & Privacy Policy content
+    // 6. Save About Us, Privacy Policy, Terms of Use, and Contact Us content
     if (pathname === '/api/admin/content' && method === 'POST') {
       const body = await parseBody(req);
       const siteConfig = readJson('site_config.json');
       if (body.aboutUsHtml !== undefined) siteConfig.aboutUsHtml = body.aboutUsHtml;
       if (body.privacyPolicyHtml !== undefined) siteConfig.privacyPolicyHtml = body.privacyPolicyHtml;
+      if (body.termsHtml !== undefined) siteConfig.termsHtml = body.termsHtml;
+      if (body.contactHtml !== undefined) siteConfig.contactHtml = body.contactHtml;
       writeJson('site_config.json', siteConfig);
+
+      try {
+        const { execSync } = require('child_process');
+        execSync('node generate_pages.js', { cwd: __dirname });
+      } catch (genErr) {
+        console.error('Failed to regenerate pages:', genErr);
+      }
+
       res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
       return res.end(JSON.stringify({ success: true }));
     }
@@ -739,6 +784,34 @@ const server = http.createServer(async (req, res) => {
       'Privacy Policy',
       'Privacy Policy',
       siteConfig.privacyPolicyHtml || '<h2>Privacy Policy</h2><p>Privacy Policy content...</p>',
+      siteConfig,
+      categories
+    );
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=UTF-8' });
+    return res.end(html);
+  }
+
+  if (pathname === '/terms' || pathname === '/terms.html') {
+    const siteConfig = readJson('site_config.json');
+    const categories = readJson('categories.json', []);
+    const html = renderDynamicContentPage(
+      'Terms of Use',
+      'Terms of Use',
+      siteConfig.termsHtml || '<h2>Terms of Use</h2><p>Terms of Use content...</p>',
+      siteConfig,
+      categories
+    );
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=UTF-8' });
+    return res.end(html);
+  }
+
+  if (pathname === '/contact' || pathname === '/contact.html') {
+    const siteConfig = readJson('site_config.json');
+    const categories = readJson('categories.json', []);
+    const html = renderDynamicContentPage(
+      'Contact Us',
+      'Contact Us',
+      siteConfig.contactHtml || '<h2>Contact Us</h2><p>Contact Us content...</p>',
       siteConfig,
       categories
     );

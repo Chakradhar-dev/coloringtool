@@ -503,6 +503,12 @@
             <button class="sidebar-btn" onclick="switchTab('privacy', this)">🔒 Edit Privacy Policy</button>
           </li>
           <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('terms', this)">📜 Edit Terms of Use</button>
+          </li>
+          <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('contact', this)">✉️ Edit Contact Us</button>
+          </li>
+          <li class="sidebar-item">
             <button class="sidebar-btn" onclick="switchTab('adsense', this)">💰 Google AdSense & ads.txt</button>
           </li>
           <li class="sidebar-item">
@@ -557,8 +563,10 @@
               <button class="btn-action" style="background:#7C3AED;" onclick="switchTab('seo', document.querySelector('.sidebar-btn-seo'))">🔍 SEO & Keywords</button>
               <button class="btn-action" style="background:#0EA5E9;" onclick="switchTab('about', document.querySelectorAll('.sidebar-btn')[5])">📝 Edit About Us Content</button>
               <button class="btn-action" style="background:#EC4899;" onclick="switchTab('privacy', document.querySelectorAll('.sidebar-btn')[6])">🔒 Edit Privacy Policy</button>
-              <button class="btn-action" style="background:#10B981;" onclick="switchTab('adsense', document.querySelectorAll('.sidebar-btn')[7])">💰 Manage AdSense & ads.txt</button>
-              <button class="btn-action" style="background:#059669;" onclick="switchTab('analytics', document.querySelectorAll('.sidebar-btn')[8])">📈 Configure Analytics (GA4)</button>
+              <button class="btn-action" style="background:#D97706;" onclick="switchTab('terms', document.querySelectorAll('.sidebar-btn')[7])">📜 Edit Terms of Use</button>
+              <button class="btn-action" style="background:#2563EB;" onclick="switchTab('contact', document.querySelectorAll('.sidebar-btn')[8])">✉️ Edit Contact Us</button>
+              <button class="btn-action" style="background:#10B981;" onclick="switchTab('adsense', document.querySelectorAll('.sidebar-btn')[9])">💰 Manage AdSense & ads.txt</button>
+              <button class="btn-action" style="background:#059669;" onclick="switchTab('analytics', document.querySelectorAll('.sidebar-btn')[10])">📈 Configure Analytics (GA4)</button>
             </div>
           </div>
 
@@ -665,6 +673,42 @@
               <textarea id="privacyPolicyContent" class="form-control" style="min-height:350px;"></textarea>
             </div>
             <button class="btn-action" onclick="savePrivacyPolicy()">💾 Save & Publish Changes</button>
+          </div>
+        </section>
+
+        <!-- 5.5 EDIT TERMS OF USE TAB -->
+        <section id="tab-terms" class="tab-section">
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h2>📜 Edit Terms of Use & Educational Licensing</h2>
+                <span style="color:#64748B;font-size:0.88rem;">Live on <a href="/terms.html" target="_blank">/terms.html</a></span>
+              </div>
+              <button class="btn-action" onclick="saveTermsOfUse()">💾 Save Terms of Use</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">HTML / Terms Content</label>
+              <textarea id="termsContent" class="form-control" style="min-height:350px;"></textarea>
+            </div>
+            <button class="btn-action" onclick="saveTermsOfUse()">💾 Save & Publish Changes</button>
+          </div>
+        </section>
+
+        <!-- 5.6 EDIT CONTACT US TAB -->
+        <section id="tab-contact" class="tab-section">
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h2>✉️ Edit Contact Us Page & Support Details</h2>
+                <span style="color:#64748B;font-size:0.88rem;">Live on <a href="/contact.html" target="_blank">/contact.html</a></span>
+              </div>
+              <button class="btn-action" onclick="saveContactUs()">💾 Save Contact Us</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">HTML / Contact Content</label>
+              <textarea id="contactContent" class="form-control" style="min-height:350px;"></textarea>
+            </div>
+            <button class="btn-action" onclick="saveContactUs()">💾 Save & Publish Changes</button>
           </div>
         </section>
 
@@ -1510,6 +1554,8 @@
       // Populate text editors
       document.getElementById('aboutUsContent').value = siteConfig.aboutUsHtml || '';
       document.getElementById('privacyPolicyContent').value = siteConfig.privacyPolicyHtml || '';
+      if (document.getElementById('termsContent')) document.getElementById('termsContent').value = siteConfig.termsHtml || '';
+      if (document.getElementById('contactContent')) document.getElementById('contactContent').value = siteConfig.contactHtml || '';
 
       // Populate AdSense settings
       const ad = siteConfig.adsense || {};
@@ -1879,6 +1925,38 @@
       siteConfig.privacyPolicyHtml = html;
       saveLocalConfig();
       alert('Privacy Policy updated and saved! 🔒');
+    }
+
+    // Save Terms of Use
+    async function saveTermsOfUse() {
+      const html = document.getElementById('termsContent').value;
+      try {
+        const res = await adminFetch('/api/admin/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ termsHtml: html })
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+      siteConfig.termsHtml = html;
+      saveLocalConfig();
+      alert('Terms of Use updated and saved! 📜');
+    }
+
+    // Save Contact Us
+    async function saveContactUs() {
+      const html = document.getElementById('contactContent').value;
+      try {
+        const res = await adminFetch('/api/admin/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contactHtml: html })
+        });
+        await safeParseJson(res);
+      } catch(e) {}
+      siteConfig.contactHtml = html;
+      saveLocalConfig();
+      alert('Contact Us details updated and saved! ✉️');
     }
 
     // Save AdSense Settings

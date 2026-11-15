@@ -77,6 +77,16 @@ function jsonResponse(data, status = 200, headers = {}) {
   });
 }
 
+async function safeJsonBody(req) {
+  try {
+    const text = await req.text();
+    if (!text || !text.trim()) return {};
+    return JSON.parse(text);
+  } catch(e) {
+    return {};
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -93,6 +103,11 @@ export default {
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
         }
       });
+    }
+
+    // Redirect /admin to /admin/
+    if (pathname === '/admin') {
+      return Response.redirect(url.origin + '/admin/', 301);
     }
 
     // ========================================================
@@ -127,7 +142,7 @@ export default {
     }
 
     if (pathname === '/api/admin/login' && method === 'POST') {
-      const body = await request.json().catch(() => ({}));
+      const body = await safeJsonBody(request);
       const cfg = getConfig();
       const validUsername = cfg.admin?.username || 'admin';
       const validPassword = cfg.admin?.password || 'admin123';
@@ -171,7 +186,7 @@ export default {
 
       // 2. Add or Edit Coloring Page
       if (pathname === '/api/admin/games' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
+        const body = await safeJsonBody(request);
         const gamesList = getGames();
         const cats = getCategories();
         const catObj = cats.find(c => c.id === body.catId) || cats[0] || { id: 'animals', name: 'Animals' };
@@ -219,7 +234,7 @@ export default {
 
       // 4. Add Category
       if (pathname === '/api/admin/categories' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
+        const body = await safeJsonBody(request);
         const cats = getCategories();
         const newCat = {
           id: body.slug || \`cat-\${Date.now()}\`,
@@ -239,18 +254,20 @@ export default {
         return jsonResponse({ success: true });
       }
 
-      // 6. Save Content (About Us & Privacy Policy)
+      // 6. Save Content (About Us, Privacy Policy, Terms, Contact)
       if (pathname === '/api/admin/content' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
+        const body = await safeJsonBody(request);
         const cfg = getConfig();
         if (body.aboutUsHtml !== undefined) cfg.aboutUsHtml = body.aboutUsHtml;
         if (body.privacyPolicyHtml !== undefined) cfg.privacyPolicyHtml = body.privacyPolicyHtml;
+        if (body.termsHtml !== undefined) cfg.termsHtml = body.termsHtml;
+        if (body.contactHtml !== undefined) cfg.contactHtml = body.contactHtml;
         return jsonResponse({ success: true });
       }
 
       // 7. Save AdSense & ads.txt
       if (pathname === '/api/admin/adsense' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
+        const body = await safeJsonBody(request);
         const cfg = getConfig();
         cfg.adsense = {
           enabled: Boolean(body.enabled),
@@ -266,7 +283,7 @@ export default {
 
       // 8. Save Google Analytics
       if (pathname === '/api/admin/analytics' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
+        const body = await safeJsonBody(request);
         const cfg = getConfig();
         cfg.analytics = {
           enabled: Boolean(body.enabled),
@@ -281,7 +298,7 @@ export default {
 
       // 9. Update Credentials
       if (pathname === '/api/admin/credentials' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
+        const body = await safeJsonBody(request);
         const cfg = getConfig();
         if (!cfg.admin) cfg.admin = {};
         if (body.username) cfg.admin.username = body.username.trim();
@@ -291,7 +308,7 @@ export default {
 
       // 10. Update Website Logo & Branding
       if (pathname === '/api/admin/logo' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
+        const body = await safeJsonBody(request);
         const cfg = getConfig();
         if (!cfg.logo) cfg.logo = {};
         if (body.imageBase64) {
@@ -307,7 +324,7 @@ export default {
 
       // 11. Update SEO & Keywords Configuration
       if (pathname === '/api/admin/seo' && method === 'POST') {
-        const body = await request.json().catch(() => ({}));
+        const body = await safeJsonBody(request);
         const cfg = getConfig();
         if (!cfg.seo) cfg.seo = {};
         cfg.seo = Object.assign(cfg.seo, {
@@ -344,6 +361,8 @@ export default {
       xml += '  <url>\\n    <loc>' + base + '/gallery.html</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>weekly</changefreq>\\n    <priority>0.6</priority>\\n  </url>\\n';
       xml += '  <url>\\n    <loc>' + base + '/about.html</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>monthly</changefreq>\\n    <priority>0.5</priority>\\n  </url>\\n';
       xml += '  <url>\\n    <loc>' + base + '/privacy.html</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>monthly</changefreq>\\n    <priority>0.5</priority>\\n  </url>\\n';
+      xml += '  <url>\\n    <loc>' + base + '/terms.html</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>monthly</changefreq>\\n    <priority>0.5</priority>\\n  </url>\\n';
+      xml += '  <url>\\n    <loc>' + base + '/contact.html</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>monthly</changefreq>\\n    <priority>0.5</priority>\\n  </url>\\n';
       cats.forEach(c => {
         xml += '  <url>\\n    <loc>' + base + '/' + c.id + '/</loc>\\n    <lastmod>' + today + '</lastmod>\\n    <changefreq>weekly</changefreq>\\n    <priority>0.8</priority>\\n  </url>\\n';
       });
