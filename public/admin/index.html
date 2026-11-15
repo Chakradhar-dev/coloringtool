@@ -760,6 +760,8 @@
     let siteConfig = {};
     let pendingImageBase64 = null;
     let pendingFilename = '';
+    let pendingColorImageBase64 = null;
+    let pendingColorFilename = '';
 
     function adminFetch(url, options) {
       options = options || {};
@@ -980,11 +982,6 @@
       const sel = document.getElementById('gameCatSelect');
       sel.innerHTML = catsList.map(c => `<option value="${c.id}">${c.icon || ''} ${c.name}</option>`).join('');
     }
-
-    let pendingFilename = '';
-    let pendingImageBase64 = null;
-    let pendingColorFilename = '';
-    let pendingColorImageBase64 = null;
 
     // Image Upload Preview (Line-Art Contour)
     function previewGameImage(input) {
