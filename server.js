@@ -147,6 +147,30 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
     <li><a href="/${c.id}/">${c.icon || '🎨'} Online ${c.name} Coloring Pages</a></li>
   `).join('');
 
+  const logo = siteConfig.logo || {};
+  const logoMode = logo.mode || (logo.imageSrc ? 'image_text' : 'icon_text');
+  const siteName = siteConfig.siteName || 'ColoringTool';
+  let logoHtml = `
+    <a href="/" class="brand-logo" title="${siteName}">
+      <div class="brand-logo-icon">${logo.icon || '🎨'}</div>
+      <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+    </a>
+  `;
+  if (logoMode === 'image_only' && logo.imageSrc) {
+    logoHtml = `
+      <a href="/" class="brand-logo" title="${siteName}">
+        <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">
+      </a>
+    `;
+  } else if (logoMode === 'image_text' && logo.imageSrc) {
+    logoHtml = `
+      <a href="/" class="brand-logo" title="${siteName}">
+        <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">
+        <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+      </a>
+    `;
+  }
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -163,10 +187,7 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
   <!-- Navigation Header -->
   <nav class="site-nav">
     <div class="nav-container">
-      <a href="/" class="brand-logo">
-        <div class="brand-logo-icon">🎨</div>
-        <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.8;">.com</span></span>
-      </a>
+      ${logoHtml}
       <button class="nav-toggle-btn" aria-label="Toggle Navigation" onclick="document.getElementById('serverNavLinks').classList.toggle('mobile-open')">
         <span class="hamburger-bar"></span>
         <span class="hamburger-bar"></span>
@@ -581,6 +602,52 @@ const server = http.createServer(async (req, res) => {
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
       return res.end(JSON.stringify({ success: true, analytics: siteConfig.analytics }));
+    }
+
+    // 10. Update Website Logo & Branding
+    if (pathname === '/api/admin/logo' && method === 'POST') {
+      const body = await parseBody(req);
+      const siteConfig = readJson('site_config.json');
+      if (!siteConfig.logo) siteConfig.logo = {};
+
+      let logoUrl = body.logoUrl || siteConfig.logo.imageSrc || '';
+
+      if (body.imageBase64) {
+        try {
+          const match = body.imageBase64.match(/^data:image\/([a-zA-Z0-9\+]+);base64,(.+)$/);
+          const ext = match ? (match[1].replace('svg+xml', 'svg')) : 'png';
+          const base64Data = match ? match[2] : body.imageBase64;
+          const cleanName = (body.filename || `logo_${Date.now()}`).replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+          const finalFilename = cleanName.endsWith(`.${ext}`) ? cleanName : `${cleanName}.${ext}`;
+          const targetDiskPath = path.join(UPLOADS_DIR, finalFilename);
+
+          fs.writeFileSync(targetDiskPath, Buffer.from(base64Data, 'base64'));
+          logoUrl = `/uploads/${finalFilename}`;
+        } catch (uploadErr) {
+          console.error('Failed to save uploaded logo:', uploadErr);
+        }
+      }
+
+      siteConfig.logo = {
+        imageSrc: logoUrl,
+        icon: body.icon || siteConfig.logo.icon || '🎨',
+        mode: body.mode || siteConfig.logo.mode || (logoUrl ? 'image_text' : 'icon_text'),
+        text: body.text || siteConfig.logo.text || 'ColoringTool'
+      };
+      if (body.siteName) siteConfig.siteName = body.siteName;
+
+      writeJson('site_config.json', siteConfig);
+
+      // Trigger automatic regeneration of static pages
+      try {
+        const { execSync } = require('child_process');
+        execSync('node generate_pages.js', { cwd: __dirname });
+      } catch (genErr) {
+        console.error('Failed to regenerate pages:', genErr);
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
+      return res.end(JSON.stringify({ success: true, logo: siteConfig.logo, siteName: siteConfig.siteName }));
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json; charset=UTF-8' });

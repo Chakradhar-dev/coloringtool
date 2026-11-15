@@ -268,6 +268,20 @@
     }
     .modal-header h3 { margin: 0; font-size: 1.25rem; }
     .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94A3B8; }
+    .emoji-opt-btn {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 1.3rem;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .emoji-opt-btn:hover {
+      background: #EEF2FF;
+      border-color: #6366F1;
+      transform: scale(1.1);
+    }
     
     /* Login Overlay */
     #loginOverlay {
@@ -349,6 +363,9 @@
             <button class="sidebar-btn" onclick="switchTab('categories', this)">📂 Categories</button>
           </li>
           <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('logo', this)">🖼️ Website Logo</button>
+          </li>
+          <li class="sidebar-item">
             <button class="sidebar-btn" onclick="switchTab('about', this)">📝 Edit About Us</button>
           </li>
           <li class="sidebar-item">
@@ -401,10 +418,11 @@
             <div style="display:flex;gap:12px;flex-wrap:wrap;">
               <button class="btn-action" onclick="openAddGameModal()">➕ Add New Coloring Page</button>
               <button class="btn-action" style="background:#8B5CF6;" onclick="openAddCatModal()">➕ Add New Category</button>
-              <button class="btn-action" style="background:#0EA5E9;" onclick="switchTab('about', document.querySelectorAll('.sidebar-btn')[3])">📝 Edit About Us Content</button>
-              <button class="btn-action" style="background:#EC4899;" onclick="switchTab('privacy', document.querySelectorAll('.sidebar-btn')[4])">🔒 Edit Privacy Policy</button>
-              <button class="btn-action" style="background:#10B981;" onclick="switchTab('adsense', document.querySelectorAll('.sidebar-btn')[5])">💰 Manage AdSense & ads.txt</button>
-              <button class="btn-action" style="background:#059669;" onclick="switchTab('analytics', document.querySelectorAll('.sidebar-btn')[6])">📈 Configure Analytics (GA4)</button>
+              <button class="btn-action" style="background:#6366F1;" onclick="switchTab('logo', document.querySelectorAll('.sidebar-btn')[3])">🖼️ Website Logo</button>
+              <button class="btn-action" style="background:#0EA5E9;" onclick="switchTab('about', document.querySelectorAll('.sidebar-btn')[4])">📝 Edit About Us Content</button>
+              <button class="btn-action" style="background:#EC4899;" onclick="switchTab('privacy', document.querySelectorAll('.sidebar-btn')[5])">🔒 Edit Privacy Policy</button>
+              <button class="btn-action" style="background:#10B981;" onclick="switchTab('adsense', document.querySelectorAll('.sidebar-btn')[6])">💰 Manage AdSense & ads.txt</button>
+              <button class="btn-action" style="background:#059669;" onclick="switchTab('analytics', document.querySelectorAll('.sidebar-btn')[7])">📈 Configure Analytics (GA4)</button>
             </div>
           </div>
 
@@ -637,7 +655,103 @@
           </div>
         </section>
 
-        <!-- 8. ADMIN CREDENTIALS TAB -->
+        <!-- 8. WEBSITE LOGO & BRANDING TAB -->
+        <section id="tab-logo" class="tab-section">
+          <div class="card-panel" style="max-width:850px;">
+            <div class="panel-header">
+              <h2>🖼️ Website Logo & Branding</h2>
+              <span style="font-size:0.85rem;color:#64748B;">Upload your custom logo image or customize brand icon</span>
+            </div>
+
+            <!-- Live Header Simulation Preview -->
+            <div style="background:#0F172A;border-radius:14px;padding:16px 20px;margin-bottom:24px;border:1px solid #334155;">
+              <span style="font-size:0.75rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:10px;">Live Header Preview</span>
+              <div style="background:#000000;border-radius:10px;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+                <div id="liveLogoPreviewContainer" style="display:flex;align-items:center;gap:12px;">
+                  <div id="previewIconWrap" class="brand-logo-icon" style="width:40px;height:40px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 10px rgba(0,0,0,0.2);">🎨</div>
+                  <img id="previewImgWrap" src="" alt="Custom Logo" style="display:none;max-height:40px;max-width:180px;object-fit:contain;border-radius:8px;">
+                  <span id="previewLogoText" style="font-size:1.35rem;font-weight:700;color:#FFFFFF;letter-spacing:-0.5px;">Coloring<span style="color:#F59E0B;">Tool</span><span style="font-size:0.88rem;opacity:0.85;">.com</span></span>
+                </div>
+                <div style="color:#94A3B8;font-size:0.85rem;display:flex;gap:12px;">
+                  <span>🏠 Home</span>
+                  <span>📂 Categories ▾</span>
+                  <span>🎨 Gallery</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode Selection: Image Logo vs Icon+Text -->
+            <div class="form-group">
+              <label class="form-label">Logo Display Mode</label>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:#F8FAFC;padding:8px 14px;border-radius:10px;border:1px solid #CBD5E1;">
+                  <input type="radio" name="logoModeRadio" value="icon_text" checked onchange="updateLogoPreview()">
+                  <span>🎨 <strong>Default Icon + Site Name</strong></span>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:#F8FAFC;padding:8px 14px;border-radius:10px;border:1px solid #CBD5E1;">
+                  <input type="radio" name="logoModeRadio" value="image_text" onchange="updateLogoPreview()">
+                  <span>🖼️ <strong>Custom Image Icon + Site Name</strong></span>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:#F8FAFC;padding:8px 14px;border-radius:10px;border:1px solid #CBD5E1;">
+                  <input type="radio" name="logoModeRadio" value="image_only" onchange="updateLogoPreview()">
+                  <span>✨ <strong>Full Graphic Logo (Image Only)</strong></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div id="logoImageUploadSection" style="background:#F8FAFC;border:2px dashed #CBD5E1;border-radius:14px;padding:24px;margin-bottom:20px;text-align:center;">
+              <div style="font-size:2.5rem;margin-bottom:8px;">📤</div>
+              <h4 style="margin:0 0 6px;">Upload Custom Logo Image</h4>
+              <p style="color:#64748B;font-size:0.88rem;margin:0 0 16px;">Recommended: Transparent PNG, SVG, or WEBP (Height: 40px – 80px)</p>
+              
+              <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;align-items:center;">
+                <input type="file" id="logoFileInput" accept="image/*" style="display:none;" onchange="handleLogoFileSelect(this)">
+                <button type="button" class="btn-action" style="background:#4F46E5;padding:8px 20px;" onclick="document.getElementById('logoFileInput').click()">📁 Choose Logo File</button>
+                <span style="color:#94A3B8;font-size:0.88rem;">or</span>
+                <input type="text" id="logoUrlInput" class="form-control" style="max-width:280px;" placeholder="Image URL (e.g. /images/logo.png)" oninput="handleLogoUrlInput(this.value)">
+              </div>
+
+              <!-- Uploaded thumbnail preview with clear button -->
+              <div id="uploadedLogoThumbBox" style="display:none;margin-top:16px;align-items:center;justify-content:center;gap:12px;">
+                <img id="uploadedLogoThumb" src="" alt="Logo Thumbnail" style="max-height:50px;max-width:200px;border-radius:8px;border:1px solid #CBD5E1;padding:4px;background:white;">
+                <button type="button" onclick="clearUploadedLogo()" style="background:#EF4444;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem;">Remove</button>
+              </div>
+            </div>
+
+            <!-- Emoji Icon Selector (When Icon mode is used) -->
+            <div id="logoEmojiSection" class="form-group">
+              <label class="form-label">Brand Icon (Emoji)</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('🎨')">🎨</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('🖌️')">🖌️</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('🖍️')">🖍️</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('🌈')">🌈</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('✨')">✨</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('⭐')">⭐</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('🦄')">🦄</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('🦁')">🦁</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('🎈')">🎈</button>
+                <button type="button" class="emoji-opt-btn" onclick="selectLogoEmoji('🚀')">🚀</button>
+              </div>
+              <input type="text" id="logoEmojiInput" class="form-control" style="max-width:120px;" value="🎨" oninput="updateLogoPreview()">
+            </div>
+
+            <!-- Site Name Text -->
+            <div class="form-group">
+              <label class="form-label">Website Name Display</label>
+              <input type="text" id="logoSiteNameInput" class="form-control" value="ColoringTool" placeholder="ColoringTool" oninput="updateLogoPreview()">
+              <small style="color:#64748B;">Displays as brand text next to the icon (e.g. Coloring<strong>Tool</strong>.com)</small>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:24px;">
+              <button type="button" class="btn-action" style="background:#10B981;font-size:1rem;padding:10px 24px;" onclick="saveLogoSettings()">💾 Save Logo & Update Website</button>
+              <button type="button" class="btn-action" style="background:#64748B;font-size:0.9rem;" onclick="resetLogoDefault()">↺ Reset to Default</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. ADMIN CREDENTIALS TAB -->
         <section id="tab-settings" class="tab-section">
           <div class="card-panel" style="max-width:500px;">
             <div class="panel-header">
@@ -762,6 +876,8 @@
     let pendingFilename = '';
     let pendingColorImageBase64 = null;
     let pendingColorFilename = '';
+    let pendingLogoBase64 = null;
+    let pendingLogoFilename = '';
 
     function adminFetch(url, options) {
       options = options || {};
@@ -1049,6 +1165,22 @@
 
       // Populate username
       document.getElementById('adminNewUsername').value = siteConfig.admin?.username || 'admin';
+
+      // Populate Website Logo & Branding settings
+      const logo = siteConfig.logo || {};
+      const logoMode = logo.mode || 'icon_text';
+      const modeRadios = document.querySelectorAll('input[name="logoModeRadio"]');
+      modeRadios.forEach(r => { r.checked = (r.value === logoMode); });
+      document.getElementById('logoEmojiInput').value = logo.icon || '🎨';
+      document.getElementById('logoUrlInput').value = logo.imageSrc || '';
+      document.getElementById('logoSiteNameInput').value = logo.text || siteConfig.siteName || 'ColoringTool';
+      if (logo.imageSrc) {
+        document.getElementById('uploadedLogoThumb').src = logo.imageSrc;
+        document.getElementById('uploadedLogoThumbBox').style.display = 'flex';
+      } else {
+        document.getElementById('uploadedLogoThumbBox').style.display = 'none';
+      }
+      updateLogoPreview();
     }
 
     function renderOverviewTables() {
@@ -1445,6 +1577,186 @@
       } catch(e) {}
       saveLocalConfig();
       alert('Admin credentials updated successfully! 🔐');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Logo & Branding Functions
+    function handleLogoFileSelect(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file (PNG, SVG, WEBP, JPG).');
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Logo image should be under 2MB.');
+        return;
+      }
+      pendingLogoFilename = file.name;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        pendingLogoBase64 = e.target.result;
+        document.getElementById('logoUrlInput').value = '';
+        document.getElementById('uploadedLogoThumb').src = pendingLogoBase64;
+        document.getElementById('uploadedLogoThumbBox').style.display = 'flex';
+
+        // Auto select image_text mode if on icon_text
+        const currentMode = document.querySelector('input[name="logoModeRadio"]:checked')?.value;
+        if (currentMode === 'icon_text') {
+          const imgTextRadio = document.querySelector('input[name="logoModeRadio"][value="image_text"]');
+          if (imgTextRadio) imgTextRadio.checked = true;
+        }
+        updateLogoPreview();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleLogoUrlInput(url) {
+      url = (url || '').trim();
+      if (url) {
+        pendingLogoBase64 = null;
+        document.getElementById('uploadedLogoThumb').src = url;
+        document.getElementById('uploadedLogoThumbBox').style.display = 'flex';
+        const currentMode = document.querySelector('input[name="logoModeRadio"]:checked')?.value;
+        if (currentMode === 'icon_text') {
+          const imgTextRadio = document.querySelector('input[name="logoModeRadio"][value="image_text"]');
+          if (imgTextRadio) imgTextRadio.checked = true;
+        }
+      } else if (!pendingLogoBase64) {
+        document.getElementById('uploadedLogoThumbBox').style.display = 'none';
+      }
+      updateLogoPreview();
+    }
+
+    function selectLogoEmoji(em) {
+      document.getElementById('logoEmojiInput').value = em;
+      const iconRadio = document.querySelector('input[name="logoModeRadio"][value="icon_text"]');
+      if (iconRadio) iconRadio.checked = true;
+      updateLogoPreview();
+    }
+
+    function clearUploadedLogo() {
+      pendingLogoBase64 = null;
+      pendingLogoFilename = '';
+      document.getElementById('logoFileInput').value = '';
+      document.getElementById('logoUrlInput').value = '';
+      document.getElementById('uploadedLogoThumbBox').style.display = 'none';
+      const iconRadio = document.querySelector('input[name="logoModeRadio"][value="icon_text"]');
+      if (iconRadio) iconRadio.checked = true;
+      updateLogoPreview();
+    }
+
+    function updateLogoPreview() {
+      const mode = document.querySelector('input[name="logoModeRadio"]:checked')?.value || 'icon_text';
+      const emoji = document.getElementById('logoEmojiInput').value || '🎨';
+      const siteName = document.getElementById('logoSiteNameInput').value || 'ColoringTool';
+      const imgSrc = pendingLogoBase64 || document.getElementById('logoUrlInput').value || (siteConfig.logo && siteConfig.logo.imageSrc) || '';
+
+      const previewIcon = document.getElementById('previewIconWrap');
+      const previewImg = document.getElementById('previewImgWrap');
+      const previewText = document.getElementById('previewLogoText');
+      const logoEmojiSection = document.getElementById('logoEmojiSection');
+
+      // Format site name text nicely (highlight second half if ColoringTool)
+      if (siteName.toLowerCase().startsWith('coloring') && siteName.length > 8) {
+        const rest = siteName.slice(8);
+        previewText.innerHTML = `Coloring<span style="color:#F59E0B;">${escapeHtml(rest)}</span><span style="font-size:0.88rem;opacity:0.85;">.com</span>`;
+      } else {
+        previewText.innerHTML = `${escapeHtml(siteName)}<span style="font-size:0.88rem;opacity:0.85;">.com</span>`;
+      }
+
+      if (mode === 'image_only') {
+        previewIcon.style.display = 'none';
+        previewText.style.display = 'none';
+        previewImg.style.display = 'inline-block';
+        previewImg.src = imgSrc || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="40" viewBox="0 0 160 40"><text x="10" y="26" font-family="sans-serif" font-weight="bold" fill="%23FFFFFF">Logo Preview</text></svg>';
+        previewImg.style.maxHeight = '42px';
+        previewImg.style.maxWidth = '200px';
+        if (logoEmojiSection) logoEmojiSection.style.display = 'none';
+      } else if (mode === 'image_text') {
+        previewIcon.style.display = 'none';
+        previewText.style.display = 'inline-block';
+        previewImg.style.display = 'inline-block';
+        previewImg.src = imgSrc || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="%234F46E5"/><text x="12" y="27" font-size="20" fill="white">🎨</text></svg>';
+        previewImg.style.maxHeight = '38px';
+        previewImg.style.maxWidth = '50px';
+        if (logoEmojiSection) logoEmojiSection.style.display = 'none';
+      } else {
+        // icon_text
+        previewIcon.style.display = 'flex';
+        previewIcon.innerText = emoji;
+        previewText.style.display = 'inline-block';
+        previewImg.style.display = 'none';
+        if (logoEmojiSection) logoEmojiSection.style.display = 'block';
+      }
+    }
+
+    async function saveLogoSettings() {
+      const mode = document.querySelector('input[name="logoModeRadio"]:checked')?.value || 'icon_text';
+      const emoji = document.getElementById('logoEmojiInput').value.trim() || '🎨';
+      const siteName = document.getElementById('logoSiteNameInput').value.trim() || 'ColoringTool';
+      const urlInput = document.getElementById('logoUrlInput').value.trim();
+
+      const payload = {
+        mode: mode,
+        icon: emoji,
+        text: siteName,
+        imageSrc: urlInput || (pendingLogoBase64 ? '' : (siteConfig.logo?.imageSrc || '')),
+        imageBase64: pendingLogoBase64 || null,
+        filename: pendingLogoFilename || null
+      };
+
+      try {
+        const res = await adminFetch('/api/admin/logo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await safeParseJson(res);
+        if (data && data.success && data.logo) {
+          siteConfig.logo = data.logo;
+          siteConfig.siteName = siteName;
+          if (data.logo.imageSrc) {
+            document.getElementById('logoUrlInput').value = data.logo.imageSrc;
+            document.getElementById('uploadedLogoThumb').src = data.logo.imageSrc;
+          }
+          pendingLogoBase64 = null;
+          pendingLogoFilename = '';
+        } else {
+          siteConfig.logo = {
+            mode: mode,
+            icon: emoji,
+            text: siteName,
+            imageSrc: pendingLogoBase64 || urlInput || (siteConfig.logo?.imageSrc || '')
+          };
+          siteConfig.siteName = siteName;
+        }
+      } catch(e) {
+        siteConfig.logo = {
+          mode: mode,
+          icon: emoji,
+          text: siteName,
+          imageSrc: pendingLogoBase64 || urlInput || (siteConfig.logo?.imageSrc || '')
+        };
+        siteConfig.siteName = siteName;
+      }
+
+      saveLocalConfig();
+      alert('Website Logo & Branding updated successfully! 🚀');
+      updateLogoPreview();
+    }
+
+    function resetLogoDefault() {
+      if (!confirm('Reset website logo to default (ColoringTool.com with 🎨 icon)?')) return;
+      document.querySelector('input[name="logoModeRadio"][value="icon_text"]').checked = true;
+      document.getElementById('logoEmojiInput').value = '🎨';
+      document.getElementById('logoSiteNameInput').value = 'ColoringTool';
+      clearUploadedLogo();
+      updateLogoPreview();
     }
 
     window.onload = checkAuth;

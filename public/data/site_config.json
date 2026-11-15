@@ -1,6 +1,12 @@
 {
   "siteName": "ColoringTool",
   "domain": "coloringtool.com",
+  "logo": {
+    "mode": "icon_text",
+    "icon": "🎨",
+    "imageSrc": "",
+    "text": "ColoringTool"
+  },
   "siteTitle": "ColoringTool.com — Free Online Coloring Pages for Kids & Painting Games",
   "tagline": "Enjoy free drawings to paint and color online — fun coloring games for kids ages 3 to 10. Animals, unicorns, Christmas and more. No download, no signup!",
   "theme": {

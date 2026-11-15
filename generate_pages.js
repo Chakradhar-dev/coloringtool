@@ -48,14 +48,41 @@ function renderAdUnit(slotId, label = 'ADVERTISEMENT') {
   `;
 }
 
+function renderBrandLogo() {
+  const logo = siteConfig.logo || {};
+  const mode = logo.mode || (logo.imageSrc ? 'image_text' : 'icon_text');
+  const siteName = siteConfig.siteName || 'ColoringTool';
+
+  if (mode === 'image_only' && logo.imageSrc) {
+    return `
+      <a href="/" class="brand-logo" title="${siteName}">
+        <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">
+      </a>
+    `;
+  }
+
+  if (mode === 'image_text' && logo.imageSrc) {
+    return `
+      <a href="/" class="brand-logo" title="${siteName}">
+        <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">
+        <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+      </a>
+    `;
+  }
+
+  return `
+    <a href="/" class="brand-logo" title="${siteName}">
+      <div class="brand-logo-icon">${logo.icon || '🎨'}</div>
+      <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+    </a>
+  `;
+}
+
 function renderNav(activeTab = '') {
   return `
   <nav class="site-nav">
     <div class="nav-container">
-      <a href="/" class="brand-logo">
-        <div class="brand-logo-icon">🎨</div>
-        <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
-      </a>
+      ${renderBrandLogo()}
       <button class="nav-toggle-btn" id="navToggleBtn" aria-label="Toggle Navigation" onclick="toggleMobileNav(event)">
         <span class="hamburger-bar"></span>
         <span class="hamburger-bar"></span>
@@ -92,13 +119,17 @@ function renderNav(activeTab = '') {
 }
 
 function renderFooter() {
+  const logo = siteConfig.logo || {};
   return `
   <footer class="site-footer">
     <div class="footer-container">
       <div class="footer-brand">
         <div class="footer-logo">
-          <div class="brand-logo-icon" style="width:34px;height:34px;font-size:1.2rem;">🎨</div>
-          <strong>ColoringTool.com</strong>
+          ${logo.imageSrc ?
+            `<img src="${logo.imageSrc}" alt="${siteConfig.siteName || 'ColoringTool.com'}" style="max-height:36px;max-width:140px;object-fit:contain;display:block;">` :
+            `<div class="brand-logo-icon" style="width:34px;height:34px;font-size:1.2rem;">${logo.icon || '🎨'}</div>
+             <strong>${siteConfig.siteName || 'ColoringTool'}.com</strong>`
+          }
         </div>
         <p>${siteConfig.tagline}</p>
       </div>

@@ -289,6 +289,22 @@ export default {
         return jsonResponse({ success: true });
       }
 
+      // 10. Update Website Logo & Branding
+      if (pathname === '/api/admin/logo' && method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        const cfg = getConfig();
+        if (!cfg.logo) cfg.logo = {};
+        if (body.imageBase64) {
+          cfg.logo.imageSrc = body.imageBase64;
+        } else if (body.logoUrl !== undefined) {
+          cfg.logo.imageSrc = body.logoUrl;
+        }
+        if (body.icon) cfg.logo.icon = body.icon;
+        if (body.mode) cfg.logo.mode = body.mode;
+        if (body.siteName) cfg.siteName = body.siteName;
+        return jsonResponse({ success: true, logo: cfg.logo, siteName: cfg.siteName });
+      }
+
       return jsonResponse({ error: 'Endpoint not found' }, 404);
     }
 
