@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Art Gallery — ColoringTool.com</title>
+  <meta name="description" content="View, print, and download all your colored masterpieces on ColoringTool.com">
+  <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96">
+  <link rel="stylesheet" href="/css/modern-theme.css">
+  
+</head>
+<body>
+  
+  <nav class="site-nav">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-logo-icon">🎨</div>
+        <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="/" >🏠 Home</a>
+        <div class="dropdown">
+          <a href="#" class="dropbtn">📂 Categories ▾</a>
+          <div class="dropdown-content">
+            <a href="/animals/">🦁 Animals</a><a href="/unicorn/">🦄 Unicorns</a><a href="/princess/">👑 Princesses</a><a href="/transport/">🚀 Transportation</a><a href="/christmas/">🎄 Christmas</a><a href="/food/">🍦 Food</a>
+          </div>
+        </div>
+        <a href="/gallery.html" class="active">🎨 My Art Gallery</a>
+        <a href="/about.html" >ℹ️ About Us</a>
+        <a href="/privacy.html" >🔒 Privacy Policy</a>
+      </div>
+      <div class="nav-actions">
+        <a href="/studio.html?random=1" class="btn-surprise" title="Surprise Me with a random drawing!">✨ Surprise Me!</a>
+        <a href="/admin/" class="btn-admin-link">⚙️ Admin</a>
+      </div>
+    </div>
+  </nav>
+  
+
+  <header class="hero-banner">
+    <div style="font-size:3.5rem;margin-bottom:8px;">🎨</div>
+    <h1 class="hero-title">My Saved Art Gallery</h1>
+    <p class="hero-sub">All your saved colored drawings from ColoringTool.com are saved right here in your browser!</p>
+  </header>
+
+  <main class="section-container" style="min-height:50vh;">
+    <div id="emptyGalleryNotice" style="text-align:center;padding:60px 20px;background:#FFFFFF;border-radius:20px;border:1px solid #E2E8F0;box-shadow:0 4px 15px rgba(0,0,0,0.04);">
+      <div style="font-size:3rem;margin-bottom:12px;">🖼️</div>
+      <h2>Your Gallery is Waiting for Artwork!</h2>
+      <p style="color:#64748B;max-width:500px;margin:10px auto 20px;">Whenever you color a drawing in our studio and click <strong>"Save / Download"</strong>, a copy appears here!</p>
+      <a href="/studio.html" class="btn-surprise">Start Coloring a Drawing Now &rarr;</a>
+    </div>
+
+    <div class="drawings-grid" id="savedGalleryGrid" style="display:none;"></div>
+  </main>
+
+  
+
+  
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="brand-logo-icon" style="width:34px;height:34px;font-size:1.2rem;">🎨</div>
+          <strong>ColoringTool.com</strong>
+        </div>
+        <p>Enjoy free drawings to paint and color online — fun coloring games for kids ages 3 to 10. Animals, unicorns, Christmas and more. No download, no signup!</p>
+      </div>
+      <div class="footer-links-group">
+        <h4>Coloring Categories</h4>
+        <ul>
+          <li><a href="/animals/">🦁 Online Animals Drawings</a></li><li><a href="/unicorn/">🦄 Online Unicorns Drawings</a></li><li><a href="/princess/">👑 Online Princesses Drawings</a></li><li><a href="/transport/">🚀 Online Transportation Drawings</a></li><li><a href="/christmas/">🎄 Online Christmas Drawings</a></li><li><a href="/food/">🍦 Online Food Drawings</a></li>
+        </ul>
+      </div>
+      <div class="footer-links-group">
+        <h4>Features & Information</h4>
+        <ul>
+          <li><a href="/gallery.html">🎨 My Art Gallery</a></li>
+          <li><a href="/studio.html?random=1">✨ Random Drawing</a></li>
+          <li><a href="/about.html">ℹ️ About ColoringTool.com</a></li>
+          <li><a href="/privacy.html">🔒 Privacy Policy & COPPA</a></li>
+          <li><a href="/admin/">⚙️ Admin Management Tool</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 <a href="/">ColoringTool.com</a> &bull; All rights reserved. Free online drawing and coloring games for kids. Safe, instant, educational!</p>
+    </div>
+  </footer>
+  
+
+  <script>
+    function loadGallery() {
+      const saved = JSON.parse(localStorage.getItem('coloring_art_gallery') || '[]');
+      const emptyDiv = document.getElementById('emptyGalleryNotice');
+      const gridDiv = document.getElementById('savedGalleryGrid');
+
+      if (!saved || saved.length === 0) {
+        emptyDiv.style.display = 'block';
+        gridDiv.style.display = 'none';
+        return;
+      }
+
+      emptyDiv.style.display = 'none';
+      gridDiv.style.display = 'grid';
+      gridDiv.innerHTML = saved.map((item, idx) => {
+        return '<div class="drawing-card">' +
+          '<div class="drawing-card-inner" style="cursor:default;">' +
+            '<div class="drawing-thumb-wrap">' +
+              '<img src="' + item.thumb + '" alt="' + item.title + '" style="object-fit:contain;background:#FFFFFF;">' +
+            '</div>' +
+            '<h3 class="drawing-title">' + item.title + '</h3>' +
+            '<p style="font-size:0.8rem;color:#64748B;margin:4px 0 10px;">' + item.category + ' &bull; ' + item.date + '</p>' +
+            '<div style="display:flex;gap:6px;width:100%;">' +
+              '<a href="' + item.thumb + '" download="' + item.title + '.png" class="btn-action" style="flex:1;text-align:center;padding:6px;font-size:0.85rem;text-decoration:none;background:#10B981;">📥 Download</a>' +
+              '<button onclick="deleteArt(' + idx + ')" style="background:#EF4444;color:white;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;">🗑️</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function deleteArt(idx) {
+      if (!confirm('Remove this drawing from your gallery?')) return;
+      const saved = JSON.parse(localStorage.getItem('coloring_art_gallery') || '[]');
+      saved.splice(idx, 1);
+      localStorage.setItem('coloring_art_gallery', JSON.stringify(saved));
+      loadGallery();
+    }
+
+    window.onload = loadGallery;
+  </script>
+</body>
+</html>

@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — ColoringTool.com</title>
+  <link rel="stylesheet" href="/css/modern-theme.css">
+  <style>
+    body {
+      background: #F1F5F9;
+      font-family: 'Fredoka', 'Quicksand', system-ui, sans-serif;
+      margin: 0;
+      color: #0F172A;
+    }
+    .admin-header {
+      background: #1E1B4B;
+      color: white;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid var(--accent-gold);
+    }
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 70px);
+    }
+    .admin-sidebar {
+      width: 250px;
+      background: #FFFFFF;
+      border-right: 1px solid #E2E8F0;
+      padding: 20px 12px;
+      flex-shrink: 0;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar-item {
+      margin-bottom: 6px;
+    }
+    .sidebar-btn {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+    .sidebar-btn:hover {
+      background: #EEF2FF;
+      color: var(--primary);
+    }
+    .sidebar-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+    .admin-content {
+      flex: 1;
+      padding: 28px;
+      overflow-y: auto;
+    }
+    .tab-section {
+      display: none;
+    }
+    .tab-section.active {
+      display: block;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #FFFFFF;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .stat-val {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 4px 0 0;
+    }
+    .stat-label {
+      font-size: 0.88rem;
+      color: #64748B;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card-panel {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      margin-bottom: 24px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #F1F5F9;
+      padding-bottom: 12px;
+    }
+    .panel-header h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+    .btn-action {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-action:hover {
+      background: var(--primary-dark);
+    }
+    .btn-danger {
+      background: #EF4444;
+    }
+    .btn-danger:hover {
+      background: #DC2626;
+    }
+    .btn-secondary {
+      background: #64748B;
+    }
+    .btn-secondary:hover {
+      background: #475569;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .data-table th {
+      background: #F8FAFC;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #64748B;
+      border-bottom: 2px solid #E2E8F0;
+    }
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #E2E8F0;
+      font-size: 0.92rem;
+      vertical-align: middle;
+    }
+    .table-thumb {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #E2E8F0;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #CBD5E1;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    textarea.form-control {
+      min-height: 220px;
+      line-height: 1.5;
+    }
+    .switch-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #CBD5E1; transition: .3s; border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #10B981; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-box {
+      background: #FFFFFF;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border-bottom: 1px solid #E2E8F0;
+      padding-bottom: 12px;
+    }
+    .modal-header h3 { margin: 0; font-size: 1.25rem; }
+    .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94A3B8; }
+    
+    /* Login Overlay */
+    #loginOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .login-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 36px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .login-logo {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Modal Overlay (shown when not authenticated) -->
+  <div id="loginOverlay" style="display:flex;">
+    <div class="login-card">
+      <div class="login-logo">🎨</div>
+      <h2 style="margin:0 0 6px;">ColoringTool Admin</h2>
+      <p style="color:#64748B;font-size:0.9rem;margin:0 0 24px;">Please enter your credentials to manage the site</p>
+      
+      <div id="loginError" style="display:none;background:#FEE2E2;color:#DC2626;padding:10px;border-radius:8px;font-size:0.85rem;margin-bottom:16px;"></div>
+
+      <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label">Username</label>
+          <input type="text" id="loginUsername" class="form-control" value="admin" placeholder="admin" required autocomplete="username">
+        </div>
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-control" value="admin123" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="loginSubmitBtn" class="btn-action" style="width:100%;justify-content:center;padding:12px;font-size:1rem;background:#4F46E5;">Sign In &rarr;</button>
+      </form>
+      <p style="font-size:0.8rem;color:#94A3B8;margin-top:16px;">Default: admin / admin123</p>
+    </div>
+  </div>
+
+  <!-- Main Admin Layout -->
+  <div id="adminApp" style="display:none;">
+    <header class="admin-header">
+      <div class="admin-logo">
+        <span>🎨</span>
+        <span>ColoringTool Admin</span>
+        <span style="font-size:0.75rem;background:#4F46E5;padding:3px 8px;border-radius:12px;margin-left:6px;">PRO</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:15px;">
+        <a href="/" target="_blank" style="color:#CBD5E1;text-decoration:none;font-size:0.9rem;">🌐 View Live Site</a>
+        <button onclick="handleLogout()" style="background:#EF4444;color:white;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <ul class="sidebar-menu">
+          <li class="sidebar-item">
+            <button class="sidebar-btn active" onclick="switchTab('overview', this)">📊 Dashboard Overview</button>
+          </li>
+          <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('pages', this)">🎨 Coloring Pages</button>
+          </li>
+          <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('categories', this)">📂 Categories</button>
+          </li>
+          <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('about', this)">📝 Edit About Us</button>
+          </li>
+          <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('privacy', this)">🔒 Edit Privacy Policy</button>
+          </li>
+          <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('adsense', this)">💰 Google AdSense & ads.txt</button>
+          </li>
+          <li class="sidebar-item">
+            <button class="sidebar-btn" onclick="switchTab('settings', this)">⚙️ Admin Credentials</button>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+
+        <!-- 1. DASHBOARD OVERVIEW TAB -->
+        <section id="tab-overview" class="tab-section active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total Drawings</div>
+              <div class="stat-val" id="statPages">113</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Active Categories</div>
+              <div class="stat-val" id="statCats">6</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">AdSense Status</div>
+              <div class="stat-val" id="statAdsense" style="color:#10B981;font-size:1.6rem;margin-top:8px;">Ready</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Domain Name</div>
+              <div class="stat-val" style="font-size:1.35rem;margin-top:10px;color:#334155;">coloringtool.com</div>
+            </div>
+          </div>
+
+          <div class="card-panel">
+            <div class="panel-header">
+              <h2>⚡ Quick Management Shortcuts</h2>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <button class="btn-action" onclick="openAddGameModal()">➕ Add New Coloring Page</button>
+              <button class="btn-action" style="background:#8B5CF6;" onclick="openAddCatModal()">➕ Add New Category</button>
+              <button class="btn-action" style="background:#0EA5E9;" onclick="switchTab('about', document.querySelectorAll('.sidebar-btn')[3])">📝 Edit About Us Content</button>
+              <button class="btn-action" style="background:#EC4899;" onclick="switchTab('privacy', document.querySelectorAll('.sidebar-btn')[4])">🔒 Edit Privacy Policy</button>
+              <button class="btn-action" style="background:#10B981;" onclick="switchTab('adsense', document.querySelectorAll('.sidebar-btn')[5])">💰 Manage AdSense & ads.txt</button>
+            </div>
+          </div>
+
+          <div class="card-panel">
+            <div class="panel-header">
+              <h2>🎨 Recently Added Drawings</h2>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Preview</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="overviewRecentTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 2. COLORING PAGES MANAGEMENT TAB -->
+        <section id="tab-pages" class="tab-section">
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h2>🎨 Manage Coloring Pages</h2>
+                <span style="color:#64748B;font-size:0.9rem;" id="pagesCountLabel">113 Drawings</span>
+              </div>
+              <div style="display:flex;gap:10px;">
+                <input type="text" id="adminSearchInput" class="form-control" placeholder="Search drawings..." style="width:240px;" oninput="filterAdminGames()">
+                <button class="btn-action" onclick="openAddGameModal()">➕ Add Coloring Page</button>
+              </div>
+            </div>
+
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Slug</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminGamesTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 3. CATEGORIES MANAGEMENT TAB -->
+        <section id="tab-categories" class="tab-section">
+          <div class="card-panel">
+            <div class="panel-header">
+              <h2>📂 Manage Categories</h2>
+              <button class="btn-action" onclick="openAddCatModal()">➕ Add New Category</button>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Icon</th>
+                  <th>Name</th>
+                  <th>Slug</th>
+                  <th>Color</th>
+                  <th>Drawings</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminCatsTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 4. EDIT ABOUT US PAGE TAB -->
+        <section id="tab-about" class="tab-section">
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h2>📝 Edit About Us Page</h2>
+                <span style="color:#64748B;font-size:0.88rem;">Live on <a href="/about.html" target="_blank">/about.html</a></span>
+              </div>
+              <button class="btn-action" onclick="saveAboutUs()">💾 Save About Us</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">HTML / Content</label>
+              <textarea id="aboutUsContent" class="form-control" style="min-height:350px;"></textarea>
+            </div>
+            <button class="btn-action" onclick="saveAboutUs()">💾 Save & Publish Changes</button>
+          </div>
+        </section>
+
+        <!-- 5. EDIT PRIVACY POLICY PAGE TAB -->
+        <section id="tab-privacy" class="tab-section">
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h2>🔒 Edit Privacy Policy (AdSense & COPPA Compliant)</h2>
+                <span style="color:#64748B;font-size:0.88rem;">Live on <a href="/privacy.html" target="_blank">/privacy.html</a></span>
+              </div>
+              <button class="btn-action" onclick="savePrivacyPolicy()">💾 Save Privacy Policy</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">HTML / Policy Content</label>
+              <textarea id="privacyPolicyContent" class="form-control" style="min-height:350px;"></textarea>
+            </div>
+            <button class="btn-action" onclick="savePrivacyPolicy()">💾 Save & Publish Changes</button>
+          </div>
+        </section>
+
+        <!-- 6. GOOGLE ADSENSE & ADS.TXT TAB -->
+        <section id="tab-adsense" class="tab-section">
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h2>💰 Google AdSense Integration & ads.txt</h2>
+                <span style="color:#64748B;font-size:0.88rem;">Configure your publisher code, ad units, and root ads.txt</span>
+              </div>
+              <button class="btn-action" onclick="saveAdsenseSettings()">💾 Save AdSense Settings</button>
+            </div>
+
+            <div class="switch-wrap">
+              <label class="switch">
+                <input type="checkbox" id="adsenseEnabled">
+                <span class="slider"></span>
+              </label>
+              <span style="font-weight:700;font-size:1.05rem;">Enable Google AdSense Ads Across Site</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Google AdSense Publisher Client ID</label>
+              <input type="text" id="adsensePubId" class="form-control" placeholder="ca-pub-1234567890123456">
+              <small style="color:#64748B;">Format: ca-pub-XXXXXXXXXXXXXXXX</small>
+            </div>
+
+            <div class="switch-wrap">
+              <label class="switch">
+                <input type="checkbox" id="adsenseAutoAds">
+                <span class="slider"></span>
+              </label>
+              <span>Enable Google Auto Ads (Recommended for automatic optimization)</span>
+            </div>
+
+            <h3 style="margin-top:24px;border-bottom:1px solid #E2E8F0;padding-bottom:8px;">Custom Ad Unit Slot IDs</h3>
+            
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+              <div class="form-group">
+                <label class="form-label">Header Leaderboard Slot ID</label>
+                <input type="text" id="adsenseHeaderSlot" class="form-control" placeholder="1234567890">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Game Sidebar Slot ID</label>
+                <input type="text" id="adsenseSidebarSlot" class="form-control" placeholder="2345678901">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Below Game Slot ID</label>
+                <input type="text" id="adsenseBelowSlot" class="form-control" placeholder="3456789012">
+              </div>
+            </div>
+
+            <h3 style="margin-top:24px;border-bottom:1px solid #E2E8F0;padding-bottom:8px;">ads.txt Content (Served at /ads.txt)</h3>
+            <div class="form-group">
+              <textarea id="adsenseAdsTxt" class="form-control" style="min-height:120px;font-family:monospace;"></textarea>
+              <small style="color:#64748B;">Must match your Google AdSense seller ID e.g.: google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0</small>
+            </div>
+
+            <button class="btn-action" onclick="saveAdsenseSettings()">💾 Save & Update AdSense</button>
+          </div>
+        </section>
+
+        <!-- 7. ADMIN CREDENTIALS TAB -->
+        <section id="tab-settings" class="tab-section">
+          <div class="card-panel" style="max-width:500px;">
+            <div class="panel-header">
+              <h2>⚙️ Change Admin Credentials</h2>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="adminNewUsername" class="form-control" placeholder="admin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" id="adminNewPassword" class="form-control" placeholder="New Password">
+            </div>
+            <button class="btn-action" onclick="saveCredentials()">Update Credentials</button>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT GAME MODAL -->
+  <div id="gameModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="gameModalTitle">➕ Add New Coloring Page</h3>
+        <button class="btn-close" onclick="closeGameModal()">&times;</button>
+      </div>
+
+      <input type="hidden" id="editGameId">
+
+      <div class="form-group">
+        <label class="form-label">Drawing Title / Name *</label>
+        <input type="text" id="gameTitleInput" class="form-control" placeholder="e.g. Cute Baby Dinosaur" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category *</label>
+        <select id="gameCatSelect" class="form-control"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Drawing Picture (File Upload or URL) *</label>
+        <input type="file" id="gameFileInput" class="form-control" accept="image/*" onchange="previewGameImage(this)">
+        <div style="margin-top:6px;font-size:0.85rem;color:#64748B;">OR provide image path / URL:</div>
+        <input type="text" id="gameUrlInput" class="form-control" placeholder="/uploads/my-drawing.png" style="margin-top:4px;">
+        <div id="imagePreviewWrap" style="margin-top:10px;display:none;">
+          <img id="imagePreview" src="" style="max-width:140px;height:auto;border-radius:8px;border:2px solid #CBD5E1;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description Text</label>
+        <textarea id="gameDescInput" class="form-control" style="min-height:90px;" placeholder="Fun and easy coloring page for kids..."></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+        <button class="btn-action btn-secondary" onclick="closeGameModal()">Cancel</button>
+        <button class="btn-action" onclick="submitGameForm()">Save Coloring Page</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD CATEGORY MODAL -->
+  <div id="catModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>➕ Add New Category</h3>
+        <button class="btn-close" onclick="closeCatModal()">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category Name *</label>
+        <input type="text" id="catNameInput" class="form-control" placeholder="e.g. Dinosaurs" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Slug (URL friendly) *</label>
+        <input type="text" id="catSlugInput" class="form-control" placeholder="e.g. dinosaurs" required>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Emoji Icon</label>
+          <input type="text" id="catIconInput" class="form-control" value="🎨" placeholder="🦖">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Theme Color</label>
+          <input type="color" id="catColorInput" class="form-control" value="#10B981" style="height:44px;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="catDescInput" class="form-control" style="min-height:80px;" placeholder="Explore fun dinosaur coloring pages..."></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+        <button class="btn-action btn-secondary" onclick="closeCatModal()">Cancel</button>
+        <button class="btn-action" onclick="submitCatForm()">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let gamesList = [];
+    let catsList = [];
+    let siteConfig = {};
+    let pendingImageBase64 = null;
+    let pendingFilename = '';
+
+    function adminFetch(url, options) {
+      options = options || {};
+      const token = localStorage.getItem('coloringtool_admin_token');
+      const headers = Object.assign({}, options.headers || {});
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+        headers['X-Admin-Token'] = token;
+      }
+      options.headers = headers;
+      options.credentials = 'same-origin';
+      return fetch(url, options);
+    }
+
+    // Auth state check
+    async function checkAuth() {
+      try {
+        const res = await adminFetch('/api/admin/check');
+        const data = await res.json();
+        if (data.authenticated) {
+          document.getElementById('loginOverlay').style.display = 'none';
+          document.getElementById('adminApp').style.display = 'block';
+          await loadDashboardData();
+        } else {
+          document.getElementById('loginOverlay').style.display = 'flex';
+          document.getElementById('adminApp').style.display = 'none';
+        }
+      } catch(e) {
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('adminApp').style.display = 'none';
+      }
+    }
+
+    async function handleLogin() {
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+      const errDiv = document.getElementById('loginError');
+      const btn = document.getElementById('loginSubmitBtn');
+
+      if (!u || !p) {
+        errDiv.innerText = 'Please enter both username and password.';
+        errDiv.style.display = 'block';
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Signing In...';
+      }
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ username: u, password: p })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (data.token) {
+            localStorage.setItem('coloringtool_admin_token', data.token);
+          }
+          errDiv.style.display = 'none';
+          document.getElementById('loginOverlay').style.display = 'none';
+          document.getElementById('adminApp').style.display = 'block';
+          await loadDashboardData();
+        } else {
+          errDiv.innerText = data.error || 'Invalid credentials';
+          errDiv.style.display = 'block';
+        }
+      } catch(err) {
+        errDiv.innerText = 'Connection error: ' + err.message;
+        errDiv.style.display = 'block';
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = 'Sign In →';
+        }
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await adminFetch('/api/admin/logout', { method: 'POST' });
+      } catch(e) {}
+      localStorage.removeItem('coloringtool_admin_token');
+      window.location.reload();
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    async function loadDashboardData() {
+      // 1. Load games
+      const gRes = await fetch('/api/games');
+      gamesList = await gRes.json();
+      document.getElementById('statPages').innerText = gamesList.length;
+      document.getElementById('pagesCountLabel').innerText = gamesList.length + ' Drawings';
+
+      // 2. Load categories
+      const cRes = await fetch('/api/categories');
+      catsList = await cRes.json();
+      document.getElementById('statCats').innerText = catsList.length;
+
+      // 3. Load site config & AdSense & Content
+      const sRes = await adminFetch('/api/admin/config');
+      siteConfig = await sRes.json();
+
+      // Populate Overview tables
+      renderOverviewTables();
+      renderGamesTable();
+      renderCatsTable();
+      populateCatDropdown();
+
+      // Populate text editors
+      document.getElementById('aboutUsContent').value = siteConfig.aboutUsHtml || '';
+      document.getElementById('privacyPolicyContent').value = siteConfig.privacyPolicyHtml || '';
+
+      // Populate AdSense settings
+      const ad = siteConfig.adsense || {};
+      document.getElementById('adsenseEnabled').checked = !!ad.enabled;
+      document.getElementById('adsensePubId').value = ad.publisherId || '';
+      document.getElementById('adsenseAutoAds').checked = !!ad.autoAds;
+      document.getElementById('adsenseHeaderSlot').value = ad.headerSlot || '';
+      document.getElementById('adsenseSidebarSlot').value = ad.sidebarSlot || '';
+      document.getElementById('adsenseBelowSlot').value = ad.belowGameSlot || '';
+      document.getElementById('adsenseAdsTxt').value = ad.adsTxtContent || '';
+      document.getElementById('statAdsense').innerText = ad.enabled ? 'Active' : 'Disabled';
+      document.getElementById('statAdsense').style.color = ad.enabled ? '#10B981' : '#EF4444';
+
+      // Populate username
+      document.getElementById('adminNewUsername').value = siteConfig.admin?.username || 'admin';
+    }
+
+    function renderOverviewTables() {
+      const recent = gamesList.slice(-6).reverse();
+      document.getElementById('overviewRecentTable').innerHTML = recent.map(g => `
+        <tr>
+          <td><img src="/${g.thumbSrc || g.fullImageSrc}" class="table-thumb" alt="${g.label}"></td>
+          <td><strong>${g.label}</strong></td>
+          <td><span style="background:#EEF2FF;color:#4F46E5;padding:2px 8px;border-radius:12px;font-size:0.8rem;">${g.catName}</span></td>
+          <td><a href="/studio.html?cat=${g.catId}&game=${g.slug}" target="_blank" style="color:var(--primary);font-weight:600;">Play &rarr;</a></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderGamesTable(filtered = null) {
+      const list = filtered || gamesList;
+      document.getElementById('adminGamesTable').innerHTML = list.map(g => `
+        <tr>
+          <td><img src="/${g.thumbSrc || g.fullImageSrc}" class="table-thumb" alt="${g.label}"></td>
+          <td><strong>${g.label}</strong></td>
+          <td>${g.catName}</td>
+          <td><code>${g.slug}</code></td>
+          <td>
+            <a href="/studio.html?cat=${g.catId}&game=${g.slug}" target="_blank" style="margin-right:10px;text-decoration:none;">View</a>
+            <button onclick="editGame('${g.id}')" style="background:#0EA5E9;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;margin-right:6px;">Edit</button>
+            <button onclick="deleteGame('${g.id}')" style="background:#EF4444;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterAdminGames() {
+      const q = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+      if (!q) return renderGamesTable();
+      const filtered = gamesList.filter(g => g.label.toLowerCase().includes(q) || g.catName.toLowerCase().includes(q));
+      renderGamesTable(filtered);
+    }
+
+    function renderCatsTable() {
+      document.getElementById('adminCatsTable').innerHTML = catsList.map(c => `
+        <tr>
+          <td style="font-size:1.6rem;">${c.icon || '🎨'}</td>
+          <td><strong>${c.name}</strong></td>
+          <td><code>${c.id}</code></td>
+          <td><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${c.color};vertical-align:middle;"></span> ${c.color}</td>
+          <td>${gamesList.filter(g => g.catId === c.id).length}</td>
+          <td>
+            <a href="/${c.id}/" target="_blank" style="margin-right:10px;text-decoration:none;">View</a>
+            <button onclick="deleteCat('${c.id}')" style="background:#EF4444;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function populateCatDropdown() {
+      const sel = document.getElementById('gameCatSelect');
+      sel.innerHTML = catsList.map(c => `<option value="${c.id}">${c.icon || ''} ${c.name}</option>`).join('');
+    }
+
+    // Image Upload Preview
+    function previewGameImage(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        pendingFilename = file.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          pendingImageBase64 = e.target.result;
+          document.getElementById('imagePreview').src = pendingImageBase64;
+          document.getElementById('imagePreviewWrap').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function openAddGameModal() {
+      document.getElementById('editGameId').value = '';
+      document.getElementById('gameModalTitle').innerText = '➕ Add New Coloring Page';
+      document.getElementById('gameTitleInput').value = '';
+      document.getElementById('gameUrlInput').value = '';
+      document.getElementById('gameFileInput').value = '';
+      document.getElementById('gameDescInput').value = '';
+      document.getElementById('imagePreviewWrap').style.display = 'none';
+      pendingImageBase64 = null;
+      document.getElementById('gameModal').style.display = 'flex';
+    }
+
+    function closeGameModal() {
+      document.getElementById('gameModal').style.display = 'none';
+    }
+
+    async function submitGameForm() {
+      const id = document.getElementById('editGameId').value;
+      const title = document.getElementById('gameTitleInput').value.trim();
+      const catId = document.getElementById('gameCatSelect').value;
+      const desc = document.getElementById('gameDescInput').value.trim();
+      const urlInput = document.getElementById('gameUrlInput').value.trim();
+
+      if (!title) return alert('Please enter a drawing title.');
+
+      const payload = {
+        id,
+        title,
+        catId,
+        desc,
+        imageUrl: urlInput,
+        imageBase64: pendingImageBase64,
+        filename: pendingFilename
+      };
+
+      const res = await adminFetch('/api/admin/games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeGameModal();
+        alert('Coloring page saved successfully! 🎨');
+        loadDashboardData();
+      } else {
+        alert(data.error || 'Failed to save coloring page');
+      }
+    }
+
+    function editGame(id) {
+      const g = gamesList.find(x => x.id === id);
+      if (!g) return;
+      document.getElementById('editGameId').value = g.id;
+      document.getElementById('gameModalTitle').innerText = '✏️ Edit Coloring Page: ' + g.label;
+      document.getElementById('gameTitleInput').value = g.label;
+      document.getElementById('gameCatSelect').value = g.catId;
+      document.getElementById('gameUrlInput').value = g.fullImageSrc || g.thumbSrc || '';
+      document.getElementById('gameDescInput').value = g.descriptionText || '';
+      document.getElementById('imagePreview').src = '/' + (g.fullImageSrc || g.thumbSrc);
+      document.getElementById('imagePreviewWrap').style.display = 'block';
+      document.getElementById('gameModal').style.display = 'flex';
+    }
+
+    async function deleteGame(id) {
+      if (!confirm('Are you sure you want to delete this coloring page?')) return;
+      const res = await adminFetch('/api/admin/games/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        loadDashboardData();
+      } else {
+        alert(data.error || 'Failed to delete');
+      }
+    }
+
+    function openAddCatModal() {
+      document.getElementById('catNameInput').value = '';
+      document.getElementById('catSlugInput').value = '';
+      document.getElementById('catDescInput').value = '';
+      document.getElementById('catModal').style.display = 'flex';
+    }
+    function closeCatModal() {
+      document.getElementById('catModal').style.display = 'none';
+    }
+
+    async function submitCatForm() {
+      const name = document.getElementById('catNameInput').value.trim();
+      let slug = document.getElementById('catSlugInput').value.trim().toLowerCase().replace(/[^a-z0-9\-]/g, '');
+      const icon = document.getElementById('catIconInput').value.trim() || '🎨';
+      const color = document.getElementById('catColorInput').value;
+      const desc = document.getElementById('catDescInput').value.trim();
+
+      if (!name || !slug) return alert('Name and slug are required.');
+
+      const res = await adminFetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug, icon, color, desc })
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeCatModal();
+        alert('Category added successfully!');
+        loadDashboardData();
+      } else {
+        alert(data.error || 'Failed to add category');
+      }
+    }
+
+    async function deleteCat(id) {
+      if (!confirm('Delete this category? Associated drawings will remain.')) return;
+      const res = await adminFetch('/api/admin/categories/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        loadDashboardData();
+      }
+    }
+
+    // Save About Us
+    async function saveAboutUs() {
+      const html = document.getElementById('aboutUsContent').value;
+      const res = await adminFetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ aboutUsHtml: html })
+      });
+      const data = await res.json();
+      if (data.success) alert('About Us page updated and published live! 🚀');
+    }
+
+    // Save Privacy Policy
+    async function savePrivacyPolicy() {
+      const html = document.getElementById('privacyPolicyContent').value;
+      const res = await adminFetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ privacyPolicyHtml: html })
+      });
+      const data = await res.json();
+      if (data.success) alert('Privacy Policy updated and published live! 🔒');
+    }
+
+    // Save AdSense Settings
+    async function saveAdsenseSettings() {
+      const payload = {
+        enabled: document.getElementById('adsenseEnabled').checked,
+        publisherId: document.getElementById('adsensePubId').value.trim(),
+        autoAds: document.getElementById('adsenseAutoAds').checked,
+        headerSlot: document.getElementById('adsenseHeaderSlot').value.trim(),
+        sidebarSlot: document.getElementById('adsenseSidebarSlot').value.trim(),
+        belowGameSlot: document.getElementById('adsenseBelowSlot').value.trim(),
+        adsTxtContent: document.getElementById('adsenseAdsTxt').value.trim()
+      };
+
+      const res = await adminFetch('/api/admin/adsense', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Google AdSense configuration and ads.txt saved and updated live! 💰');
+        loadDashboardData();
+      }
+    }
+
+    // Save Admin Credentials
+    async function saveCredentials() {
+      const u = document.getElementById('adminNewUsername').value.trim();
+      const p = document.getElementById('adminNewPassword').value.trim();
+      if (!u || !p) return alert('Both username and password are required.');
+
+      const res = await adminFetch('/api/admin/credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      const data = await res.json();
+      if (data.success) alert('Admin credentials updated successfully!');
+    }
+
+    window.onload = checkAuth;
+  </script>
+</body>
+</html>

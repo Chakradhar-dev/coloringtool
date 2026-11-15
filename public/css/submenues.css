@@ -1,0 +1,584 @@
+@charset "utf-8";
+
+/* CSS Document */
+
+/* latin */
+@font-face {
+  font-family: 'Fredoka One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/fredokaone/v8/k3kUo8kEI-tA1RRcTZGmTlHGCac.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+* {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+	/* ELIMINA EL BLOQUEO AZUL EN IPAD */
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+body {
+    margin: 0;
+	background-color: #b9bfb6;
+  font-family: 'Fredoka One';
+}
+
+.centrar{
+        text-align: center;
+}
+
+
+#header1 {
+  min-height: 90px;
+}
+
+#midcontent1 {
+	
+}
+
+
+@media (max-width: 767px) {
+	#header1 {
+		min-width: 0;
+		min-height: 0;
+	}
+
+	#midcontent1 {
+		min-height: 0;
+	}
+
+	#mobile1 {
+		min-height: 280px;
+	}
+
+}
+
+
+.clearfloat {
+  clear: both;
+	
+}
+
+.clearfloat-10 {
+  clear: both;
+	height: 10px;
+}
+
+.clearfloat-mobile {
+  clear: both;
+}
+@media (min-width: 992px) {
+  .clearfloat-mobile { display: none; }
+}
+
+.clearfloat-desk {
+  clear: both;
+}
+@media (max-width: 991px) {
+  .clearfloat-desk { display: none; }
+}
+
+.responsive-img{
+	width: 100%;
+	height: auto;
+	display:block;
+	margin:auto;
+}
+
+footer{
+		width: 100%;
+	margin-top: 2%;
+
+}
+
+.pie_creditos{
+	width: 100%;
+	background-color: #6b4d5e;
+   
+}
+
+.pie_creditos p{
+    color: #c0b1b1;
+    text-align: left;
+    text-decoration: none;
+    padding-left: 3%;
+}
+
+.pie_creditos a{
+color: #c0b1b1;
+text-decoration: none;
+}
+
+/* DESK SUBMENUES **********************************************/
+
+
+
+.container{
+	width: 100%;
+	max-width: 1280px;
+	margin:auto;
+	
+}
+
+main{
+	width: 100%;
+	height: auto;
+	float: left;
+}
+
+
+.contenido{
+	width: 100%;
+	height: 100%;
+    display: block;
+	margin: auto;
+}
+
+.book-ad-menu{
+    width: 100%;
+    height: auto;
+    float: right;
+    margin: auto;
+}
+.book-ad-menu img{
+       width: 100%;
+    height: auto;
+	max-width: 360px;
+}
+
+h1{
+	
+    font-size: 1.7em;
+	text-align: center;
+	color: #F9C9C9;
+	font-weight: 200;
+}
+
+
+
+
+
+.galeria-menu{
+	width: 70%;
+	height: 100%;
+	float: left;
+    background-color: #6b4d5e;
+}
+
+
+
+.encabezado{
+ width: 100%; 
+	height: auto;
+    padding-top: 1%;
+background-color: #6a6a6a;
+}
+
+.encabezado img{
+ width: 100%;  
+	height: auto;
+     display: block;
+    margin: auto;
+}
+
+.enca-mobile {
+    display: none;
+}
+
+.caja-miniaturas{
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    margin: auto;
+    float: left;
+    border-bottom: 0.5em solid #ed2e3e;
+    border-left: 0.5em solid #ed2e3e;
+    border-right: 0.5em solid #ed2e3e;
+    border-top: 0px;
+}
+
+
+
+
+
+.minis{
+	width: 33%;
+	height: auto;
+	float: left;
+    display: block;
+	margin: auto;
+	margin-bottom: -1%;
+	padding: 2%;
+	border-radius: 10px 10px 10px 10px;
+}
+
+.minis img{
+	width: 100%;
+	height: auto;
+	border:0.5em solid #fc9b38;
+	border-radius: 10px 10px 10px 10px;
+}
+
+.minis img:hover {
+  box-shadow: 0 0 16px 6px #faa83d;
+}
+
+h2{
+	
+    font-size: 1.2em;
+	letter-spacing: 0.05em;
+	margin-top: 0px;
+	margin-bottom: 0px;
+    color: #ffffff;
+	text-align: left;
+	font-weight: 200;
+}
+
+h2 a{
+	color: #ffffff;
+	text-decoration: none;
+	font-weight: 200;
+}
+
+.textoFluo{
+    width: 100%;
+    display: block;
+    margin: auto;
+    height: auto;
+    /* [disabled]padding-top: 2%; */
+    padding-right: 2%;
+    padding-left: 2%;
+    padding-bottom: 2%;
+	
+}
+.textoFluo p {
+    font-family: system-ui, Arial, sans-serif;
+}
+
+.textoFluo li {
+    font-family: system-ui, Arial, sans-serif;
+}
+.textoFluo cite {
+    color: #fc9b38;
+    font-family: system-ui, Arial, sans-serif;
+    font-size: 0.9em;
+}
+.textoFluo ul {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.textoFluo li {
+    color: #B5D829;
+    margin-bottom: 0.5em;
+    line-height: 1.4;
+}
+
+.textoFluo dl {
+    margin-bottom: 1.5em;
+}
+
+.textoFluo dt {
+    color: #fc9b38;
+    font-family: 'Fredoka One', sans-serif;
+    font-size: 1em;
+    margin-top: 1em;
+    margin-bottom: 0.2em;
+}
+
+.textoFluo dd {
+    color: #B5D829;
+    font-family: system-ui, Arial, sans-serif;
+    font-size: 0.95em;
+    margin-left: 1em;
+    line-height: 1.4;
+}
+
+h3 {
+    font-size: 1.1em;
+    color: #F9C9C9;
+    font-weight: 200;
+    margin-bottom: 0.5em;
+}
+.home-img img{
+    float: left;
+    padding: 0px;
+    width: 40px;
+    height: 40px;
+    background-color: #000000;
+    
+}
+
+.home-txt a{
+    float: left;
+    color: #ffffff;
+    margin-left: 1%;
+}
+
+.textoFluo p{
+    color: #B5D829;
+    text-align: justify;
+}
+.textoFluo p a {
+    color: #ffffff;
+    
+}
+
+.textoFluo p a:hover {
+    color: #c0b1b1;
+    text-decoration: none;
+}
+
+
+.aside-menu{
+    width: 28%;
+    height: auto;
+    float: left;
+    margin-left: 2%;
+    align-content: center;
+}
+
+.main-sm{
+	width: 100%;
+	height: auto;
+	float: left;
+ }
+
+.main-sm h1{
+    font-size: 1.7em;
+    text-align: left;
+    color: #FBEBF4;
+    padding-left: 2%;
+    font-weight: 200;
+}
+
+.galeria-sm{
+	width: 70%;
+	height: 100%;
+	 float: left;
+  margin: 0 auto;
+    background-color: #6b4d5e;
+	 overflow: hidden;
+}
+
+
+.minis-sm{
+	width: 33%;
+	  height: auto;
+
+	float: left;
+    display: block;
+	margin: auto;
+	margin-bottom: -1%;
+	padding: 2%;
+	border-radius: 10px 10px 10px 10px;
+}
+
+.minis-sm img{
+	width: 100%;
+	height: auto;
+	border:0.5em solid #fc9b38;
+	border-radius: 10px 10px 10px 10px;
+}
+
+.minis-sm img:hover {
+  box-shadow: 0 0 16px 6px #faa83d;
+}
+
+.aside-sm{
+width: 28%;
+	height: auto;
+	float: left;
+    margin-left: 1%;
+    align-content: center;
+}
+
+
+.esconder-mini-en-desk{
+		display: none;
+	}
+
+.esconder-mini-en-movil{
+		display: inline-block;
+	}
+
+
+/* DESK ADSENSE **********************************************/
+
+
+.publicidad-responsive-inferior{
+	display: none;
+	background-color: #000000;
+}
+
+.ad-inferior-sm-tablet{display: none;}
+
+aside{
+	width: 34%;
+	float: left;
+	display: table-cell;
+}
+
+
+aside p{
+	font-size: 1em;
+}
+
+.publicidad-sm-inferior{
+	width: 72%;
+	height: auto;
+	float: left;
+	margin-left: 1%;
+	}
+
+
+/******* TABLET SUBMENUES **********************************************/
+
+@media (min-width: 501px)and (max-width: 799px) {
+	
+	
+.publicidad-submenu-derecha{
+		display: none;
+	}
+	
+.ad-inferior-sm-tablet{
+	display: block;
+	margin: auto;
+	background-color: #FFFFFF;
+}
+	
+.main-sm{
+	width: 100%;
+	 
+
+
+}
+    
+.galeria-sm{
+	width: 100%;
+}
+
+    .minis-sm img{
+		width: 100%;
+		 height: auto;
+	border:0.4em solid #fc9b38;
+	border-radius: 10px 10px 10px 10px;
+}
+  
+/* TABLET ADSENSE **********************************************/
+
+
+.publicidad-responsive-inferior{
+	display: none;
+}
+	
+.publicidad-juegos-derecha{
+		display: none;
+	}
+	
+.publicidad-sm-inferior{
+	width: 100%;
+	height: auto;
+	float: left;
+	margin-left: 1%;
+	}
+	
+}
+
+
+/* MOVIL SUBMENUES ******************************************/
+@media (max-width : 500px){
+
+	
+.main-sm{
+	width: 100%;
+}
+    
+.galeria-sm{
+	  width: 100%;
+  float: none;
+  margin: auto;
+}
+    
+.galeria-sm  h1{
+	
+    font-size: 1.2em;
+	text-align: center;
+	color: #FBEBF4;
+    padding-left: 1%;
+    padding-right: 1%;
+	font-weight: 200;
+}
+    
+.publicidad-submenu-derecha{
+		display: none;
+	}
+.link-sm {
+	width: 100%;
+	
+	}
+	
+.link-sm a {
+		font-size: 1.4em;
+	background-color: #faa83d;
+	color: #436b60;
+	padding-top: 3%;
+	padding-bottom: 3%;
+	}
+	
+
+.minis-sm{
+	width: 50%;
+	  height: auto;
+}
+    
+    .minis-sm img{
+	width: 100%;
+		  height: auto;
+
+
+	border:0.4em solid #fc9b38;
+	border-radius: 10px;
+}
+	
+/* MOVIL ADSENSE **********************************************/
+	
+.container-indiv .juego-main .publi {
+    display: none;
+}
+	
+.publicidad-juegos-derecha{
+		display: none;
+        visibility: hidden;
+	}
+	
+}
+
+/* LABEL ETIQUETA PARA IMÁGENES **********************************************/
+
+.minis-sm-label {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    font-family: 'Fredoka One', sans-serif;
+    font-size: 1em;
+    color: #F9C9C9;
+    text-decoration: none;
+    padding: 4px 4px 6px;
+    line-height: 1.2;
+}
+.minis-sm-label:hover {
+    color: #fc9b38;
+}
+@media (max-width: 500px) {
+    .minis-sm-label { font-size: 1em; }
+}
+/* Ezoic CLS fix */
+[id^="ezoic-pub-ad-placeholder-"] {
+  min-height: 250px;
+  width: 100%;
+  box-sizing: border-box;
+}

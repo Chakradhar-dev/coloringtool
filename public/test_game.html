@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Test Interactive Game</title>
+  <script src="/js/createjs.min.js"></script>
+  <script src="/animals/js/animales-mono-ingles.js"></script>
+  <style>
+    body { background: #555; text-align: center; margin: 20px; font-family: sans-serif; }
+    #canvas { background: #999; margin: auto; display: block; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  </style>
+</head>
+<body onload="init();">
+  <h2 style="color:white;">Monkey Interactive Coloring Test</h2>
+  <canvas id="canvas" width="510" height="580"></canvas>
+
+  <script>
+    var canvas, stage, exportRoot;
+    function init() {
+      canvas = document.getElementById("canvas");
+      var compKeys = Object.keys(AdobeAn.compositions);
+      console.log('compKeys:', compKeys);
+      var compId = compKeys[compKeys.length - 1];
+      var comp = AdobeAn.getComposition(compId);
+      var lib = comp.getLibrary();
+      console.log('lib keys:', Object.keys(lib));
+
+      var loader = new createjs.LoadQueue(false);
+      loader.installPlugin(createjs.Sound);
+      loader.addEventListener("complete", function(evt) {
+        console.log('Manifest loaded, starting stage...');
+        var ss = comp.getSpriteSheet();
+        var queue = evt.target;
+        var ssMetadata = lib.ssMetadata || [];
+        for (var i = 0; i < ssMetadata.length; i++) {
+          ss[ssMetadata[i].name] = new createjs.SpriteSheet({ "images": [queue.getResult(ssMetadata[i].name)], "frames": ssMetadata[i].frames });
+        }
+
+        var funcKeys = Object.keys(lib).filter(k => typeof lib[k] === 'function' && k !== 'Stage');
+        var RootConstructor = lib[funcKeys[funcKeys.length - 1]];
+        console.log('RootConstructor:', RootConstructor.name || funcKeys[funcKeys.length - 1]);
+        
+        exportRoot = new RootConstructor();
+        stage = new lib.Stage(canvas);
+        stage.enableMouseOver();
+        stage.addChild(exportRoot);
+        createjs.Ticker.setFPS(lib.properties.fps || 32);
+        createjs.Ticker.addEventListener("tick", stage);
+        console.log('Game initialized successfully!');
+      });
+
+      // Relative path for manifest sounds
+      var manifest = lib.properties.manifest || [];
+      // prefix with /animals/ if needed
+      manifest = manifest.map(m => ({ ...m, src: '/animals/' + m.src }));
+      console.log('Manifest to load:', manifest);
+      loader.loadManifest(manifest);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment and Logs
+*.log
+.env
+.DS_Store
+Thumbs.db
+
+# Scraping & scratch diagnostic scripts
+check_*.js
+test_*.js
+analyze_*.js
+parse_*.js
+inspect_*.js
+print_*.js
+scrape_*.js
+download_*.js
+fetch_*.js
+patch_*.js
+update_studio.js
+init_data.js
+verify_all_ready.js
+build_site.js
+show_categories.js
+extract_home_text.js
+*.zip
+
+# Scraped raw dumps in root (production files live in public/ and data/)
+all_categories.json
+all_games_detailed.json
+images.json
+links.json
+unicorn-game.js
+animals.html
+homepage.html
+jumping-unicorn.html
+about.html
+privacy.html
+juegos-indiv.css
+menu-responsive.css
+build_modern_coloringtool.js
