@@ -315,12 +315,19 @@ export default {
 };
 `;
 
-// Write to worker.js, _worker.js, and public/_worker.js
+// Write to worker.js and _worker.js
 fs.writeFileSync(path.join(__dirname, 'worker.js'), workerSource, 'utf-8');
 fs.writeFileSync(path.join(__dirname, '_worker.js'), workerSource, 'utf-8');
-fs.writeFileSync(path.join(PUBLIC_DIR, '_worker.js'), workerSource, 'utf-8');
+
+// Ensure public directory does not contain _worker.js (conflicts with Cloudflare Workers assets)
+const publicWorkerPath = path.join(PUBLIC_DIR, '_worker.js');
+if (fs.existsSync(publicWorkerPath)) {
+  fs.unlinkSync(publicWorkerPath);
+}
+
+// Ensure .assetsignore exists in public/
+fs.writeFileSync(path.join(PUBLIC_DIR, '.assetsignore'), '_worker.js\n', 'utf-8');
 
 console.log('Cloudflare Worker edge files generated successfully:');
 console.log('- worker.js');
 console.log('- _worker.js');
-console.log('- public/_worker.js');
