@@ -333,45 +333,60 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-        @media (max-width: 600px) {
-      .studio-tool-bar {
-        justify-content: center !important;
-        gap: 6px !important;
-        padding: 6px 8px !important;
-      }
-      .tool-btn {
-        padding: 6px 10px !important;
-        font-size: 0.8rem !important;
-      }
-      .tool-indicator-badge {
-        padding: 4px 8px !important;
-      }
-    }
-    /* Studio Toolbar & Brush Indicator */
-    .studio-tool-bar {
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 510px;
-      margin: 12px auto 8px;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: #FFFFFF;
-      padding: 8px 12px;
-      border-radius: 16px;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
-      border: 1px solid #E2E8F0;
-      box-sizing: border-box;
+        /* Studio Workspace layout: Side-by-side on desktop, stacked on mobile */
+    .studio-workspace {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 24px;
       width: 100%;
     }
+    .studio-canvas-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 0 auto;
+      max-width: 510px;
+      width: 100%;
+    }
+    .studio-tools-side {
+      display: none; /* Shown dynamically for raster games */
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 250px;
+      flex-shrink: 0;
+      background: #FFFFFF;
+      padding: 16px 14px;
+      border-radius: 18px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+      box-sizing: border-box;
+    }
+    .studio-tools-side-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Common tool button & badge styles */
     .tool-group {
       display: flex;
       gap: 6px;
       align-items: center;
+      width: 100%;
     }
     .tool-btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       background: #F1F5F9;
       border: 2px solid transparent;
@@ -398,7 +413,7 @@
       align-items: center;
       gap: 8px;
       background: #F8FAFC;
-      padding: 5px 12px;
+      padding: 6px 12px;
       border-radius: 12px;
       border: 1px solid #E2E8F0;
     }
@@ -435,29 +450,196 @@
       color: #64748B;
       font-weight: 600;
     }
-    /* Dynamic Color Palette for raster custom uploaded drawings */
-    .raster-palette {
-      display: none;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-      justify-content: center;
-      max-width: 510px;
-      box-sizing: border-box;
-      width: 100%;
-    }
     .palette-swatch {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 3px solid white;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       cursor: pointer;
       transition: transform 0.15s;
+      flex-shrink: 0;
     }
     .palette-swatch:hover, .palette-swatch.active {
-      transform: scale(1.25);
+      transform: scale(1.22);
       border-color: #0F172A;
+      box-shadow: 0 0 0 3px #38BDF8, 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    /* DESKTOP ONLY: Color palette, tools, and action buttons docked on the RIGHT side of canvas */
+    @media (min-width: 900px) {
+      .studio-tools-side {
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        width: 250px;
+        flex-shrink: 0;
+        background: #FFFFFF;
+        padding: 16px 14px;
+        border-radius: 18px;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+        box-sizing: border-box;
+      }
+      .studio-tool-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+        background: transparent;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        margin: 0;
+      }
+      .studio-tool-bar .tool-group {
+        display: flex;
+        gap: 6px;
+        width: 100%;
+      }
+      .studio-tool-bar .tool-group .tool-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 10px;
+        font-size: 0.85rem;
+      }
+      .studio-tool-bar .tool-indicator-badge {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+        padding: 8px 12px;
+      }
+      .raster-palette {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        width: 100%;
+        max-width: 220px;
+        margin: 6px auto 0;
+        box-sizing: border-box;
+      }
+      .controls-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        width: 100%;
+        margin-top: 10px;
+        padding-top: 12px;
+        border-top: 1px solid #F1F5F9;
+        box-sizing: border-box;
+      }
+      .btn-studio-action {
+        width: 100%;
+        padding: 9px 6px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        border-radius: 12px;
+      }
+    }
+
+    /* MOBILE: Under 900px, color palette, tools, and action buttons stack below canvas */
+    @media (max-width: 899px) {
+      .studio-workspace {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .studio-canvas-area {
+        max-width: 510px;
+        width: 100%;
+      }
+      .studio-tools-side {
+        display: flex !important;
+        width: 100%;
+        max-width: 510px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        gap: 10px;
+      }
+      .studio-tools-side-title {
+        display: none;
+      }
+      .studio-tool-bar {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        background: #FFFFFF;
+        padding: 8px 12px;
+        border-radius: 16px;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        box-sizing: border-box;
+        margin: 0;
+      }
+      .studio-tool-bar .tool-group {
+        width: auto;
+      }
+      .studio-tool-bar .tool-indicator-badge {
+        width: auto;
+      }
+      .raster-palette {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        width: 100%;
+        max-width: 510px;
+        margin: 4px auto 0;
+      }
+      .palette-swatch {
+        width: 32px;
+        height: 32px;
+      }
+      .controls-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        width: 100%;
+        max-width: 510px;
+        margin-top: 8px;
+        box-sizing: border-box;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .controls-strip {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .btn-studio-action {
+        padding: 8px 6px;
+        font-size: 0.78rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .studio-tool-bar {
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 6px 8px !important;
+      }
+      .tool-btn {
+        padding: 6px 8px !important;
+        font-size: 0.78rem !important;
+      }
+      .tool-indicator-badge {
+        padding: 4px 6px !important;
+      }
+      .palette-swatch {
+        width: 30px !important;
+        height: 30px !important;
+      }
     }
     @media print {
       body * { visibility: hidden; }
@@ -521,62 +703,74 @@
     <!-- Main Drawing Stage -->
     <main class="stage-wrapper">
       <div class="hint-banner">
-        <span>💡 Tap a color in the palette below, then tap inside any part of the picture to color it!</span>
+        <span>💡 Tap a color in the palette, then tap inside any part of the picture to color it!</span>
       </div>
 
-      <div class="canvas-container">
-        <canvas id="canvas" width="510" height="580"></canvas>
-      </div>
-
-      <!-- Raster custom drawing toolbar (active for custom uploaded drawings) -->
-      <div class="studio-tool-bar" id="rasterToolBar" style="display:none;">
-        <div class="tool-group">
-          <button type="button" class="tool-btn active" id="toolBucketBtn" onclick="setStudioTool('bucket')" title="Tap-to-Fill Region">
-            <span>🪣</span>
-            <span>Fill Bucket</span>
-          </button>
-          <button type="button" class="tool-btn" id="toolBrushBtn" onclick="setStudioTool('brush')" title="Paint with Brush">
-            <span>🖌️</span>
-            <span>Paint Brush</span>
-          </button>
+      <div class="studio-workspace">
+        <div class="studio-canvas-area">
+          <div class="canvas-container">
+            <canvas id="canvas" width="510" height="580"></canvas>
+          </div>
         </div>
 
-        <div class="tool-indicator-badge" id="toolIndicatorBadge">
-          <div class="brush-icon-wrapper">
-            <svg class="brush-svg" viewBox="0 0 32 32" width="30" height="30" style="overflow:visible;display:block;">
-              <polygon points="6,26 10,25 25,10 21,6 6,21" fill="#F8FAFC" stroke="#0F172A" stroke-width="1.6" stroke-linejoin="round"/>
-              <polygon id="brushSvgTip" points="6,26 10,25 6,21" fill="#FF3B30" stroke="#0F172A" stroke-width="1.2"/>
-              <polygon points="21,6 25,10 27,8 23,4" fill="#94A3B8" stroke="#0F172A" stroke-width="1.4" stroke-linejoin="round"/>
-              <circle id="brushColorDot" cx="4" cy="28" r="3.5" fill="#FF3B30" stroke="#FFFFFF" stroke-width="1.5"/>
-            </svg>
+        <!-- Right Side Controls & Palette (Desktop Right Side / Mobile Below) -->
+        <div class="studio-tools-side" id="studioToolsSide">
+          <div class="studio-tools-side-title raster-only" id="toolsSideTitle" style="display:none;">
+            <span>🎨 Color Tools</span>
           </div>
-          <div class="brush-info">
-            <div style="display:flex;align-items:center;gap:4px;">
-              <span id="toolIndicatorIcon">🪣</span>
-              <span class="brush-mode-text" id="brushModeText">Tap to Fill</span>
+
+          <!-- Raster custom drawing toolbar (active for custom uploaded drawings) -->
+          <div class="studio-tool-bar raster-only" id="rasterToolBar" style="display:none;">
+            <div class="tool-group">
+              <button type="button" class="tool-btn active" id="toolBucketBtn" onclick="setStudioTool('bucket')" title="Tap-to-Fill Region">
+                <span>🪣</span>
+                <span>Fill Bucket</span>
+              </button>
+              <button type="button" class="tool-btn" id="toolBrushBtn" onclick="setStudioTool('brush')" title="Paint with Brush">
+                <span>🖌️</span>
+                <span>Paint Brush</span>
+              </button>
             </div>
-            <span class="brush-color-name" id="brushColorName">Color: Red</span>
+
+            <div class="tool-indicator-badge" id="toolIndicatorBadge">
+              <div class="brush-icon-wrapper">
+                <svg class="brush-svg" viewBox="0 0 32 32" width="30" height="30" style="overflow:visible;display:block;">
+                  <polygon points="6,26 10,25 25,10 21,6 6,21" fill="#F8FAFC" stroke="#0F172A" stroke-width="1.6" stroke-linejoin="round"/>
+                  <polygon id="brushSvgTip" points="6,26 10,25 6,21" fill="#FF3B30" stroke="#0F172A" stroke-width="1.2"/>
+                  <polygon points="21,6 25,10 27,8 23,4" fill="#94A3B8" stroke="#0F172A" stroke-width="1.4" stroke-linejoin="round"/>
+                  <circle id="brushColorDot" cx="4" cy="28" r="3.5" fill="#FF3B30" stroke="#FFFFFF" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <div class="brush-info">
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <span id="toolIndicatorIcon">🪣</span>
+                  <span class="brush-mode-text" id="brushModeText">Tap to Fill</span>
+                </div>
+                <span class="brush-color-name" id="brushColorName">Color: Red</span>
+              </div>
+            </div>
+
+            <div class="tool-group">
+              <button type="button" class="tool-btn btn-undo" id="btnUndo" onclick="undoLastColorAction()" title="Undo Last Action">
+                <span>↩️ Undo</span>
+              </button>
+              <button type="button" class="tool-btn btn-clean" id="btnCleanCanvas" onclick="cleanRasterCanvas()" title="Reset Canvas">
+                <span>🧹 Clean</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Raster custom drawing palette (active for uploaded pictures) -->
+          <div class="raster-palette raster-only" id="rasterPalette" style="display:none;"></div>
+
+          <!-- Action buttons (Placed in Right Panel on Desktop, Stacked Below on Mobile) -->
+          <div class="controls-strip" id="controlsStrip">
+            <button class="btn-studio-action" onclick="navigateGame(-1)">◀ Previous</button>
+            <button class="btn-studio-action" onclick="navigateGame(1)">Next ▶</button>
+            <button class="btn-studio-action btn-print" onclick="if(typeof window.gtag==='function'){window.gtag('event','print_drawing',{item_name:currentGame.label,item_category:currentGame.catName});} window.print()">🖨️ Print</button>
+            <button class="btn-studio-action btn-save" onclick="saveArtwork()">💾 Save Artwork</button>
           </div>
         </div>
-
-        <div class="tool-group">
-          <button type="button" class="tool-btn btn-undo" id="btnUndo" onclick="undoLastColorAction()" title="Undo Last Action">
-            <span>↩️ Undo</span>
-          </button>
-          <button type="button" class="tool-btn btn-clean" id="btnCleanCanvas" onclick="cleanRasterCanvas()" title="Reset Canvas">
-            <span>🧹 Clean</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Raster custom drawing palette (active for uploaded pictures) -->
-      <div class="raster-palette" id="rasterPalette"></div>
-
-      <div class="controls-strip">
-        <button class="btn-studio-action" onclick="navigateGame(-1)">◀ Previous</button>
-        <button class="btn-studio-action" onclick="navigateGame(1)">Next ▶</button>
-        <button class="btn-studio-action btn-print" onclick="if(typeof window.gtag==='function'){window.gtag('event','print_drawing',{item_name:currentGame.label,item_category:currentGame.catName});} window.print()">🖨️ Print</button>
-        <button class="btn-studio-action btn-save" onclick="saveArtwork()">💾 Save Artwork</button>
       </div>
     </main>
 
@@ -973,6 +1167,7 @@
     }
 
     function loadCreateJSGame(game) {
+      document.querySelectorAll('.raster-only').forEach(el => el.style.display = 'none');
       const s = document.createElement('script');
       s.src = '/' + game.gameScript.split('?')[0];
       s.onload = function() {
@@ -1130,16 +1325,45 @@
       const fillRgb = hexToRgb(fillHex);
       const fillR = fillRgb[0], fillG = fillRgb[1], fillB = fillRgb[2];
 
-      const startIdx = (startY * w + startX) * 4;
-      const startR = data[startIdx];
-      const startG = data[startIdx + 1];
-      const startB = data[startIdx + 2];
-      const startA = data[startIdx + 3];
+      let sX = startX;
+      let sY = startY;
+      let startIdx = (sY * w + sX) * 4;
+      let startR = data[startIdx];
+      let startG = data[startIdx + 1];
+      let startB = data[startIdx + 2];
+      let startA = data[startIdx + 3];
+      let startLum = 0.299 * startR + 0.587 * startG + 0.114 * startB;
 
-      // Luminance check: don't fill if clicking directly on a dark line/contour
-      const startLum = 0.299 * startR + 0.587 * startG + 0.114 * startB;
+      // Smart Touch Snapping: If finger tapped directly on a dark outline, look in 1-5px radius for fillable space
       if (startLum < 75 && startA > 160) {
-        return; // Don't wipe out the outline
+        let found = false;
+        for (let r = 1; r <= 5 && !found; r++) {
+          const offsets = [
+            [0, -r], [0, r], [-r, 0], [r, 0],
+            [-r, -r], [r, -r], [-r, r], [r, r]
+          ];
+          for (let i = 0; i < offsets.length; i++) {
+            const nx = sX + offsets[i][0];
+            const ny = sY + offsets[i][1];
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              const nIdx = (ny * w + nx) * 4;
+              const nLum = 0.299 * data[nIdx] + 0.587 * data[nIdx + 1] + 0.114 * data[nIdx + 2];
+              if (nLum >= 75) {
+                sX = nx;
+                sY = ny;
+                startIdx = nIdx;
+                startR = data[nIdx];
+                startG = data[nIdx + 1];
+                startB = data[nIdx + 2];
+                startA = data[nIdx + 3];
+                startLum = nLum;
+                found = true;
+                break;
+              }
+            }
+          }
+        }
+        if (!found) return; // Surrounded entirely by thick dark line
       }
 
       // Check if target area already matches the fill color
@@ -1236,8 +1460,9 @@
 
     // Raster Coloring Engine for Admin-uploaded Pictures
     function loadRasterColoringGame(game) {
-      const toolBar = document.getElementById('rasterToolBar');
-      if (toolBar) toolBar.style.display = 'flex';
+      document.querySelectorAll('.raster-only').forEach(el => el.style.display = 'flex');
+      const titleEl = document.getElementById('toolsSideTitle');
+      if (titleEl && window.innerWidth >= 900) titleEl.style.display = 'flex';
 
       const palette = document.getElementById('rasterPalette');
       if (palette) {
@@ -1343,7 +1568,7 @@
         renderImageToCanvas();
       }
 
-      // Pointer interactions (Tap to Fill & Smooth Paint Brush)
+      // Pointer & Touch interactions (Tap to Fill & Smooth Paint Brush)
       let isPointerDown = false;
       let startPos = { x: 0, y: 0 };
       let lastX = 0, lastY = 0;
@@ -1353,8 +1578,15 @@
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const clientX = e.touches ? e.touches[0].clientX : (e.changedTouches ? e.changedTouches[0].clientX : e.clientX);
-        const clientY = e.touches ? e.touches[0].clientY : (e.changedTouches ? e.changedTouches[0].clientY : e.clientY);
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if (e.touches && e.touches.length > 0) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+          clientX = e.changedTouches[0].clientX;
+          clientY = e.changedTouches[0].clientY;
+        }
         return {
           x: Math.round((clientX - rect.left) * scaleX),
           y: Math.round((clientY - rect.top) * scaleY)
@@ -1362,6 +1594,7 @@
       }
 
       function onPointerDown(e) {
+        if (e.cancelable) e.preventDefault();
         isPointerDown = true;
         hasDragged = false;
         const pos = getCanvasPos(e);
@@ -1369,7 +1602,10 @@
         lastX = pos.x;
         lastY = pos.y;
 
-        if (currentTool === 'brush') {
+        // BUCKET TOOL: Fill immediately on touch/click down!
+        if (currentTool === 'bucket') {
+          performFloodFill(pos.x, pos.y, currentColor);
+        } else if (currentTool === 'brush') {
           saveUndoState();
           ctx.fillStyle = currentColor;
           ctx.beginPath();
@@ -1380,9 +1616,10 @@
 
       function onPointerMove(e) {
         if (!isPointerDown) return;
+        if (e.cancelable) e.preventDefault();
         const pos = getCanvasPos(e);
         const dist = Math.hypot(pos.x - startPos.x, pos.y - startPos.y);
-        if (dist > 4) hasDragged = true;
+        if (dist > 3) hasDragged = true;
 
         if (currentTool === 'brush') {
           ctx.strokeStyle = currentColor;
@@ -1402,29 +1639,35 @@
       function onPointerUp(e) {
         if (!isPointerDown) return;
         isPointerDown = false;
-
-        if (currentTool === 'bucket') {
-          const pos = getCanvasPos(e);
-          performFloodFill(pos.x, pos.y, currentColor);
-        }
+        if (e.cancelable) e.preventDefault();
       }
 
-      canvas.onmousedown = onPointerDown;
-      canvas.onmousemove = onPointerMove;
-      window.onmouseup = onPointerUp;
-
-      canvas.ontouchstart = (e) => {
+      let lastActionTime = 0;
+      function handleTouchDown(e) {
+        const now = Date.now();
+        if (now - lastActionTime < 50) return;
+        lastActionTime = now;
         onPointerDown(e);
-        e.preventDefault();
-      };
-      canvas.ontouchmove = (e) => {
-        onPointerMove(e);
-        e.preventDefault();
-      };
-      canvas.ontouchend = (e) => {
-        onPointerUp(e);
-        e.preventDefault();
-      };
+      }
+
+      // Pointer events (modern unified standard)
+      if (window.PointerEvent) {
+        canvas.addEventListener('pointerdown', handleTouchDown, { passive: false });
+        canvas.addEventListener('pointermove', onPointerMove, { passive: false });
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
+      }
+
+      // Touch & Mouse fallbacks
+      canvas.addEventListener('touchstart', handleTouchDown, { passive: false });
+      canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+      window.addEventListener('touchend', onPointerUp);
+      window.addEventListener('touchcancel', onPointerUp);
+
+      canvas.addEventListener('mousedown', handleTouchDown);
+      canvas.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', onPointerUp);
+      canvas.addEventListener('click', handleTouchDown);
     }
 
     function makeResponsive(isResp, respDim, isScale, scaleType, lib) {
