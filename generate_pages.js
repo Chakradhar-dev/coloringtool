@@ -816,14 +816,14 @@ ${renderSeoHeadTags({
       display: flex;
       justify-content: center;
       align-items: center;
-      cursor: url('/images/paintbrush-cursor.svg') 2 30, crosshair;
+      cursor: url('/images/paintbrush-cursor.png') 12 43, url('/images/paintbrush-cursor.svg') 3 29, crosshair;
     }
     #canvas {
       width: 100%;
       height: 100%;
       display: block;
       touch-action: none;
-      cursor: url('/images/paintbrush-cursor.svg') 2 30, crosshair;
+      cursor: url('/images/paintbrush-cursor.png') 12 43, url('/images/paintbrush-cursor.svg') 3 29, crosshair;
     }
     .controls-strip {
       display: grid;
@@ -1779,16 +1779,18 @@ ${renderSeoHeadTags({
       const color = c || currentColor || '#FF3B30';
       const encColor = encodeURIComponent(color);
       const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">' +
-        '<defs><filter id="s" x="-20%" y="-20%" width="150%" height="150%"><feDropShadow dx="1" dy="1" stdDeviation="0.8" flood-color="#000000" flood-opacity="0.45"/></filter></defs>' +
+        '<defs><filter id="s" x="-20%" y="-20%" width="150%" height="150%"><feDropShadow dx="1" dy="1" stdDeviation="0.6" flood-color="#000000" flood-opacity="0.45"/></filter></defs>' +
         '<g filter="url(#s)">' +
-        '<path d="M21,3 L29,11 L27,13 L19,5 Z" fill="#D97706" stroke="#78350F" stroke-width="1.2" stroke-linejoin="round"/>' +
-        '<path d="M16,8 L23,15 L19,19 L12,12 Z" fill="#E2E8F0" stroke="#475569" stroke-width="1.2" stroke-linejoin="round"/>' +
-        '<line x1="14.5" y1="13.5" x2="20.5" y2="17.5" stroke="#94A3B8" stroke-width="0.8"/>' +
-        '<path d="M12,12 L19,19 L11,25 C7,29 2,30 2,30 C2,30 3,25 7,21 Z" fill="' + encColor + '" stroke="#0F172A" stroke-width="1.4" stroke-linejoin="round"/>' +
-        '<path d="M13,15 L9,21 C7,23 5,26 4,28" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-linecap="round" fill="none"/>' +
-        '<circle cx="2" cy="30" r="1.8" fill="' + encColor + '" stroke="#FFFFFF" stroke-width="0.8"/>' +
+        '<path d="M22,2 C23.8,0.2 26.5,0.2 28.3,2 C30.1,3.8 30.1,6.5 28.3,8.3 L17.5,17.5 L13.5,13.5 L22,2 Z" fill="#FF1D6B" stroke="#A80036" stroke-width="0.8"/>' +
+        '<line x1="22.5" y1="4" x2="16" y2="15" stroke="rgba(255,255,255,0.65)" stroke-width="0.8" stroke-linecap="round"/>' +
+        '<path d="M13.5,13.5 L17.5,17.5 L15,20 L11,16 Z" fill="#94A3B8" stroke="#475569" stroke-width="0.8"/>' +
+        '<line x1="12.5" y1="17.5" x2="16" y2="15.5" stroke="#E2E8F0" stroke-width="0.6"/>' +
+        '<path d="M11,16 L15,20 C14,23 9.5,26.5 3,29 C3,29 5.5,22.5 8,19 Z" fill="#FFB703" stroke="#D97706" stroke-width="0.8" stroke-linejoin="round"/>' +
+        '<path d="M11.5,18.5 C10,21.5 7,24.5 4.5,27.5" stroke="#F59E0B" stroke-width="0.6" fill="none"/>' +
+        '<path d="M3,29 C5,26.5 7,25.5 8.5,26 C7.5,27.8 5.5,28.8 3,29 Z" fill="' + encColor + '" stroke="#0F172A" stroke-width="0.6"/>' +
+        '<circle cx="3" cy="29" r="1.5" fill="' + encColor + '"/>' +
         '</g></svg>';
-      const cursorVal = 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '") 2 30, url(/images/paintbrush-cursor.svg) 2 30, crosshair';
+      const cursorVal = 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '") 3 29, url(/images/paintbrush-cursor.png) 12 43, url(/images/paintbrush-cursor.svg) 3 29, crosshair';
       if (canvas) canvas.style.cursor = cursorVal;
       const wrap = document.querySelector('.canvas-container');
       if (wrap) wrap.style.cursor = cursorVal;
