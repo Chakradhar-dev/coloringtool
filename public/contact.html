@@ -194,12 +194,12 @@
         });
       }
     });
-    // Live header logo sync across open tabs
+    // Live header & footer logo sync across open tabs & instant load
     (function() {
       function syncHeaderLogo(cfg) {
         if (!cfg || !cfg.logo) return;
         const link = document.getElementById('brandLogoLink');
-        if (!link) return;
+        const footerLogo = document.querySelector('.footer-logo');
         const logo = cfg.logo;
         const mode = logo.mode || (logo.imageSrc ? 'image_text' : 'icon_text');
         const sName = cfg.siteName || logo.text || 'ColoringTool';
@@ -207,14 +207,46 @@
         const txtHtml = (txt === 'ColoringTool' || txt === 'ColoringTool.com') ?
           '<span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>' :
           ('<span class="brand-text">' + txt + '</span>');
-        if (mode === 'image_only' && logo.imageSrc) {
-          link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">';
-        } else if (mode === 'image_text' && logo.imageSrc) {
-          link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">' + txtHtml;
-        } else {
-          link.innerHTML = '<div class="brand-logo-icon">' + (logo.icon || '🎨') + '</div>' + txtHtml;
+        if (link) {
+          if (mode === 'image_only' && logo.imageSrc) {
+            link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">';
+          } else if (mode === 'image_text' && logo.imageSrc) {
+            link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">' + txtHtml;
+          } else {
+            link.innerHTML = '<div class="brand-logo-icon">' + (logo.icon || '🎨') + '</div>' + txtHtml;
+          }
         }
+        if (footerLogo) {
+          if (logo.imageSrc && mode !== 'icon_text') {
+            footerLogo.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" style="max-height:36px;max-width:140px;object-fit:contain;display:block;">';
+          } else {
+            footerLogo.innerHTML = '<div class="brand-logo-icon" style="width:34px;height:34px;font-size:1.2rem;">' + (logo.icon || '🎨') + '</div><strong>' + txt + '.com</strong>';
+          }
+        }
+        try {
+          localStorage.setItem('coloringtool_cached_logo', JSON.stringify({ logo: logo, siteName: sName }));
+        } catch(e) {}
       }
+      // 1. Instant sync from local cache on load
+      try {
+        const cached = JSON.parse(localStorage.getItem('coloringtool_cached_logo') || 'null');
+        if (cached && cached.logo) syncHeaderLogo(cached);
+      } catch(e) {}
+      // 2. Fetch fresh config from server on load (bypassing any browser cache)
+      fetch('/api/site-config?t=' + Date.now()).then(function(r){ return r.json(); }).then(syncHeaderLogo).catch(function(){});
+      // 3. Listen for BroadcastChannel updates from admin panel in real-time
+      try {
+        if ('BroadcastChannel' in window) {
+          const bc = new BroadcastChannel('coloringtool_sync');
+          bc.onmessage = function(ev) {
+            if (ev.data && ev.data.type === 'logo_update') {
+              if (ev.data.config) syncHeaderLogo(ev.data.config);
+              else fetch('/api/site-config?t=' + Date.now()).then(function(r){ return r.json(); }).then(syncHeaderLogo).catch(function(){});
+            }
+          };
+        }
+      } catch(e) {}
+      // 4. Storage event fallback
       window.addEventListener('storage', function(e) {
         if (e.key === 'coloringtool_logo_update' || e.key === 'coloringtool_site_config') {
           fetch('/api/site-config?t=' + Date.now()).then(function(r){ return r.json(); }).then(syncHeaderLogo).catch(function(){});

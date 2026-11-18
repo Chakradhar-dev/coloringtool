@@ -2215,6 +2215,7 @@
         mode: mode,
         icon: emoji,
         text: siteName,
+        siteName: siteName,
         imageSrc: imageSrcToSend,
         imageBase64: (mode === 'icon_text') ? null : (pendingLogoBase64 || null),
         filename: pendingLogoFilename || null
@@ -2250,6 +2251,13 @@
           updateLogoPreview();
           try {
             localStorage.setItem('coloringtool_logo_update', String(Date.now()));
+            localStorage.setItem('coloringtool_cached_logo', JSON.stringify({ logo: data.logo, siteName: siteConfig.siteName }));
+          } catch(err) {}
+          try {
+            if ('BroadcastChannel' in window) {
+              const bc = new BroadcastChannel('coloringtool_sync');
+              bc.postMessage({ type: 'logo_update', config: { logo: data.logo, siteName: siteConfig.siteName } });
+            }
           } catch(err) {}
           alert('Website Logo & Branding updated successfully! 🚀\nPages have been updated.');
         } else {

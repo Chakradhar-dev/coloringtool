@@ -884,6 +884,7 @@ const server = http.createServer(async (req, res) => {
         text: text
       };
       if (body.siteName) siteConfig.siteName = body.siteName;
+      else if (text) siteConfig.siteName = text;
 
       writeJson('site_config.json', siteConfig);
 
