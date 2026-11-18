@@ -216,7 +216,7 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
   if (logoMode === 'image_only' && logo.imageSrc) {
     logoHtml = `
       <a href="/" class="brand-logo" id="brandLogoLink" title="${siteName}">
-        <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">
+        <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo">
       </a>
     `;
   } else if (logoMode === 'image_text' && logo.imageSrc) {

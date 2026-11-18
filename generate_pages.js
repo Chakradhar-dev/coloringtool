@@ -151,7 +151,7 @@ function renderBrandLogo() {
   if (mode === 'image_only' && logo.imageSrc) {
     return `
       <a href="/" class="brand-logo" id="brandLogoLink" title="${escapeAttr(siteName)}">
-        <img src="${escapeAttr(logo.imageSrc)}" alt="${escapeAttr(siteName)}" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">
+        <img src="${escapeAttr(logo.imageSrc)}" alt="${escapeAttr(siteName)}" class="brand-custom-logo">
       </a>
     `;
   }
@@ -288,7 +288,7 @@ function renderNav(activeTab = '') {
           ('<span class="brand-text">' + txt + '</span>');
         if (link) {
           if (mode === 'image_only' && logo.imageSrc) {
-            link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">';
+            link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo">';
           } else if (mode === 'image_text' && logo.imageSrc) {
             link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">' + txtHtml;
           } else {
