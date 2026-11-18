@@ -816,12 +816,14 @@ ${renderSeoHeadTags({
       display: flex;
       justify-content: center;
       align-items: center;
+      cursor: url('/images/paintbrush-cursor.svg') 2 30, crosshair;
     }
     #canvas {
       width: 100%;
       height: 100%;
       display: block;
       touch-action: none;
+      cursor: url('/images/paintbrush-cursor.svg') 2 30, crosshair;
     }
     .controls-strip {
       display: grid;
@@ -1773,6 +1775,25 @@ ${renderSeoHeadTags({
       try { createjs.Sound.play('sonidoClic'); } catch(e) {}
     }
 
+    function updateBrushCursor(c) {
+      const color = c || currentColor || '#FF3B30';
+      const encColor = encodeURIComponent(color);
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">' +
+        '<defs><filter id="s" x="-20%" y="-20%" width="150%" height="150%"><feDropShadow dx="1" dy="1" stdDeviation="0.8" flood-color="#000000" flood-opacity="0.45"/></filter></defs>' +
+        '<g filter="url(#s)">' +
+        '<path d="M21,3 L29,11 L27,13 L19,5 Z" fill="#D97706" stroke="#78350F" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '<path d="M16,8 L23,15 L19,19 L12,12 Z" fill="#E2E8F0" stroke="#475569" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '<line x1="14.5" y1="13.5" x2="20.5" y2="17.5" stroke="#94A3B8" stroke-width="0.8"/>' +
+        '<path d="M12,12 L19,19 L11,25 C7,29 2,30 2,30 C2,30 3,25 7,21 Z" fill="' + encColor + '" stroke="#0F172A" stroke-width="1.4" stroke-linejoin="round"/>' +
+        '<path d="M13,15 L9,21 C7,23 5,26 4,28" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-linecap="round" fill="none"/>' +
+        '<circle cx="2" cy="30" r="1.8" fill="' + encColor + '" stroke="#FFFFFF" stroke-width="0.8"/>' +
+        '</g></svg>';
+      const cursorVal = 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '") 2 30, url(/images/paintbrush-cursor.svg) 2 30, crosshair';
+      if (canvas) canvas.style.cursor = cursorVal;
+      const wrap = document.querySelector('.canvas-container');
+      if (wrap) wrap.style.cursor = cursorVal;
+    }
+
     function setStudioTool(tool) {
       currentTool = 'brush';
       const brushBtn = document.getElementById('toolBrushBtn');
@@ -1782,7 +1803,7 @@ ${renderSeoHeadTags({
       if (brushBtn) brushBtn.classList.add('active');
       if (modeText) modeText.innerText = 'Paint Brush';
       if (iconSpan) iconSpan.innerText = '🖌️';
-      canvas.style.cursor = 'crosshair';
+      updateBrushCursor(currentColor);
       try { createjs.Sound.play('sonidoClic'); } catch(e) {}
     }
 
@@ -1807,6 +1828,7 @@ ${renderSeoHeadTags({
       const nameEl = document.getElementById('brushColorName');
       if (nameEl) nameEl.innerText = 'Color: ' + (COLOR_NAMES[c] || c);
 
+      updateBrushCursor(c);
       try { createjs.Sound.play('sonidoClic'); } catch(e) {}
     }
 
