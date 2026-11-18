@@ -174,6 +174,40 @@ function renderBrandLogo() {
 }
 
 function renderNav(activeTab = '') {
+  const totalDrawings = games.length;
+  const catTaglines = {
+    animals: 'Lions, puppies, elephants & pets',
+    unicorn: 'Magical horns, rainbows & stars',
+    princess: 'Royal gowns, tiaras & castles',
+    transport: 'Cars, rockets, airplanes & trains',
+    christmas: 'Santa Claus, trees & reindeer',
+    food: 'Ice creams, cupcakes & fruits'
+  };
+
+  const megaCardsHtml = categories.map(c => {
+    const count = games.filter(g => g.catId === c.id).length;
+    const tagline = catTaglines[c.id] || (c.description ? c.description.slice(0, 36) + '...' : 'Color online for free');
+    const bannerImg = c.banner ? `/${c.banner}` : '';
+    const emoji = c.icon || '🎨';
+    const accent = c.color || '#4F46E5';
+
+    return `
+      <a href="/${c.id}/" class="mega-card" style="--cat-accent: ${accent};">
+        <div class="mega-card-icon-wrap">
+          ${bannerImg ? `<img src="${bannerImg}" alt="${c.name}" class="mega-card-img" loading="lazy">` : `<span class="mega-card-emoji">${emoji}</span>`}
+        </div>
+        <div class="mega-card-content">
+          <div class="mega-card-top-line">
+            <span class="mega-card-title">${c.name}</span>
+            <span class="mega-card-badge">${count}</span>
+          </div>
+          <span class="mega-card-tagline">${tagline}</span>
+          <span class="mega-card-link-arrow">Color Now <span class="arrow-sym">→</span></span>
+        </div>
+      </a>
+    `;
+  }).join('');
+
   return `
   <nav class="site-nav">
     <div class="nav-container">
@@ -185,10 +219,29 @@ function renderNav(activeTab = '') {
       </button>
       <div class="nav-links" id="siteNavLinks">
         <a href="/" ${activeTab === 'home' ? 'class="active"' : ''}>🏠 Home</a>
-        <div class="dropdown">
-          <a href="javascript:void(0)" class="dropbtn" onclick="toggleMobileDropdown(this)">📂 Categories ▾</a>
-          <div class="dropdown-content">
-            ${categories.map(c => `<a href="/${c.id}/">${c.icon || '🎨'} ${c.name}</a>`).join('')}
+        <div class="dropdown mega-dropdown">
+          <a href="javascript:void(0)" class="dropbtn" onclick="toggleMobileDropdown(this, event)">📂 Categories <span class="nav-arrow">▾</span></a>
+          <div class="dropdown-content mega-menu" id="categoryMegaMenu">
+            <div class="mega-menu-header">
+              <div class="mega-header-text">
+                <span class="mega-eyebrow">🎨 Coloring Themes</span>
+                <span class="mega-heading">Explore All Categories</span>
+              </div>
+              <span class="mega-stat-pill">6 Themes • ${totalDrawings}+ Drawings</span>
+            </div>
+            <div class="mega-grid">
+              ${megaCardsHtml}
+            </div>
+            <div class="mega-bottom-bar">
+              <div class="mega-bottom-left">
+                <span class="mega-sparkle">✨</span>
+                <span class="mega-bottom-caption"><strong>100% Free Coloring Pages:</strong> Interactive canvas, paint brush &amp; vibrant palette!</span>
+              </div>
+              <div class="mega-bottom-right">
+                <a href="/studio.html?random=1" class="mega-quick-link mega-random-btn">🎲 Surprise Drawing</a>
+                <a href="/gallery.html" class="mega-quick-link mega-gallery-btn">🖼️ Art Gallery →</a>
+              </div>
+            </div>
           </div>
         </div>
         <a href="/gallery.html" ${activeTab === 'gallery' ? 'class="active"' : ''}>🎨 My Art Gallery</a>
@@ -203,12 +256,23 @@ function renderNav(activeTab = '') {
       const el = document.getElementById('siteNavLinks');
       if (el) el.classList.toggle('mobile-open');
     }
-    function toggleMobileDropdown(btn) {
+    function toggleMobileDropdown(btn, e) {
+      if (e) e.stopPropagation();
+      const parent = btn.closest('.dropdown');
+      if (!parent) return;
       if (window.innerWidth <= 768) {
-        const parent = btn.closest('.dropdown');
-        if (parent) parent.classList.toggle('mobile-open');
+        parent.classList.toggle('mobile-open');
+      } else {
+        parent.classList.toggle('desktop-open');
       }
     }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown.desktop-open').forEach(function(d) {
+          d.classList.remove('desktop-open');
+        });
+      }
+    });
     // Live header logo sync across open tabs
     (function() {
       function syncHeaderLogo(cfg) {

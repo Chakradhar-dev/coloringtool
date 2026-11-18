@@ -667,10 +667,113 @@
       </button>
       <div class="nav-links" id="siteNavLinks">
         <a href="/" >🏠 Home</a>
-        <div class="dropdown">
-          <a href="javascript:void(0)" class="dropbtn" onclick="toggleMobileDropdown(this)">📂 Categories ▾</a>
-          <div class="dropdown-content">
-            <a href="/animals/">🦁 Animals</a><a href="/unicorn/">🦄 Unicorns</a><a href="/princess/">👑 Princesses</a><a href="/transport/">🚀 Transportation</a><a href="/christmas/">🎄 Christmas</a><a href="/food/">🍦 Food</a>
+        <div class="dropdown mega-dropdown">
+          <a href="javascript:void(0)" class="dropbtn" onclick="toggleMobileDropdown(this, event)">📂 Categories <span class="nav-arrow">▾</span></a>
+          <div class="dropdown-content mega-menu" id="categoryMegaMenu">
+            <div class="mega-menu-header">
+              <div class="mega-header-text">
+                <span class="mega-eyebrow">🎨 Coloring Themes</span>
+                <span class="mega-heading">Explore All Categories</span>
+              </div>
+              <span class="mega-stat-pill">6 Themes • 114+ Drawings</span>
+            </div>
+            <div class="mega-grid">
+              
+      <a href="/animals/" class="mega-card" style="--cat-accent: #EF4444;">
+        <div class="mega-card-icon-wrap">
+          <img src="/minis-menu/sm-animals.png" alt="Animals" class="mega-card-img" loading="lazy">
+        </div>
+        <div class="mega-card-content">
+          <div class="mega-card-top-line">
+            <span class="mega-card-title">Animals</span>
+            <span class="mega-card-badge">22</span>
+          </div>
+          <span class="mega-card-tagline">Lions, puppies, elephants & pets</span>
+          <span class="mega-card-link-arrow">Color Now <span class="arrow-sym">→</span></span>
+        </div>
+      </a>
+    
+      <a href="/unicorn/" class="mega-card" style="--cat-accent: #8B5CF6;">
+        <div class="mega-card-icon-wrap">
+          <img src="/minis-menu/sm-unicorns.png" alt="Unicorns" class="mega-card-img" loading="lazy">
+        </div>
+        <div class="mega-card-content">
+          <div class="mega-card-top-line">
+            <span class="mega-card-title">Unicorns</span>
+            <span class="mega-card-badge">21</span>
+          </div>
+          <span class="mega-card-tagline">Magical horns, rainbows & stars</span>
+          <span class="mega-card-link-arrow">Color Now <span class="arrow-sym">→</span></span>
+        </div>
+      </a>
+    
+      <a href="/princess/" class="mega-card" style="--cat-accent: #EC4899;">
+        <div class="mega-card-icon-wrap">
+          <img src="/minis-menu/sm-princesses.png" alt="Princesses" class="mega-card-img" loading="lazy">
+        </div>
+        <div class="mega-card-content">
+          <div class="mega-card-top-line">
+            <span class="mega-card-title">Princesses</span>
+            <span class="mega-card-badge">21</span>
+          </div>
+          <span class="mega-card-tagline">Royal gowns, tiaras & castles</span>
+          <span class="mega-card-link-arrow">Color Now <span class="arrow-sym">→</span></span>
+        </div>
+      </a>
+    
+      <a href="/transport/" class="mega-card" style="--cat-accent: #0EA5E9;">
+        <div class="mega-card-icon-wrap">
+          <img src="/minis-menu/sm-transportation.png" alt="Transportation" class="mega-card-img" loading="lazy">
+        </div>
+        <div class="mega-card-content">
+          <div class="mega-card-top-line">
+            <span class="mega-card-title">Transportation</span>
+            <span class="mega-card-badge">17</span>
+          </div>
+          <span class="mega-card-tagline">Cars, rockets, airplanes & trains</span>
+          <span class="mega-card-link-arrow">Color Now <span class="arrow-sym">→</span></span>
+        </div>
+      </a>
+    
+      <a href="/christmas/" class="mega-card" style="--cat-accent: #10B981;">
+        <div class="mega-card-icon-wrap">
+          <img src="/minis-menu/sm-christmas.png" alt="Christmas" class="mega-card-img" loading="lazy">
+        </div>
+        <div class="mega-card-content">
+          <div class="mega-card-top-line">
+            <span class="mega-card-title">Christmas</span>
+            <span class="mega-card-badge">15</span>
+          </div>
+          <span class="mega-card-tagline">Santa Claus, trees & reindeer</span>
+          <span class="mega-card-link-arrow">Color Now <span class="arrow-sym">→</span></span>
+        </div>
+      </a>
+    
+      <a href="/food/" class="mega-card" style="--cat-accent: #F59E0B;">
+        <div class="mega-card-icon-wrap">
+          <img src="/minis-menu/sm-food.png" alt="Food" class="mega-card-img" loading="lazy">
+        </div>
+        <div class="mega-card-content">
+          <div class="mega-card-top-line">
+            <span class="mega-card-title">Food</span>
+            <span class="mega-card-badge">18</span>
+          </div>
+          <span class="mega-card-tagline">Ice creams, cupcakes & fruits</span>
+          <span class="mega-card-link-arrow">Color Now <span class="arrow-sym">→</span></span>
+        </div>
+      </a>
+    
+            </div>
+            <div class="mega-bottom-bar">
+              <div class="mega-bottom-left">
+                <span class="mega-sparkle">✨</span>
+                <span class="mega-bottom-caption"><strong>100% Free Coloring Pages:</strong> Interactive canvas, paint brush &amp; vibrant palette!</span>
+              </div>
+              <div class="mega-bottom-right">
+                <a href="/studio.html?random=1" class="mega-quick-link mega-random-btn">🎲 Surprise Drawing</a>
+                <a href="/gallery.html" class="mega-quick-link mega-gallery-btn">🖼️ Art Gallery →</a>
+              </div>
+            </div>
           </div>
         </div>
         <a href="/gallery.html" >🎨 My Art Gallery</a>
@@ -685,12 +788,23 @@
       const el = document.getElementById('siteNavLinks');
       if (el) el.classList.toggle('mobile-open');
     }
-    function toggleMobileDropdown(btn) {
+    function toggleMobileDropdown(btn, e) {
+      if (e) e.stopPropagation();
+      const parent = btn.closest('.dropdown');
+      if (!parent) return;
       if (window.innerWidth <= 768) {
-        const parent = btn.closest('.dropdown');
-        if (parent) parent.classList.toggle('mobile-open');
+        parent.classList.toggle('mobile-open');
+      } else {
+        parent.classList.toggle('desktop-open');
       }
     }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown.desktop-open').forEach(function(d) {
+          d.classList.remove('desktop-open');
+        });
+      }
+    });
     // Live header logo sync across open tabs
     (function() {
       function syncHeaderLogo(cfg) {
