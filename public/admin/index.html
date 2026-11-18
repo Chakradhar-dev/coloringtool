@@ -1555,11 +1555,13 @@
         siteConfig = await safeParseJson(fbRes) || {};
       }
 
-      // Check localStorage overrides
-      try {
-        const localConfig = JSON.parse(localStorage.getItem('coloringtool_local_config') || 'null');
-        if (localConfig) Object.assign(siteConfig, localConfig);
-      } catch(e) {}
+      // Fallback to localStorage only if server config failed to load
+      if (!siteConfig || !siteConfig.siteName) {
+        try {
+          const localConfig = JSON.parse(localStorage.getItem('coloringtool_local_config') || 'null');
+          if (localConfig) siteConfig = localConfig;
+        } catch(e) {}
+      }
 
       // Populate Overview tables
       renderOverviewTables();
@@ -2200,12 +2202,21 @@
       const siteName = document.getElementById('logoSiteNameInput').value.trim() || 'ColoringTool';
       const urlInput = document.getElementById('logoUrlInput').value.trim();
 
+      const saveBtn = document.querySelector('button[onclick="saveLogoSettings()"]');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerText = '⏳ Saving & Updating Website...';
+      }
+
+      // If mode is icon_text, clear imageSrc
+      const imageSrcToSend = (mode === 'icon_text') ? '' : (urlInput || (pendingLogoBase64 ? '' : (siteConfig.logo?.imageSrc || '')));
+
       const payload = {
         mode: mode,
         icon: emoji,
         text: siteName,
-        imageSrc: urlInput || (pendingLogoBase64 ? '' : (siteConfig.logo?.imageSrc || '')),
-        imageBase64: pendingLogoBase64 || null,
+        imageSrc: imageSrcToSend,
+        imageBase64: (mode === 'icon_text') ? null : (pendingLogoBase64 || null),
         filename: pendingLogoFilename || null
       };
 
@@ -2215,47 +2226,53 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+        if (res.status === 401) {
+          alert('Session expired or unauthorized. Please log in again.');
+          localStorage.removeItem('coloringtool_admin_token');
+          window.location.reload();
+          return;
+        }
         const data = await safeParseJson(res);
         if (data && data.success && data.logo) {
           siteConfig.logo = data.logo;
-          siteConfig.siteName = siteName;
+          siteConfig.siteName = data.siteName || siteName;
           if (data.logo.imageSrc) {
             document.getElementById('logoUrlInput').value = data.logo.imageSrc;
             document.getElementById('uploadedLogoThumb').src = data.logo.imageSrc;
+            document.getElementById('uploadedLogoThumbBox').style.display = 'flex';
+          } else {
+            document.getElementById('logoUrlInput').value = '';
+            document.getElementById('uploadedLogoThumbBox').style.display = 'none';
           }
           pendingLogoBase64 = null;
           pendingLogoFilename = '';
+          saveLocalConfig();
+          updateLogoPreview();
+          try {
+            localStorage.setItem('coloringtool_logo_update', String(Date.now()));
+          } catch(err) {}
+          alert('Website Logo & Branding updated successfully! 🚀\nPages have been updated.');
         } else {
-          siteConfig.logo = {
-            mode: mode,
-            icon: emoji,
-            text: siteName,
-            imageSrc: pendingLogoBase64 || urlInput || (siteConfig.logo?.imageSrc || '')
-          };
-          siteConfig.siteName = siteName;
+          alert('Failed to update logo: ' + ((data && data.error) ? data.error : 'Server returned an error'));
         }
       } catch(e) {
-        siteConfig.logo = {
-          mode: mode,
-          icon: emoji,
-          text: siteName,
-          imageSrc: pendingLogoBase64 || urlInput || (siteConfig.logo?.imageSrc || '')
-        };
-        siteConfig.siteName = siteName;
+        alert('Network error updating logo: ' + e.message);
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerText = '💾 Save Logo & Update Website';
+        }
       }
-
-      saveLocalConfig();
-      alert('Website Logo & Branding updated successfully! 🚀');
-      updateLogoPreview();
     }
 
-    function resetLogoDefault() {
+    async function resetLogoDefault() {
       if (!confirm('Reset website logo to default (ColoringTool.com with 🎨 icon)?')) return;
       document.querySelector('input[name="logoModeRadio"][value="icon_text"]').checked = true;
       document.getElementById('logoEmojiInput').value = '🎨';
       document.getElementById('logoSiteNameInput').value = 'ColoringTool';
       clearUploadedLogo();
       updateLogoPreview();
+      await saveLogoSettings();
     }
 
     // ==========================================

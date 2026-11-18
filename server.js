@@ -13,8 +13,23 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-// In-memory active session tokens
-const activeSessions = new Set();
+// Persistent active session tokens
+const SESSIONS_FILE = path.join(DATA_DIR, '.sessions.json');
+function loadSessions() {
+  try {
+    if (fs.existsSync(SESSIONS_FILE)) {
+      const arr = JSON.parse(fs.readFileSync(SESSIONS_FILE, 'utf8'));
+      if (Array.isArray(arr)) return new Set(arr);
+    }
+  } catch(e) {}
+  return new Set();
+}
+function saveSessions(set) {
+  try {
+    fs.writeFileSync(SESSIONS_FILE, JSON.stringify([...set]), 'utf8');
+  } catch(e) {}
+}
+const activeSessions = loadSessions();
 
 // Helper to read and write JSON data files safely
 function readJson(filename, defaultVal = {}) {
@@ -150,24 +165,30 @@ function renderDynamicContentPage(pageTitle, pageHeading, contentHtml, siteConfi
 
   const logo = siteConfig.logo || {};
   const logoMode = logo.mode || (logo.imageSrc ? 'image_text' : 'icon_text');
-  const siteName = siteConfig.siteName || 'ColoringTool';
+  const siteName = siteConfig.siteName || logo.text || 'ColoringTool';
+  const logoText = logo.text || siteName || 'ColoringTool';
+  let brandTextHtml = `<span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>`;
+  if (logoText !== 'ColoringTool' && logoText !== 'ColoringTool.com') {
+    brandTextHtml = `<span class="brand-text">${escapeHtml(logoText)}</span>`;
+  }
+
   let logoHtml = `
-    <a href="/" class="brand-logo" title="${siteName}">
+    <a href="/" class="brand-logo" id="brandLogoLink" title="${siteName}">
       <div class="brand-logo-icon">${logo.icon || '🎨'}</div>
-      <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+      ${brandTextHtml}
     </a>
   `;
   if (logoMode === 'image_only' && logo.imageSrc) {
     logoHtml = `
-      <a href="/" class="brand-logo" title="${siteName}">
+      <a href="/" class="brand-logo" id="brandLogoLink" title="${siteName}">
         <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">
       </a>
     `;
   } else if (logoMode === 'image_text' && logo.imageSrc) {
     logoHtml = `
-      <a href="/" class="brand-logo" title="${siteName}">
+      <a href="/" class="brand-logo" id="brandLogoLink" title="${siteName}">
         <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">
-        <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+        ${brandTextHtml}
       </a>
     `;
   }
@@ -406,6 +427,7 @@ const server = http.createServer(async (req, res) => {
     if (body.username === validUsername && body.password === validPassword) {
       const sessionToken = crypto.randomBytes(32).toString('hex');
       activeSessions.add(sessionToken);
+      saveSessions(activeSessions);
 
       // Set cookie for 7 days
       res.writeHead(200, {
@@ -432,11 +454,33 @@ const server = http.createServer(async (req, res) => {
     if (tokenHeader) {
       activeSessions.delete(tokenHeader.trim());
     }
+    saveSessions(activeSessions);
     res.writeHead(200, {
       'Set-Cookie': `admin_session=; Path=/; HttpOnly; Max-Age=0`,
       'Content-Type': 'application/json; charset=UTF-8'
     });
     return res.end(JSON.stringify({ success: true }));
+  }
+
+  // ========================================================
+  // PUBLIC SITE CONFIGURATION ENDPOINT
+  // ========================================================
+  if (pathname === '/api/site-config' && method === 'GET') {
+    const siteConfig = readJson('site_config.json');
+    const pubConfig = {
+      siteName: siteConfig.siteName || 'ColoringTool',
+      domain: siteConfig.domain || 'coloringtool.com',
+      siteTitle: siteConfig.siteTitle || 'ColoringTool.com — Free Online Coloring Pages for Kids',
+      tagline: siteConfig.tagline || 'Free online coloring pages for kids.',
+      logo: siteConfig.logo || { mode: 'icon_text', icon: '🎨', imageSrc: '', text: 'ColoringTool' },
+      analytics: siteConfig.analytics || {},
+      seo: siteConfig.seo || {}
+    };
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
+    return res.end(JSON.stringify(pubConfig));
   }
 
   // ========================================================
@@ -452,16 +496,24 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/admin/config' && method === 'GET') {
       const siteConfig = readJson('site_config.json');
       const safeConfig = {
-        siteName: siteConfig.siteName,
-        domain: siteConfig.domain,
-        siteTitle: siteConfig.siteTitle,
-        tagline: siteConfig.tagline,
-        adsense: siteConfig.adsense,
-        aboutUsHtml: siteConfig.aboutUsHtml,
-        privacyPolicyHtml: siteConfig.privacyPolicyHtml,
+        siteName: siteConfig.siteName || 'ColoringTool',
+        domain: siteConfig.domain || 'coloringtool.com',
+        siteTitle: siteConfig.siteTitle || 'ColoringTool.com — Free Online Coloring Pages for Kids',
+        tagline: siteConfig.tagline || 'Free online coloring pages for kids.',
+        logo: siteConfig.logo || { mode: 'icon_text', icon: '🎨', imageSrc: '', text: 'ColoringTool' },
+        analytics: siteConfig.analytics || {},
+        seo: siteConfig.seo || {},
+        adsense: siteConfig.adsense || {},
+        aboutUsHtml: siteConfig.aboutUsHtml || '',
+        privacyPolicyHtml: siteConfig.privacyPolicyHtml || '',
+        termsHtml: siteConfig.termsHtml || '',
+        contactHtml: siteConfig.contactHtml || '',
         admin: { username: siteConfig.admin?.username || 'admin' }
       };
-      res.writeHead(200, { 'Content-Type': 'application/json; charset=UTF-8' });
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      });
       return res.end(JSON.stringify(safeConfig));
     }
 
@@ -709,29 +761,54 @@ const server = http.createServer(async (req, res) => {
       const siteConfig = readJson('site_config.json');
       if (!siteConfig.logo) siteConfig.logo = {};
 
-      let logoUrl = body.logoUrl || siteConfig.logo.imageSrc || '';
+      const mode = body.mode || 'icon_text';
+      let logoUrl = '';
+      if (body.imageSrc !== undefined) {
+        logoUrl = (body.imageSrc || '').trim();
+      } else if (body.logoUrl !== undefined) {
+        logoUrl = (body.logoUrl || '').trim();
+      } else if (mode !== 'icon_text') {
+        logoUrl = siteConfig.logo.imageSrc || '';
+      }
 
-      if (body.imageBase64) {
+      if (body.imageBase64 && String(body.imageBase64).trim()) {
         try {
-          const match = body.imageBase64.match(/^data:image\/([a-zA-Z0-9\+]+);base64,(.+)$/);
-          const ext = match ? (match[1].replace('svg+xml', 'svg')) : 'png';
-          const base64Data = match ? match[2] : body.imageBase64;
-          const cleanName = (body.filename || `logo_${Date.now()}`).replace(/[^a-zA-Z0-9_\-\.]/g, '_');
-          const finalFilename = cleanName.endsWith(`.${ext}`) ? cleanName : `${cleanName}.${ext}`;
+          let base64Data = String(body.imageBase64).trim();
+          let ext = 'png';
+          if (base64Data.includes(',')) {
+            const parts = base64Data.split(',');
+            const mimeMatch = parts[0].match(/:(.*?);/);
+            if (mimeMatch && mimeMatch[1]) {
+              const mime = mimeMatch[1].toLowerCase();
+              if (mime.includes('svg')) ext = 'svg';
+              else if (mime.includes('jpeg') || mime.includes('jpg')) ext = 'jpg';
+              else if (mime.includes('webp')) ext = 'webp';
+              else if (mime.includes('gif')) ext = 'gif';
+              else ext = 'png';
+            }
+            base64Data = parts[1];
+          }
+          const cleanName = (body.filename ? path.parse(body.filename).name : `logo_${Date.now()}`).replace(/[^a-zA-Z0-9_\-]/g, '_');
+          const finalFilename = `${cleanName || 'logo'}_${Date.now()}.${ext}`;
           const targetDiskPath = path.join(UPLOADS_DIR, finalFilename);
 
-          fs.writeFileSync(targetDiskPath, Buffer.from(base64Data, 'base64'));
+          fs.writeFileSync(targetDiskPath, Buffer.from(base64Data.trim(), 'base64'));
           logoUrl = `/uploads/${finalFilename}`;
         } catch (uploadErr) {
           console.error('Failed to save uploaded logo:', uploadErr);
+          res.writeHead(500, { 'Content-Type': 'application/json; charset=UTF-8' });
+          return res.end(JSON.stringify({ success: false, error: 'Failed to save uploaded logo: ' + uploadErr.message }));
         }
       }
 
+      const icon = body.icon || siteConfig.logo.icon || '🎨';
+      const text = body.text || siteConfig.logo.text || siteConfig.siteName || 'ColoringTool';
+
       siteConfig.logo = {
-        imageSrc: logoUrl,
-        icon: body.icon || siteConfig.logo.icon || '🎨',
-        mode: body.mode || siteConfig.logo.mode || (logoUrl ? 'image_text' : 'icon_text'),
-        text: body.text || siteConfig.logo.text || 'ColoringTool'
+        imageSrc: (mode === 'icon_text') ? '' : logoUrl,
+        icon: icon,
+        mode: mode,
+        text: text
       };
       if (body.siteName) siteConfig.siteName = body.siteName;
 
@@ -740,7 +817,7 @@ const server = http.createServer(async (req, res) => {
       // Trigger automatic regeneration of static pages
       try {
         const { execSync } = require('child_process');
-        execSync('node generate_pages.js', { cwd: __dirname });
+        execSync(`"${process.execPath}" generate_pages.js`, { cwd: __dirname, stdio: 'inherit' });
       } catch (genErr) {
         console.error('Failed to regenerate pages:', genErr);
       }

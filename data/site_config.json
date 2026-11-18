@@ -2,9 +2,9 @@
   "siteName": "ColoringTool",
   "domain": "coloringtool.com",
   "logo": {
-    "mode": "icon_text",
-    "icon": "🎨",
     "imageSrc": "",
+    "icon": "🎨",
+    "mode": "icon_text",
     "text": "ColoringTool"
   },
   "siteTitle": "ColoringTool.com — Free Online Coloring Pages for Kids & Painting Games",

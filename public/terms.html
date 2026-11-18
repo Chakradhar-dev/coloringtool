@@ -44,7 +44,7 @@
   <nav class="site-nav">
     <div class="nav-container">
       
-    <a href="/" class="brand-logo" title="ColoringTool">
+    <a href="/" class="brand-logo" id="brandLogoLink" title="ColoringTool">
       <div class="brand-logo-icon">🎨</div>
       <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
     </a>
@@ -80,6 +80,33 @@
         if (parent) parent.classList.toggle('mobile-open');
       }
     }
+    // Live header logo sync across open tabs
+    (function() {
+      function syncHeaderLogo(cfg) {
+        if (!cfg || !cfg.logo) return;
+        const link = document.getElementById('brandLogoLink');
+        if (!link) return;
+        const logo = cfg.logo;
+        const mode = logo.mode || (logo.imageSrc ? 'image_text' : 'icon_text');
+        const sName = cfg.siteName || logo.text || 'ColoringTool';
+        const txt = logo.text || sName || 'ColoringTool';
+        const txtHtml = (txt === 'ColoringTool' || txt === 'ColoringTool.com') ?
+          '<span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>' :
+          ('<span class="brand-text">' + txt + '</span>');
+        if (mode === 'image_only' && logo.imageSrc) {
+          link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">';
+        } else if (mode === 'image_text' && logo.imageSrc) {
+          link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">' + txtHtml;
+        } else {
+          link.innerHTML = '<div class="brand-logo-icon">' + (logo.icon || '🎨') + '</div>' + txtHtml;
+        }
+      }
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'coloringtool_logo_update' || e.key === 'coloringtool_site_config') {
+          fetch('/api/site-config?t=' + Date.now()).then(function(r){ return r.json(); }).then(syncHeaderLogo).catch(function(){});
+        }
+      });
+    })();
   </script>
   
   <header class="hero-banner" style="padding:40px 20px 30px;">

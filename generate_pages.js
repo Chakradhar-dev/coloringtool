@@ -140,29 +140,35 @@ function renderAdUnit(slotId, label = 'ADVERTISEMENT') {
 function renderBrandLogo() {
   const logo = siteConfig.logo || {};
   const mode = logo.mode || (logo.imageSrc ? 'image_text' : 'icon_text');
-  const siteName = siteConfig.siteName || 'ColoringTool';
+  const siteName = siteConfig.siteName || logo.text || 'ColoringTool';
+  const logoText = logo.text || siteName || 'ColoringTool';
+
+  let brandTextHtml = `<span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>`;
+  if (logoText !== 'ColoringTool' && logoText !== 'ColoringTool.com') {
+    brandTextHtml = `<span class="brand-text">${escapeHtml(logoText)}</span>`;
+  }
 
   if (mode === 'image_only' && logo.imageSrc) {
     return `
-      <a href="/" class="brand-logo" title="${siteName}">
-        <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">
+      <a href="/" class="brand-logo" id="brandLogoLink" title="${escapeAttr(siteName)}">
+        <img src="${escapeAttr(logo.imageSrc)}" alt="${escapeAttr(siteName)}" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">
       </a>
     `;
   }
 
   if (mode === 'image_text' && logo.imageSrc) {
     return `
-      <a href="/" class="brand-logo" title="${siteName}">
-        <img src="${logo.imageSrc}" alt="${siteName}" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">
-        <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+      <a href="/" class="brand-logo" id="brandLogoLink" title="${escapeAttr(siteName)}">
+        <img src="${escapeAttr(logo.imageSrc)}" alt="${escapeAttr(siteName)}" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">
+        ${brandTextHtml}
       </a>
     `;
   }
 
   return `
-    <a href="/" class="brand-logo" title="${siteName}">
+    <a href="/" class="brand-logo" id="brandLogoLink" title="${escapeAttr(siteName)}">
       <div class="brand-logo-icon">${logo.icon || '🎨'}</div>
-      <span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>
+      ${brandTextHtml}
     </a>
   `;
 }
@@ -203,21 +209,49 @@ function renderNav(activeTab = '') {
         if (parent) parent.classList.toggle('mobile-open');
       }
     }
+    // Live header logo sync across open tabs
+    (function() {
+      function syncHeaderLogo(cfg) {
+        if (!cfg || !cfg.logo) return;
+        const link = document.getElementById('brandLogoLink');
+        if (!link) return;
+        const logo = cfg.logo;
+        const mode = logo.mode || (logo.imageSrc ? 'image_text' : 'icon_text');
+        const sName = cfg.siteName || logo.text || 'ColoringTool';
+        const txt = logo.text || sName || 'ColoringTool';
+        const txtHtml = (txt === 'ColoringTool' || txt === 'ColoringTool.com') ?
+          '<span class="brand-text">Coloring<span class="brand-accent">Tool</span><span style="font-size:0.95rem;opacity:0.85;">.com</span></span>' :
+          ('<span class="brand-text">' + txt + '</span>');
+        if (mode === 'image_only' && logo.imageSrc) {
+          link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:40px;max-width:180px;object-fit:contain;display:block;">';
+        } else if (mode === 'image_text' && logo.imageSrc) {
+          link.innerHTML = '<img src="' + logo.imageSrc + '" alt="' + sName + '" class="brand-custom-logo" style="max-height:38px;max-width:44px;object-fit:contain;border-radius:8px;display:block;">' + txtHtml;
+        } else {
+          link.innerHTML = '<div class="brand-logo-icon">' + (logo.icon || '🎨') + '</div>' + txtHtml;
+        }
+      }
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'coloringtool_logo_update' || e.key === 'coloringtool_site_config') {
+          fetch('/api/site-config?t=' + Date.now()).then(function(r){ return r.json(); }).then(syncHeaderLogo).catch(function(){});
+        }
+      });
+    })();
   </script>
   `;
 }
 
 function renderFooter() {
   const logo = siteConfig.logo || {};
+  const showImg = (logo.mode !== 'icon_text') && Boolean(logo.imageSrc);
   return `
   <footer class="site-footer">
     <div class="footer-container">
       <div class="footer-brand">
         <div class="footer-logo">
-          ${logo.imageSrc ?
-            `<img src="${logo.imageSrc}" alt="${siteConfig.siteName || 'ColoringTool.com'}" style="max-height:36px;max-width:140px;object-fit:contain;display:block;">` :
+          ${showImg ?
+            `<img src="${escapeAttr(logo.imageSrc)}" alt="${escapeAttr(siteConfig.siteName || 'ColoringTool.com')}" style="max-height:36px;max-width:140px;object-fit:contain;display:block;">` :
             `<div class="brand-logo-icon" style="width:34px;height:34px;font-size:1.2rem;">${logo.icon || '🎨'}</div>
-             <strong>${siteConfig.siteName || 'ColoringTool'}.com</strong>`
+             <strong>${escapeHtml(siteConfig.siteName || 'ColoringTool')}.com</strong>`
           }
         </div>
         <p>${siteConfig.tagline}</p>
@@ -1251,11 +1285,7 @@ ${renderSeoHeadTags({
           <!-- Raster custom drawing toolbar (active for custom uploaded drawings) -->
           <div class="studio-tool-bar raster-only" id="rasterToolBar" style="display:none;">
             <div class="tool-group">
-              <button type="button" class="tool-btn active" id="toolBucketBtn" onclick="setStudioTool('bucket')" title="Tap-to-Fill Region">
-                <span>🪣</span>
-                <span>Fill Bucket</span>
-              </button>
-              <button type="button" class="tool-btn" id="toolBrushBtn" onclick="setStudioTool('brush')" title="Paint with Brush">
+              <button type="button" class="tool-btn active" id="toolBrushBtn" onclick="setStudioTool('brush')" title="Paint Brush">
                 <span>🖌️</span>
                 <span>Paint Brush</span>
               </button>
@@ -1272,8 +1302,8 @@ ${renderSeoHeadTags({
               </div>
               <div class="brush-info">
                 <div style="display:flex;align-items:center;gap:4px;">
-                  <span id="toolIndicatorIcon">🪣</span>
-                  <span class="brush-mode-text" id="brushModeText">Tap to Fill</span>
+                  <span id="toolIndicatorIcon">🖌️</span>
+                  <span class="brush-mode-text" id="brushModeText">Paint Brush</span>
                 </div>
                 <span class="brush-color-name" id="brushColorName">Color: Red</span>
               </div>
@@ -1717,7 +1747,7 @@ ${renderSeoHeadTags({
       '#000000': 'Black'
     };
 
-    let currentTool = 'bucket'; // 'bucket' (Tap-to-Fill) or 'brush' (Paint Brush)
+    let currentTool = 'brush'; // 'brush' (Paint Brush)
     let undoStack = [];
     let baseLineArtImg = null;
 
@@ -1744,25 +1774,15 @@ ${renderSeoHeadTags({
     }
 
     function setStudioTool(tool) {
-      currentTool = tool;
-      const bucketBtn = document.getElementById('toolBucketBtn');
+      currentTool = 'brush';
       const brushBtn = document.getElementById('toolBrushBtn');
       const modeText = document.getElementById('brushModeText');
       const iconSpan = document.getElementById('toolIndicatorIcon');
 
-      if (tool === 'bucket') {
-        if (bucketBtn) bucketBtn.classList.add('active');
-        if (brushBtn) brushBtn.classList.remove('active');
-        if (modeText) modeText.innerText = 'Tap to Fill';
-        if (iconSpan) iconSpan.innerText = '🪣';
-        canvas.style.cursor = 'crosshair';
-      } else {
-        if (brushBtn) brushBtn.classList.add('active');
-        if (bucketBtn) bucketBtn.classList.remove('active');
-        if (modeText) modeText.innerText = 'Paint Brush';
-        if (iconSpan) iconSpan.innerText = '🖌️';
-        canvas.style.cursor = 'crosshair';
-      }
+      if (brushBtn) brushBtn.classList.add('active');
+      if (modeText) modeText.innerText = 'Paint Brush';
+      if (iconSpan) iconSpan.innerText = '🖌️';
+      canvas.style.cursor = 'crosshair';
       try { createjs.Sound.play('sonidoClic'); } catch(e) {}
     }
 
@@ -1964,7 +1984,7 @@ ${renderSeoHeadTags({
         });
       }
 
-      setStudioTool('bucket');
+      setStudioTool('brush');
       selectColor(currentColor || '#FF3B30', document.querySelector('.palette-swatch'));
 
       const ctx = canvas.getContext('2d');
@@ -2089,38 +2109,13 @@ ${renderSeoHeadTags({
         lastX = pos.x;
         lastY = pos.y;
 
-        // BUCKET TOOL: Fill immediately on touch/click down!
-        if (currentTool === 'bucket') {
-          performFloodFill(pos.x, pos.y, currentColor);
-        } else if (currentTool === 'brush') {
-          saveUndoState();
-          ctx.fillStyle = currentColor;
-          ctx.beginPath();
-          ctx.arc(pos.x, pos.y, 7, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        // PAINT BRUSH TOOL: Fill region immediately on touch/click down!
+        performFloodFill(pos.x, pos.y, currentColor);
       }
 
       function onPointerMove(e) {
         if (!isPointerDown) return;
         if (e.cancelable) e.preventDefault();
-        const pos = getCanvasPos(e);
-        const dist = Math.hypot(pos.x - startPos.x, pos.y - startPos.y);
-        if (dist > 3) hasDragged = true;
-
-        if (currentTool === 'brush') {
-          ctx.strokeStyle = currentColor;
-          ctx.fillStyle = currentColor;
-          ctx.lineWidth = 14;
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.beginPath();
-          ctx.moveTo(lastX, lastY);
-          ctx.lineTo(pos.x, pos.y);
-          ctx.stroke();
-          lastX = pos.x;
-          lastY = pos.y;
-        }
       }
 
       function onPointerUp(e) {
